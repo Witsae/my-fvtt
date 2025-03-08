@@ -524,6 +524,40 @@ Hooks.on("renderItemSheet", (app, html, data) => {
     const attributesPath = `systems/cwn-system/templates/item/parts/item-${data.document.type}-attributes.hbs`;
     console.log("CWN | Expected attributes template path:", attributesPath);
   }
+  
+  // 아이템 시트가 비어있는 경우 수동으로 내용 추가
+  if (html.find('.sheet-body').length === 0 || html.find('.sheet-body').is(':empty')) {
+    console.log("CWN | Sheet body is empty, manually adding content");
+    
+    // 기본 탭 구조 추가
+    const tabsHtml = `
+      <nav class="sheet-tabs tabs" data-group="primary">
+        <a class="item" data-tab="description">설명</a>
+        <a class="item" data-tab="attributes">속성</a>
+      </nav>
+      <section class="sheet-body">
+        <div class="tab description" data-group="primary" data-tab="description">
+          <div class="editor-content">
+            <textarea name="system.description">${data.document?.system?.description || ''}</textarea>
+          </div>
+        </div>
+        <div class="tab attributes" data-group="primary" data-tab="attributes">
+          <div class="form-group">
+            <label>아이템 타입</label>
+            <div class="form-fields">
+              <span>${data.document?.type || '알 수 없음'}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+    
+    html.find('form').append(tabsHtml);
+    
+    // 탭 초기화
+    app._tabs = app._createTabHandlers();
+    app._tabs[0].activate("description");
+  }
 });
 
 // 아이템 시트 준비 디버깅

@@ -34,9 +34,26 @@ export class CWNItemSheet extends ItemSheet {
     const type = this.item?.type || "gear";
     console.log("CWN | Item type for template:", type);
     
-    // 기본 템플릿 경로
-    const path = "systems/cwn-system/templates/item/item-sheet.hbs";
-    console.log("CWN | Using template path:", path);
+    // 타입별 템플릿 경로 설정
+    let path;
+    const typeSpecificTemplate = `systems/cwn-system/templates/item/item-${type}-sheet.hbs`;
+    
+    // 타입별 템플릿이 존재하는지 확인
+    try {
+      if (game.templates.has(typeSpecificTemplate)) {
+        path = typeSpecificTemplate;
+        console.log(`CWN | Using type-specific template: ${path}`);
+      } else {
+        // 기본 템플릿 경로
+        path = "systems/cwn-system/templates/item/item-sheet.hbs";
+        console.log(`CWN | Type-specific template not found, using default: ${path}`);
+      }
+    } catch (error) {
+      console.error("CWN | Error checking template existence:", error);
+      path = "systems/cwn-system/templates/item/item-sheet.hbs";
+    }
+    
+    console.log("CWN | Final template path:", path);
     return path;
   }
 
