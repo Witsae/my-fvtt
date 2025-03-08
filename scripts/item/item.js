@@ -10,6 +10,7 @@ export class CWNItem extends Item {
     // As with the actor class, items are documents that can have their data
     // preparation methods overridden (such as prepareBaseData()).
     super.prepareData();
+    console.log("CWN | Item prepareData called for:", this.name, this);
   }
 
   /**
@@ -30,7 +31,10 @@ export class CWNItem extends Item {
    * @override
    */
   static get sheetClass() {
-    return CONFIG.Item.sheetClasses.cwn.CWNItemSheet;
+    console.log("CWN | Getting sheetClass for CWNItem");
+    const sheetClass = CONFIG.Item.sheetClasses.cwn?.CWNItemSheet;
+    console.log("CWN | Sheet class from CONFIG:", sheetClass);
+    return sheetClass;
   }
 
   /**
@@ -38,8 +42,15 @@ export class CWNItem extends Item {
    * @override
    */
   get sheet() {
+    console.log("CWN | Getting sheet for item:", this.name);
     if (!this._sheet) {
+      console.log("CWN | No sheet instance exists, creating one");
       const SheetClass = this.constructor.sheetClass;
+      console.log("CWN | Using sheet class:", SheetClass);
+      if (!SheetClass) {
+        console.error("CWN | No sheet class found for item:", this.name);
+        return null;
+      }
       this._sheet = new SheetClass(this);
     }
     return this._sheet;

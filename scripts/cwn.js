@@ -20,8 +20,15 @@ Hooks.once("init", async function() {
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet);
   Actors.registerSheet("cwn", CWNActorSheet, { makeDefault: true });
+  
+  console.log("CWN | Registering item sheet");
   Items.unregisterSheet("core", ItemSheet);
-  Items.registerSheet("cwn", CWNItemSheet, { makeDefault: true, types: ["skill", "focus", "weapon", "armor", "gear", "cyberware", "asset"] });
+  Items.registerSheet("cwn", CWNItemSheet, { 
+    makeDefault: true, 
+    types: ["skill", "focus", "weapon", "armor", "gear", "cyberware", "asset"] 
+  });
+  
+  console.log("CWN | Item sheet classes:", CONFIG.Item.sheetClasses);
 
   // Add CWN config to CONFIG
   CONFIG.CWN = CWN;
@@ -83,6 +90,7 @@ function registerHandlebarsHelpers() {
 
 Hooks.once("ready", async function() {
   console.log("CWN | Cities Without Number System Ready");
+  console.log("CWN | Item sheet classes at ready:", CONFIG.Item.sheetClasses);
 });
 
 /* -------------------------------------------- */
@@ -108,6 +116,20 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 Hooks.on("renderItemSheet", (app, html, data) => {
   // Add any custom rendering for item sheets
   console.log("CWN | Rendering Item Sheet:", app, data);
+});
+
+/* -------------------------------------------- */
+/*  Debug Hooks                                 */
+/* -------------------------------------------- */
+
+Hooks.on("createItem", (item, options, userId) => {
+  console.log("CWN | Item created:", item);
+});
+
+Hooks.on("getItemSheetClass", (item, sheetClass) => {
+  console.log("CWN | Getting item sheet class for:", item);
+  console.log("CWN | Sheet class:", sheetClass);
+  return sheetClass;
 });
 
 /* -------------------------------------------- */

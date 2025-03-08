@@ -357,13 +357,23 @@ export class CWNActorSheet extends ActorSheet {
    */
   _openItemSheet(item) {
     try {
+      console.log("CWN | Attempting to open item sheet for:", item);
+      console.log("CWN | Item sheet instance:", item.sheet);
+      console.log("CWN | Item type:", item.type);
+      console.log("CWN | Item data:", item);
+      
       if (!item.sheet) {
-        console.warn("Item sheet not found, creating new sheet instance");
-        item.sheet = item.sheet || new CONFIG.Item.sheetClass(item);
+        console.warn("CWN | Item sheet not found, creating new sheet instance");
+        const ItemSheetClass = CONFIG.Item.sheetClasses.cwn?.CWNItemSheet || CONFIG.Item.sheetClass;
+        console.log("CWN | Using sheet class:", ItemSheetClass);
+        item.sheet = new ItemSheetClass(item);
       }
-      item.sheet.render(true);
+      
+      console.log("CWN | Rendering item sheet:", item.sheet);
+      const result = item.sheet.render(true);
+      console.log("CWN | Render result:", result);
     } catch (error) {
-      console.error("Error opening item sheet:", error);
+      console.error("CWN | Error opening item sheet:", error);
       ui.notifications.error(`Error opening item sheet: ${error.message}`);
     }
   }
