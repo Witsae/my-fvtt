@@ -2,7 +2,7 @@
   "id": "cwn-system",
   "title": "Cities Without Number",
   "description": "A system for playing Cities Without Number in Foundry VTT",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "compatibility": {
     "minimum": "12",
     "verified": "12",
