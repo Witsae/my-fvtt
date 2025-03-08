@@ -1,0 +1,60 @@
+{
+  "id": "my-fvtt-cwn",
+  "title": "Cities Without Number",
+  "description": "A system for playing Cities Without Number in Foundry VTT",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12",
+    "maximum": "12"
+  },
+  "authors": [
+    {
+      "name": "Your Name",
+      "email": "your.email@example.com",
+      "url": "https://github.com/yourusername/my-fvtt-system"
+    }
+  ],
+  "esmodules": ["scripts/cwn.js"],
+  "styles": ["styles/cwn.css"],
+  "packs": [
+    {
+      "name": "skills",
+      "label": "CWN Skills",
+      "path": "packs/skills.db",
+      "type": "Item"
+    },
+    {
+      "name": "foci",
+      "label": "CWN Foci",
+      "path": "packs/foci.db",
+      "type": "Item"
+    },
+    {
+      "name": "equipment",
+      "label": "CWN Equipment",
+      "path": "packs/equipment.db",
+      "type": "Item"
+    }
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    },
+    {
+      "lang": "ko",
+      "name": "Korean",
+      "path": "languages/ko.json"
+    }
+  ],
+  "gridDistance": 5,
+  "gridUnits": "ft",
+  "primaryTokenAttribute": "health",
+  "secondaryTokenAttribute": "sanity",
+  "url": "https://github.com/yourusername/my-fvtt-system",
+  "manifest": "https://raw.githubusercontent.com/yourusername/my-fvtt-system/main/system.json",
+  "download": "https://github.com/yourusername/my-fvtt-system/archive/refs/tags/v1.0.0.zip",
+  "license": "LICENSE"
+} 

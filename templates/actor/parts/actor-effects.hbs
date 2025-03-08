@@ -1,0 +1,34 @@
+<div class="effects-list">
+  <div class="effects-header flexrow">
+    <div class="effect-name">{{localize "Name"}}</div>
+    <div class="effect-source">{{localize "Source"}}</div>
+    <div class="effect-duration">{{localize "Duration"}}</div>
+    <div class="effect-controls">
+      <a class="effect-control" data-action="create" title="{{localize 'Add Effect'}}">
+        <i class="fas fa-plus"></i>
+      </a>
+    </div>
+  </div>
+  <ol class="effects-items">
+    {{#each effects as |effect|}}
+    <li class="effect flexrow" data-effect-id="{{effect.id}}">
+      <div class="effect-name">
+        <h4>{{effect.label}}</h4>
+      </div>
+      <div class="effect-source">{{effect.sourceName}}</div>
+      <div class="effect-duration">{{effect.duration.label}}</div>
+      <div class="effect-controls">
+        <a class="effect-control" data-action="toggle" title="{{localize 'Toggle Effect'}}">
+          <i class="fas {{#if effect.disabled}}fa-check{{else}}fa-times{{/if}}"></i>
+        </a>
+        <a class="effect-control" data-action="edit" title="{{localize 'Edit Effect'}}">
+          <i class="fas fa-edit"></i>
+        </a>
+        <a class="effect-control" data-action="delete" title="{{localize 'Delete Effect'}}">
+          <i class="fas fa-trash"></i>
+        </a>
+      </div>
+    </li>
+    {{/each}}
+  </ol>
+</div> 

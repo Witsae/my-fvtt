@@ -1,0 +1,246 @@
+/* Cities Without Number CSS */
+
+/* Global styles */
+.cwn {
+  --color-primary: #4b6584;
+  --color-secondary: #778ca3;
+  --color-tertiary: #a5b1c2;
+  --color-accent: #e66767;
+  --color-bg: #f5f6fa;
+  --color-text: #2f3542;
+  --color-border: #dfe4ea;
+  --color-shadow: rgba(47, 53, 66, 0.1);
+  --font-primary: "Roboto", sans-serif;
+  --font-secondary: "Rajdhani", sans-serif;
+  --border-radius: 3px;
+  --transition-speed: 0.2s;
+}
+
+.cwn .window-content {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-primary);
+}
+
+.cwn h1, .cwn h2, .cwn h3, .cwn h4 {
+  font-family: var(--font-secondary);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 0.5em;
+}
+
+.cwn input[type="text"],
+.cwn input[type="number"],
+.cwn input[type="password"],
+.cwn input[type="date"],
+.cwn input[type="time"],
+.cwn select {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 0.25em 0.5em;
+}
+
+.cwn button {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 0.5em 1em;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+.cwn button:hover {
+  background: var(--color-accent);
+}
+
+/* Sheet styles */
+.cwn.sheet {
+  min-width: 600px;
+  min-height: 600px;
+}
+
+.cwn .sheet-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1em;
+}
+
+.cwn .profile-img {
+  flex: 0 0 100px;
+  height: 100px;
+  margin-right: 1em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+}
+
+.cwn .header-details {
+  flex: 1;
+}
+
+.cwn .resource-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+.cwn .resource {
+  flex: 1 0 calc(33% - 0.5em);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 0.5em;
+}
+
+.cwn .resource-label {
+  font-weight: bold;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.cwn .resource-value {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25em;
+}
+
+.cwn .sheet-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1em;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cwn .sheet-tabs .item {
+  padding: 0.5em 1em;
+  margin-right: 0.5em;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+.cwn .sheet-tabs .item.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.cwn .sheet-tabs .item:hover {
+  background: var(--color-tertiary);
+}
+
+.cwn .sheet-body {
+  overflow-y: auto;
+}
+
+/* Attributes */
+.cwn .attributes-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+.cwn .attribute {
+  flex: 1 0 calc(33% - 0.5em);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 0.5em;
+}
+
+.cwn .attribute-label {
+  font-weight: bold;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.cwn .attribute-value {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.cwn .attribute-mod {
+  font-size: 0.9em;
+  color: var(--color-accent);
+}
+
+/* Items list */
+.cwn .items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cwn .items-header {
+  display: flex;
+  align-items: center;
+  padding: 0.25em 0.5em;
+  background: var(--color-primary);
+  color: white;
+  font-weight: bold;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.cwn .item {
+  display: flex;
+  align-items: center;
+  padding: 0.25em 0.5em;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cwn .item:nth-child(even) {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.cwn .item:last-child {
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.cwn .item-name {
+  flex: 2;
+  margin-right: 0.5em;
+}
+
+.cwn .item-controls {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 0.25em;
+}
+
+.cwn .item-control {
+  font-size: 0.8em;
+  color: var(--color-secondary);
+  cursor: pointer;
+  transition: color var(--transition-speed);
+}
+
+.cwn .item-control:hover {
+  color: var(--color-accent);
+}
+
+/* Rollable elements */
+.cwn .rollable {
+  cursor: pointer;
+  transition: color var(--transition-speed);
+}
+
+.cwn .rollable:hover {
+  color: var(--color-accent);
+  text-shadow: 0 0 5px var(--color-shadow);
+}
+
+/* Editor */
+.cwn .editor {
+  min-height: 200px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 0.5em;
+} 

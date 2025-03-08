@@ -1,0 +1,167 @@
+{
+  "Actor": {
+    "types": ["character", "npc", "faction"],
+    "templates": {
+      "base": {
+        "attributes": {
+          "str": {
+            "value": 10,
+            "mod": 0
+          },
+          "dex": {
+            "value": 10,
+            "mod": 0
+          },
+          "con": {
+            "value": 10,
+            "mod": 0
+          },
+          "int": {
+            "value": 10,
+            "mod": 0
+          },
+          "wis": {
+            "value": 10,
+            "mod": 0
+          },
+          "cha": {
+            "value": 10,
+            "mod": 0
+          }
+        },
+        "health": {
+          "value": 10,
+          "max": 10
+        },
+        "sanity": {
+          "value": 10,
+          "max": 10
+        },
+        "systemStrain": {
+          "value": 0,
+          "max": 2
+        },
+        "saves": {
+          "physical": 15,
+          "evasion": 15,
+          "mental": 15,
+          "luck": 15
+        },
+        "biography": "",
+        "notes": ""
+      }
+    },
+    "character": {
+      "templates": ["base"],
+      "level": 1,
+      "xp": {
+        "value": 0,
+        "min": 0,
+        "max": 3
+      },
+      "background": "",
+      "class": "",
+      "credits": 0,
+      "effort": {
+        "value": 1,
+        "max": 1
+      },
+      "skills": {},
+      "foci": []
+    },
+    "npc": {
+      "templates": ["base"],
+      "morale": 8,
+      "armor": 0,
+      "attack": "+0",
+      "damage": "1d6",
+      "instinct": "",
+      "reaction": "Neutral",
+      "number": 1,
+      "treasure": ""
+    },
+    "faction": {
+      "facCreds": 0,
+      "facExp": 0,
+      "hp": {
+        "value": 0,
+        "max": 0
+      },
+      "force": 0,
+      "cunning": 0,
+      "wealth": 0,
+      "factionType": "",
+      "goal": "",
+      "tags": [],
+      "assets": []
+    }
+  },
+  "Item": {
+    "types": ["skill", "focus", "weapon", "armor", "gear", "cyberware", "asset"],
+    "templates": {
+      "base": {
+        "description": "",
+        "source": ""
+      },
+      "physical": {
+        "quantity": 1,
+        "weight": 0,
+        "price": 0,
+        "location": "readied",
+        "equipped": false
+      }
+    },
+    "skill": {
+      "templates": ["base"],
+      "level": 0,
+      "attribute": "none",
+      "category": "standard"
+    },
+    "focus": {
+      "templates": ["base"],
+      "level": 1,
+      "prerequisites": ""
+    },
+    "weapon": {
+      "templates": ["base", "physical"],
+      "damage": "1d6",
+      "range": "melee",
+      "attackBonus": 0,
+      "skillBonus": false,
+      "ammo": {
+        "value": 0,
+        "max": 0
+      },
+      "tags": []
+    },
+    "armor": {
+      "templates": ["base", "physical"],
+      "ac": 0,
+      "type": "light"
+    },
+    "gear": {
+      "templates": ["base", "physical"],
+      "tags": []
+    },
+    "cyberware": {
+      "templates": ["base"],
+      "systemStrain": 0,
+      "location": "body",
+      "tags": []
+    },
+    "asset": {
+      "templates": ["base"],
+      "cost": 0,
+      "upkeep": 0,
+      "type": "military",
+      "rating": 0,
+      "hp": {
+        "value": 0,
+        "max": 0
+      },
+      "attack": 0,
+      "counterattack": 0,
+      "tags": []
+    }
+  }
+} 

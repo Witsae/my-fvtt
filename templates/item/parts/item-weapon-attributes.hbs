@@ -1,0 +1,103 @@
+<div class="form-group">
+  <label>{{localize "CWN.Damage"}}</label>
+  <div class="form-fields">
+    <input type="text" name="system.damage" value="{{system.damage}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Range"}}</label>
+  <div class="form-fields">
+    <select name="system.range">
+      {{#select system.range}}
+      {{#each config.weaponRanges as |name key|}}
+      <option value="{{key}}">{{localize name}}</option>
+      {{/each}}
+      {{/select}}
+    </select>
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.AttackBonus"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.attackBonus" value="{{system.attackBonus}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.SkillBonus"}}</label>
+  <div class="form-fields">
+    <input type="checkbox" name="system.skillBonus" {{checked system.skillBonus}} />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Ammo"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.ammo.value" value="{{system.ammo.value}}" />
+    <span>/</span>
+    <input type="number" name="system.ammo.max" value="{{system.ammo.max}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Quantity"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.quantity" value="{{system.quantity}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Weight"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.weight" value="{{system.weight}}" step="0.1" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Price"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.price" value="{{system.price}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Location"}}</label>
+  <div class="form-fields">
+    <select name="system.location">
+      {{#select system.location}}
+      {{#each config.itemLocations as |name key|}}
+      <option value="{{key}}">{{localize name}}</option>
+      {{/each}}
+      {{/select}}
+    </select>
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Equipped"}}</label>
+  <div class="form-fields">
+    <input type="checkbox" name="system.equipped" {{checked system.equipped}} />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Tags"}}</label>
+  <div class="form-fields tag-list">
+    {{#each system.tags as |tag i|}}
+    <div class="tag-input">
+      <select name="system.tags.{{i}}">
+        {{#select tag}}
+        <option value=""></option>
+        {{#each ../config.weaponTags as |name key|}}
+        <option value="{{key}}">{{localize name}}</option>
+        {{/each}}
+        {{/select}}
+      </select>
+      <a class="tag-delete" data-index="{{i}}"><i class="fas fa-times"></i></a>
+    </div>
+    {{/each}}
+    <button type="button" class="tag-add"><i class="fas fa-plus"></i> {{localize "Add Tag"}}</button>
+  </div>
+</div> 
