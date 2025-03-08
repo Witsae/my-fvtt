@@ -29,9 +29,14 @@ export class CWNItemSheet extends ItemSheet {
   /** @override */
   get template() {
     console.log("CWN | ItemSheet template getter called for:", this.item?.name, this.item?.type);
-    // 모든 아이템 타입에 대해 기본 템플릿 사용
+    
+    // 아이템 타입에 따른 템플릿 경로 설정
+    const type = this.item?.type || "gear";
+    console.log("CWN | Item type for template:", type);
+    
+    // 기본 템플릿 경로
     const path = "systems/cwn-system/templates/item/item-sheet.hbs";
-    console.log("CWN | Using template:", path);
+    console.log("CWN | Using template path:", path);
     return path;
   }
 
@@ -47,6 +52,7 @@ export class CWNItemSheet extends ItemSheet {
 
       // Foundry V12에서는 context.document를 사용
       const itemData = context.document;
+      console.log("CWN | Item document data:", itemData);
 
       // Retrieve the roll data for TinyMCE editors.
       context.rollData = {};
@@ -58,6 +64,9 @@ export class CWNItemSheet extends ItemSheet {
       // Add the item's data to context for easier access, as well as flags.
       context.system = itemData.system;
       context.flags = itemData.flags;
+      
+      // 시스템 데이터 확인
+      console.log("CWN | Context system data after assignment:", context.system);
 
       // Add config data
       context.config = CONFIG.CWN;
@@ -75,7 +84,8 @@ export class CWNItemSheet extends ItemSheet {
 
       // Prepare specific data for different item types
       this._prepareItemData(context);
-
+      
+      // 최종 컨텍스트 확인
       console.log("CWN | Final context for item sheet:", context);
       return context;
     } catch (error) {

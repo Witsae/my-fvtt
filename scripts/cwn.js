@@ -500,12 +500,30 @@ Hooks.on("renderDialog", (dialog, html, data) => {
   }
 });
 
-// 아이템 시트 렌더링 디버깅
+// 아이템 시트 렌더링 훅 추가
 Hooks.on("renderItemSheet", (app, html, data) => {
   console.log("CWN | renderItemSheet hook called");
   console.log("CWN | Item sheet app:", app);
   console.log("CWN | Item sheet html:", html);
   console.log("CWN | Item sheet data:", data);
+  
+  // 디버그 로그 추가
+  console.log("CWN | Item sheet data details:");
+  console.log("CWN | - Item name:", data.document?.name);
+  console.log("CWN | - Item type:", data.document?.type);
+  console.log("CWN | - Item system data:", data.document?.system);
+  console.log("CWN | - Context system data:", data.system);
+  console.log("CWN | - Template path:", app.template);
+  
+  // 템플릿 경로 확인
+  const templatePath = app.template;
+  console.log("CWN | Using template path:", templatePath);
+  
+  // 아이템 타입별 속성 템플릿 경로 확인
+  if (data.document?.type) {
+    const attributesPath = `systems/cwn-system/templates/item/parts/item-${data.document.type}-attributes.hbs`;
+    console.log("CWN | Expected attributes template path:", attributesPath);
+  }
 });
 
 // 아이템 시트 준비 디버깅

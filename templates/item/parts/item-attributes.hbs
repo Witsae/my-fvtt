@@ -1,3 +1,14 @@
 <div class="item-attributes">
-  {{> (concat "systems/cwn-system/templates/item/parts/item-" type "-attributes.hbs")}}
+  <!-- 디버그 정보 표시 -->
+  <div class="debug-info" style="margin-bottom: 10px; padding: 5px; border: 1px solid #ccc; background-color: #f9f9f9;">
+    <p><strong>아이템 타입:</strong> {{type}}</p>
+    <p><strong>템플릿 경로:</strong> systems/cwn-system/templates/item/parts/item-{{type}}-attributes.hbs</p>
+  </div>
+  
+  <!-- 아이템 타입별 속성 템플릿 포함 -->
+  {{#if type}}
+    {{> (concat "systems/cwn-system/templates/item/parts/item-" type "-attributes.hbs")}}
+  {{else}}
+    <p class="warning">아이템 타입이 정의되지 않았습니다.</p>
+  {{/if}}
 </div> 
