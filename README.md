@@ -14,7 +14,7 @@ Cities Without Number(CWN)는 Kevin Crawford의 Stars Without Number 시리즈 �
 ## 설치 방법
 
 1. Foundry VTT의 "시스템" 탭에서 "시스템 설치"를 클릭합니다.
-2. 다음 매니페스트 URL을 입력합니다: https://raw.githubusercontent.com/yourusername/my-fvtt-system/main/system.json
+2. 다음 매니페스트 URL을 입력합니다: https://raw.githubusercontent.com/Witsae/my-fvtt/main/system.json
 3. "설치"를 클릭합니다.
 
 ## 호환성

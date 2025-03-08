@@ -10,9 +10,9 @@
   },
   "authors": [
     {
-      "name": "Your Name",
-      "email": "your.email@example.com",
-      "url": "https://github.com/yourusername/my-fvtt-system"
+      "name": "Witsae",
+      "email": "",
+      "url": "https://github.com/Witsae/my-fvtt"
     }
   ],
   "esmodules": ["scripts/cwn.js"],
@@ -53,8 +53,8 @@
   "gridUnits": "ft",
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "sanity",
-  "url": "https://github.com/yourusername/my-fvtt-system",
-  "manifest": "https://raw.githubusercontent.com/yourusername/my-fvtt-system/main/system.json",
-  "download": "https://github.com/yourusername/my-fvtt-system/archive/refs/tags/v1.0.0.zip",
+  "url": "https://github.com/Witsae/my-fvtt",
+  "manifest": "https://raw.githubusercontent.com/Witsae/my-fvtt/main/system.json",
+  "download": "https://github.com/Witsae/my-fvtt/archive/refs/tags/v1.0.0.zip",
   "license": "LICENSE"
 } 
