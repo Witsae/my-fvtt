@@ -4,6 +4,28 @@
  */
 export class CWNItem extends Item {
   /**
+   * 아이템 타입에 따라 적절한 클래스를 반환합니다.
+   * @param {Object} data 아이템 데이터
+   * @returns {CWNItem} 아이템 인스턴스
+   * @static
+   */
+  static create(data, options) {
+    // 아이템 타입에 따라 적절한 클래스 사용
+    const itemType = data.type;
+    
+    // 아이템 클래스 매핑 가져오기
+    const ItemClassMap = game.cwn?.ItemClassMap;
+    
+    // 적절한 클래스가 있으면 해당 클래스로 생성
+    if (ItemClassMap && itemType in ItemClassMap) {
+      return new ItemClassMap[itemType](data, options);
+    }
+    
+    // 기본 클래스로 생성
+    return new CWNItem(data, options);
+  }
+  
+  /**
    * Augment the basic Item data model with additional dynamic data.
    */
   prepareData() {

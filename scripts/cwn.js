@@ -8,6 +8,7 @@ import { CWN } from "./config.js";
 import { ValidatedDialog } from "./utils/ValidatedDialog.js";
 import { chatListeners, calculateStats, limitConcurrency, getDefaultImage } from "./utils/utils.js";
 import { CWNCombatant, CombatUtils } from "./utils/combat.js";
+import { ItemClassMap } from "./items/index.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -119,6 +120,26 @@ function registerSystemSettings() {
     config: true,
     type: Boolean,
     default: true
+  });
+  
+  // CWN 방어구 사용 설정
+  game.settings.register("cwn-system", "useCWNArmor", {
+    name: "Use CWN Armor",
+    hint: "Use CWN armor rules with separate melee AC.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+  
+  // 트라우마 사용 설정
+  game.settings.register("cwn-system", "useTrauma", {
+    name: "Use Trauma",
+    hint: "Use trauma rules for armor.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
   });
   
   console.log("CWN | System settings registered");
@@ -247,7 +268,7 @@ Hooks.once("ready", async function() {
   }
   
   // Add global chat command for rolling skills
-  game.CWN = {
+  game.cwn = {
     rollSkill: (skillName, actorId) => {
       const actor = game.actors.get(actorId);
       if (!actor) {
@@ -264,7 +285,8 @@ Hooks.once("ready", async function() {
       }
       return actor.rollSave(saveId);
     },
-    ValidatedDialog
+    ValidatedDialog,
+    ItemClassMap
   };
 });
 
@@ -362,16 +384,7 @@ Hooks.on("updateCombat", async (combat, updateData, options, userId) => {
 });
 
 /* -------------------------------------------- */
-/*  Item Sheet Hooks                            */
-/* -------------------------------------------- */
-
-Hooks.on("renderItemSheet", (app, html, data) => {
-  // Add any custom rendering for item sheets
-  console.log("CWN | Rendering Item Sheet:", app, data);
-});
-
-/* -------------------------------------------- */
-/*  Debug Hooks                                 */
+/*  Item Hooks                                  */
 /* -------------------------------------------- */
 
 Hooks.on("createItem", (item, options, userId) => {
@@ -395,5 +408,6 @@ export default {
   CWNItemSheet,
   ValidatedDialog,
   CWNCombatant,
-  CombatUtils
+  CombatUtils,
+  ItemClassMap
 }; 
