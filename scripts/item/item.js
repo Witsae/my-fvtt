@@ -33,23 +33,15 @@ export class CWNItem extends Item {
   static get sheetClass() {
     console.log("CWN | Getting sheetClass for CWNItem");
     
-    // First try to get from CONFIG
+    // First try to get from CONFIG directly
     if (CONFIG.Item.sheetClasses?.cwn?.CWNItemSheet) {
       console.log("CWN | Found sheet class in CONFIG.Item.sheetClasses.cwn.CWNItemSheet");
       return CONFIG.Item.sheetClasses.cwn.CWNItemSheet;
     }
     
-    // If not found, try to get from the Items registry
-    const registeredSheets = Object.values(Items.registeredSheets);
-    const cwnSheet = registeredSheets.find(s => s.id === "cwn");
-    if (cwnSheet) {
-      console.log("CWN | Found sheet class in Items.registeredSheets:", cwnSheet);
-      return cwnSheet.cls;
-    }
-    
-    // If still not found, use the default sheet class
+    // Fallback to default ItemSheet
     console.log("CWN | Using default ItemSheet class");
-    return CONFIG.Item.documentClass.prototype.constructor.sheetClass || ItemSheet;
+    return ItemSheet;
   }
 
   /**
@@ -60,17 +52,16 @@ export class CWNItem extends Item {
     console.log("CWN | Getting sheet for item:", this.name);
     if (!this._sheet) {
       console.log("CWN | No sheet instance exists, creating one");
-      const SheetClass = this.constructor.sheetClass;
-      console.log("CWN | Using sheet class:", SheetClass);
-      if (!SheetClass) {
-        console.error("CWN | No sheet class found for item:", this.name);
-        // Fallback to default ItemSheet
-        this._sheet = new ItemSheet(this);
-        console.log("CWN | Created fallback ItemSheet");
+      // Use a direct reference to CWNItemSheet if available
+      const CWNItemSheet = CONFIG.Item.sheetClasses?.cwn?.CWNItemSheet;
+      if (CWNItemSheet) {
+        console.log("CWN | Creating CWNItemSheet instance");
+        this._sheet = new CWNItemSheet(this);
       } else {
-        this._sheet = new SheetClass(this);
-        console.log("CWN | Created sheet instance:", this._sheet);
+        console.log("CWN | Creating default ItemSheet instance");
+        this._sheet = new ItemSheet(this);
       }
+      console.log("CWN | Created sheet instance:", this._sheet);
     }
     return this._sheet;
   }
