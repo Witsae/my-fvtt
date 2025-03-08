@@ -5,6 +5,9 @@ import { CWNActorSheet } from "./actor/actor-sheet.js";
 import { CWNItemSheet } from "./item/item-sheet.js";
 import { preloadHandlebarsTemplates } from "./templates.js";
 import { CWN } from "./config.js";
+import { ValidatedDialog } from "./utils/ValidatedDialog.js";
+import { chatListeners, calculateStats, limitConcurrency, getDefaultImage } from "./utils/utils.js";
+import { CWNCombatant, CombatUtils } from "./utils/combat.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -16,6 +19,7 @@ Hooks.once("init", async function() {
   // Define custom Document classes
   CONFIG.Actor.documentClass = CWNActor;
   CONFIG.Item.documentClass = CWNItem;
+  CONFIG.Combatant.documentClass = CWNCombatant;
 
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet);
@@ -95,6 +99,26 @@ function registerSystemSettings() {
     config: true,
     type: String,
     default: "2d6"
+  });
+  
+  // 이니셔티브 설정
+  game.settings.register("cwn-system", "initiativeFormula", {
+    name: "Initiative Formula",
+    hint: "The formula to use for initiative rolls.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "1d8 + @attributes.dex.mod"
+  });
+  
+  // 자동 이니셔티브 굴림 설정
+  game.settings.register("cwn-system", "autoRollInitiative", {
+    name: "Auto Roll Initiative",
+    hint: "Automatically roll initiative when combat starts.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
   });
   
   console.log("CWN | System settings registered");
@@ -239,7 +263,8 @@ Hooks.once("ready", async function() {
         return;
       }
       return actor.rollSave(saveId);
-    }
+    },
+    ValidatedDialog
   };
 });
 
@@ -256,7 +281,8 @@ Hooks.on("canvasInit", function() {
 /* -------------------------------------------- */
 
 Hooks.on("renderChatMessage", (message, html, data) => {
-  // Handle chat message rendering
+  // 채팅 메시지 리스너 추가
+  chatListeners(message, html);
   
   // Add event listener for inline rolls
   html.find(".inline-roll").click(event => {
@@ -318,6 +344,24 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 });
 
 /* -------------------------------------------- */
+/*  Combat Hooks                                */
+/* -------------------------------------------- */
+
+Hooks.on("createCombat", async (combat, options, userId) => {
+  // 자동 이니셔티브 굴림
+  if (game.settings.get("cwn-system", "autoRollInitiative") && game.user.id === userId) {
+    await CombatUtils.rollInitiative(combat);
+  }
+});
+
+Hooks.on("updateCombat", async (combat, updateData, options, userId) => {
+  // 라운드 변경 시 효과 처리
+  if (updateData.round && game.user.id === userId) {
+    await CombatUtils.onRoundChange(combat, updateData, options);
+  }
+});
+
+/* -------------------------------------------- */
 /*  Item Sheet Hooks                            */
 /* -------------------------------------------- */
 
@@ -348,5 +392,8 @@ export default {
   CWNActor,
   CWNItem,
   CWNActorSheet,
-  CWNItemSheet
+  CWNItemSheet,
+  ValidatedDialog,
+  CWNCombatant,
+  CombatUtils
 }; 
