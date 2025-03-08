@@ -101,6 +101,19 @@ export class CWNItemSheet extends ItemSheet {
    */
   _prepareItemData(context) {
     console.log("CWN | _prepareItemData called for type:", context.type);
+    
+    // 아이템 타입 확인
+    if (!context.type) {
+      console.warn("CWN | Item type is undefined in _prepareItemData");
+      context.type = "gear"; // 기본값 설정
+    }
+    
+    // 시스템 데이터 확인
+    if (!context.system) {
+      console.warn("CWN | System data is undefined in _prepareItemData");
+      context.system = {}; // 빈 객체로 초기화
+    }
+    
     // Handle different item types
     if (this.item.type === 'weapon') {
       this._prepareWeaponData(context);
@@ -125,6 +138,10 @@ export class CWNItemSheet extends ItemSheet {
     } else {
       console.warn("CWN | Unknown item type:", this.item.type);
     }
+    
+    // 데이터 준비 후 최종 확인
+    console.log("CWN | Item data prepared for type:", context.type);
+    console.log("CWN | Final system data:", context.system);
   }
 
   /**
