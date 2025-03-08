@@ -43,6 +43,9 @@ export class CWNItemSheet extends ItemSheet {
 
     // Add config data
     context.config = CONFIG.CWN;
+    
+    // Add type for template
+    context.type = this.item.type;
 
     return context;
   }
@@ -56,6 +59,23 @@ export class CWNItemSheet extends ItemSheet {
     // Everything below here is only needed if the sheet is editable
     if (!this.isEditable) return;
 
-    // Roll handlers, click handlers, etc. would go here.
+    // Add tag
+    html.find('.tag-add').click(ev => {
+      ev.preventDefault();
+      const item = this.item;
+      const tags = item.system.tags || [];
+      tags.push("");
+      item.update({ "system.tags": tags });
+    });
+
+    // Delete tag
+    html.find('.tag-delete').click(ev => {
+      ev.preventDefault();
+      const item = this.item;
+      const tags = item.system.tags || [];
+      const index = Number(ev.currentTarget.dataset.index);
+      tags.splice(index, 1);
+      item.update({ "system.tags": tags });
+    });
   }
 } 

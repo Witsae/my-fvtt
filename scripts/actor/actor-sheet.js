@@ -167,9 +167,23 @@ export class CWNActorSheet extends ActorSheet {
 
     // Render the item sheet for viewing/editing prior to the editable check.
     html.find('.item-edit').click(ev => {
-      const li = $(ev.currentTarget).parents(".item");
-      const item = this.actor.items.get(li.data("itemId"));
-      item.sheet.render(true);
+      const li = $(ev.currentTarget).closest(".item");
+      const itemId = li.attr("data-item-id");
+      const item = this.actor.items.get(itemId);
+      if (item) {
+        item.sheet.render(true);
+      }
+    });
+
+    // Item name click to open sheet
+    html.find('.item-name').click(ev => {
+      if ($(ev.target).hasClass('rollable')) return;
+      const li = $(ev.currentTarget).closest(".item");
+      const itemId = li.attr("data-item-id");
+      const item = this.actor.items.get(itemId);
+      if (item) {
+        item.sheet.render(true);
+      }
     });
 
     // -------------------------------------------------------------
@@ -181,10 +195,13 @@ export class CWNActorSheet extends ActorSheet {
 
     // Delete Inventory Item
     html.find('.item-delete').click(ev => {
-      const li = $(ev.currentTarget).parents(".item");
-      const item = this.actor.items.get(li.data("itemId"));
-      item.delete();
-      li.slideUp(200, () => this.render(false));
+      const li = $(ev.currentTarget).closest(".item");
+      const itemId = li.attr("data-item-id");
+      const item = this.actor.items.get(itemId);
+      if (item) {
+        item.delete();
+        li.slideUp(200, () => this.render(false));
+      }
     });
 
     // Active Effect management
@@ -244,17 +261,17 @@ export class CWNActorSheet extends ActorSheet {
     // Handle item rolls.
     if (dataset.rollType) {
       if (dataset.rollType == 'item') {
-        const itemId = element.closest('.item').dataset.itemId;
+        const itemId = $(element).closest('.item').attr("data-item-id");
         const item = this.actor.items.get(itemId);
         if (item) return item.roll();
       }
       else if (dataset.rollType == 'attack') {
-        const itemId = element.closest('.item').dataset.itemId;
+        const itemId = $(element).closest('.item').attr("data-item-id");
         const item = this.actor.items.get(itemId);
         if (item) return item.rollAttack();
       }
       else if (dataset.rollType == 'damage') {
-        const itemId = element.closest('.item').dataset.itemId;
+        const itemId = $(element).closest('.item').attr("data-item-id");
         const item = this.actor.items.get(itemId);
         if (item) return item.rollDamage();
       }
