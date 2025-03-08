@@ -2,7 +2,7 @@
   "id": "cwn-system",
   "title": "Cities Without Number",
   "description": "A system for playing Cities Without Number in Foundry VTT",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "compatibility": {
     "minimum": "12",
     "verified": "12",
@@ -55,6 +55,6 @@
   "secondaryTokenAttribute": "sanity",
   "url": "https://github.com/Witsae/my-fvtt",
   "manifest": "https://raw.githubusercontent.com/Witsae/my-fvtt/main/system.json",
-  "download": "https://github.com/Witsae/my-fvtt/archive/refs/tags/v1.2.1.zip",
+  "download": "https://github.com/Witsae/my-fvtt/archive/refs/heads/main.zip",
   "license": "LICENSE"
 } 
