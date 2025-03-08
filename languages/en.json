@@ -119,6 +119,8 @@
     "Attributes": "Attributes",
     "Saves": "Saves",
     "Items": "Items",
+    "Powers": "Powers",
+    "Vehicles": "Vehicles",
     
     "AddItem": "Add Item",
     "EditItem": "Edit Item",
@@ -152,6 +154,8 @@
     "Effect": "Effect",
     "SideEffect": "Side Effect",
     "Overdose": "Overdose",
+    "Speed": "Speed",
+    "Crew": "Crew",
     
     "Errors": {
       "NoActor": "Cannot roll without an actor",

@@ -5,6 +5,9 @@ import { CWNArmor } from "./armor.js";
 import { CWNAsset } from "./asset.js";
 import { CWNCyberware } from "./cyberware.js";
 import { CWNGear } from "./gear.js";
+import { CWNDrug } from "./drug.js";
+import { CWNPower } from "./power.js";
+import { CWNVehicle } from "./vehicle.js";
 
 /**
  * 아이템 타입별 클래스 매핑
@@ -17,7 +20,10 @@ export const ItemClassMap = {
   armor: CWNArmor,
   asset: CWNAsset,
   cyberware: CWNCyberware,
-  gear: CWNGear
+  gear: CWNGear,
+  drug: CWNDrug,
+  power: CWNPower,
+  vehicle: CWNVehicle
 };
 
 /**
@@ -36,5 +42,8 @@ export {
   CWNArmor,
   CWNAsset,
   CWNCyberware,
-  CWNGear
+  CWNGear,
+  CWNDrug,
+  CWNPower,
+  CWNVehicle
 }; 

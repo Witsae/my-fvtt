@@ -108,6 +108,8 @@
     "Attributes": "속성",
     "Saves": "내성",
     "Items": "아이템",
+    "Powers": "초능력",
+    "Vehicles": "차량",
     
     "AddItem": "아이템 추가",
     "EditItem": "아이템 편집",
@@ -141,6 +143,8 @@
     "Effect": "효과",
     "SideEffect": "부작용",
     "Overdose": "과다복용",
+    "Speed": "속도",
+    "Crew": "승무원",
     
     "Errors": {
       "NoActor": "액터가 없는 아이템으로 굴림을 시도했습니다",
