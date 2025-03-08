@@ -1,0 +1,13 @@
+{
+  "my-foundry-module": {
+    "settings": {
+      "enableFeature": {
+        "name": "Enable Feature",
+        "hint": "Enable the main feature of this module."
+      }
+    },
+    "notifications": {
+      "initialized": "My Foundry Module initialized."
+    }
+  }
+} 
