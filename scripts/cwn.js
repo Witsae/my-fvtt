@@ -387,8 +387,13 @@ Hooks.on("updateCombat", async (combat, updateData, options, userId) => {
 /*  Item Hooks                                  */
 /* -------------------------------------------- */
 
-Hooks.on("createItem", (item, options, userId) => {
+Hooks.on("createItem", async (item, options, userId) => {
   console.log("CWN | Item created:", item);
+  // 타입이 없는 경우 기본 타입을 'gear'로 설정
+  if (!item.type) {
+    await item.update({ type: "gear" });
+    console.log("CWN | Updated item type to gear:", item);
+  }
 });
 
 Hooks.on("getItemSheetClass", (item, sheetClass) => {
@@ -410,4 +415,49 @@ export default {
   CWNCombatant,
   CombatUtils,
   ItemClassMap
-}; 
+};
+
+// 아이템 생성 대화상자 수정
+Hooks.on("renderDialog", (dialog, html, data) => {
+  // 아이템 생성 대화상자인지 확인
+  if (dialog.data.title === "Create New Item") {
+    console.log("CWN | Modifying item creation dialog");
+    
+    // 타입 선택 드롭다운 추가
+    const form = html.find("form");
+    const nameInput = form.find("input[name='name']");
+    const typeSelect = $(`
+      <div class="form-group">
+        <label>Type</label>
+        <div class="form-fields">
+          <select name="type">
+            <option value="gear">Gear</option>
+            <option value="weapon">Weapon</option>
+            <option value="armor">Armor</option>
+            <option value="skill">Skill</option>
+            <option value="focus">Focus</option>
+            <option value="cyberware">Cyberware</option>
+            <option value="drug">Drug</option>
+            <option value="asset">Asset</option>
+            <option value="power">Power</option>
+            <option value="vehicle">Vehicle</option>
+          </select>
+        </div>
+      </div>
+    `);
+    
+    // 타입 선택 드롭다운을 이름 입력 필드 다음에 추가
+    nameInput.parent().parent().after(typeSelect);
+    
+    // 폼 제출 이벤트 수정
+    form.off("submit");
+    form.on("submit", event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const name = form.name.value;
+      const type = form.type.value;
+      dialog.data.resolve({ name, type });
+      dialog.close();
+    });
+  }
+}); 
