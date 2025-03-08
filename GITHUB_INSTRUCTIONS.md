@@ -17,7 +17,7 @@
 8. 저장소가 생성되면 GitHub에서 제공하는 명령어 중 "…or push an existing repository from the command line" 섹션의 명령어를 복사하여 터미널에서 실행합니다:
 
 ```
-git remote add origin https://github.com/yourusername/my-fvtt.git
+git remote add origin https://github.com/Witsae/my-fvtt.git
 git branch -M main
 git push -u origin main
 ```

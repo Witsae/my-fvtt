@@ -10,7 +10,7 @@ Foundry VTT를 위한 커스텀 모듈입니다.
 ## 설치 방법
 
 1. Foundry VTT의 "설치된 모듈" 탭에서 "모듈 설치"를 클릭합니다.
-2. 다음 매니페스트 URL을 입력합니다: https://raw.githubusercontent.com/yourusername/my-fvtt/main/module.json
+2. 다음 매니페스트 URL을 입력합니다: https://raw.githubusercontent.com/Witsae/my-fvtt/main/module.json
 3. "설치"를 클릭합니다.
 
 ## 사용 방법
