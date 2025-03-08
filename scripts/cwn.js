@@ -389,8 +389,12 @@ Hooks.on("updateCombat", async (combat, updateData, options, userId) => {
 
 Hooks.on("createItem", async (item, options, userId) => {
   console.log("CWN | Item created:", item);
+  console.log("CWN | Item creation options:", options);
+  console.log("CWN | Item creation userId:", userId);
+  
   // 타입이 없는 경우 기본 타입을 'gear'로 설정
   if (!item.type) {
+    console.log("CWN | Item has no type, setting to gear");
     await item.update({ type: "gear" });
     console.log("CWN | Updated item type to gear:", item);
   }
@@ -422,6 +426,8 @@ Hooks.on("renderDialog", (dialog, html, data) => {
   // 아이템 생성 대화상자인지 확인
   if (dialog.data.title === "Create New Item") {
     console.log("CWN | Modifying item creation dialog");
+    console.log("CWN | Dialog data:", dialog.data);
+    console.log("CWN | Dialog html:", html);
     
     // 타입 선택 드롭다운 추가
     const form = html.find("form");
@@ -448,6 +454,7 @@ Hooks.on("renderDialog", (dialog, html, data) => {
     
     // 타입 선택 드롭다운을 이름 입력 필드 다음에 추가
     nameInput.parent().parent().after(typeSelect);
+    console.log("CWN | Added type select dropdown to dialog");
     
     // 폼 제출 이벤트 수정
     form.off("submit");
@@ -456,8 +463,33 @@ Hooks.on("renderDialog", (dialog, html, data) => {
       const form = event.currentTarget;
       const name = form.name.value;
       const type = form.type.value;
+      console.log("CWN | Form submitted with name:", name, "and type:", type);
       dialog.data.resolve({ name, type });
       dialog.close();
     });
   }
+});
+
+// 아이템 시트 렌더링 디버깅
+Hooks.on("renderItemSheet", (app, html, data) => {
+  console.log("CWN | renderItemSheet hook called");
+  console.log("CWN | Item sheet app:", app);
+  console.log("CWN | Item sheet html:", html);
+  console.log("CWN | Item sheet data:", data);
+});
+
+// 아이템 시트 준비 디버깅
+Hooks.on("preRenderItemSheet", (app, data) => {
+  console.log("CWN | preRenderItemSheet hook called");
+  console.log("CWN | Item sheet app:", app);
+  console.log("CWN | Item sheet data:", data);
+});
+
+// 아이템 업데이트 디버깅
+Hooks.on("updateItem", (item, changes, options, userId) => {
+  console.log("CWN | updateItem hook called");
+  console.log("CWN | Updated item:", item);
+  console.log("CWN | Changes:", changes);
+  console.log("CWN | Options:", options);
+  console.log("CWN | User ID:", userId);
 }); 
