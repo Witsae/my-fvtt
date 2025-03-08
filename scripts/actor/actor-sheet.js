@@ -23,9 +23,9 @@ export class CWNActorSheet extends ActorSheet {
   /* -------------------------------------------- */
 
   /** @override */
-  getData() {
+  async getData() {
     // Retrieve the data structure from the base sheet.
-    const context = super.getData();
+    const context = await super.getData();
 
     // Use a safe clone of the actor data for further operations.
     const actorData = this.actor.toObject(false);
@@ -172,7 +172,7 @@ export class CWNActorSheet extends ActorSheet {
       const itemId = li.attr("data-item-id");
       const item = this.actor.items.get(itemId);
       if (item) {
-        item.sheet.render(true);
+        this._openItemSheet(item);
       }
     });
 
@@ -186,12 +186,7 @@ export class CWNActorSheet extends ActorSheet {
       const item = this.actor.items.get(itemId);
       
       if (item) {
-        const sheet = item.sheet;
-        if (sheet) {
-          sheet.render(true);
-        } else {
-          console.error("Item sheet not found for item:", item);
-        }
+        this._openItemSheet(item);
       } else {
         console.error("Item not found with ID:", itemId);
       }
@@ -202,6 +197,7 @@ export class CWNActorSheet extends ActorSheet {
       // Skip if clicking on controls
       if ($(ev.target).closest('.item-controls').length) return;
       if ($(ev.target).hasClass('rollable')) return;
+      if ($(ev.target).hasClass('item-name')) return; // Already handled above
       
       // Get the item
       const li = $(ev.currentTarget);
@@ -209,12 +205,7 @@ export class CWNActorSheet extends ActorSheet {
       const item = this.actor.items.get(itemId);
       
       if (item) {
-        const sheet = item.sheet;
-        if (sheet) {
-          sheet.render(true);
-        } else {
-          console.error("Item sheet not found for item:", item);
-        }
+        this._openItemSheet(item);
       } else {
         console.error("Item not found with ID:", itemId);
       }
@@ -356,6 +347,24 @@ export class CWNActorSheet extends ActorSheet {
     // Handle morale rolls
     if (dataset.rollMorale) {
       return this.actor.rollMorale();
+    }
+  }
+
+  /**
+   * Helper method to open an item sheet
+   * @param {Item} item The item to open
+   * @private
+   */
+  _openItemSheet(item) {
+    try {
+      if (!item.sheet) {
+        console.warn("Item sheet not found, creating new sheet instance");
+        item.sheet = item.sheet || new CONFIG.Item.sheetClass(item);
+      }
+      item.sheet.render(true);
+    } catch (error) {
+      console.error("Error opening item sheet:", error);
+      ui.notifications.error(`Error opening item sheet: ${error.message}`);
     }
   }
 } 

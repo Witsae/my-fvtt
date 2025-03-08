@@ -26,6 +26,26 @@ export class CWNItem extends Item {
   }
 
   /**
+   * Get the appropriate sheet class for this item
+   * @override
+   */
+  static get sheetClass() {
+    return CONFIG.Item.sheetClasses.cwn.CWNItemSheet;
+  }
+
+  /**
+   * Get the sheet instance for this item, creating it if it doesn't exist
+   * @override
+   */
+  get sheet() {
+    if (!this._sheet) {
+      const SheetClass = this.constructor.sheetClass;
+      this._sheet = new SheetClass(this);
+    }
+    return this._sheet;
+  }
+
+  /**
    * Handle clickable rolls.
    * @param {Event} event   The originating click event
    * @private

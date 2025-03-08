@@ -25,9 +25,9 @@ export class CWNItemSheet extends ItemSheet {
   /* -------------------------------------------- */
 
   /** @override */
-  getData() {
+  async getData() {
     // Retrieve base data structure.
-    const context = super.getData();
+    const context = await super.getData();
 
     // Use a safe clone of the item data for further operations.
     const itemData = context.item;
@@ -79,5 +79,14 @@ export class CWNItemSheet extends ItemSheet {
       tags.splice(index, 1);
       item.update({ "system.tags": tags });
     });
+  }
+
+  /** @override */
+  _getHeaderButtons() {
+    const buttons = super._getHeaderButtons();
+    
+    // Add custom buttons here if needed
+    
+    return buttons;
   }
 } 

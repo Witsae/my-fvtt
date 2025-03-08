@@ -21,7 +21,7 @@ Hooks.once("init", async function() {
   Actors.unregisterSheet("core", ActorSheet);
   Actors.registerSheet("cwn", CWNActorSheet, { makeDefault: true });
   Items.unregisterSheet("core", ItemSheet);
-  Items.registerSheet("cwn", CWNItemSheet, { makeDefault: true });
+  Items.registerSheet("cwn", CWNItemSheet, { makeDefault: true, types: ["skill", "focus", "weapon", "armor", "gear", "cyberware", "asset"] });
 
   // Add CWN config to CONFIG
   CONFIG.CWN = CWN;
@@ -99,6 +99,15 @@ Hooks.on("canvasInit", function() {
 
 Hooks.on("renderChatMessage", (message, html, data) => {
   // Handle chat message rendering
+});
+
+/* -------------------------------------------- */
+/*  Item Sheet Hooks                            */
+/* -------------------------------------------- */
+
+Hooks.on("renderItemSheet", (app, html, data) => {
+  // Add any custom rendering for item sheets
+  console.log("CWN | Rendering Item Sheet:", app, data);
 });
 
 /* -------------------------------------------- */
