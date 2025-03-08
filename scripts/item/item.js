@@ -10,7 +10,76 @@ export class CWNItem extends Item {
     // As with the actor class, items are documents that can have their data
     // preparation methods overridden (such as prepareBaseData()).
     super.prepareData();
-    console.log("CWN | Item prepareData called for:", this.name, this);
+    
+    // Call type-specific preparation methods
+    const itemData = this;
+    const systemData = itemData.system;
+    const itemType = itemData.type;
+    
+    // Call type-specific preparation methods
+    if (itemType === 'weapon') this._prepareWeaponData(itemData);
+    if (itemType === 'armor') this._prepareArmorData(itemData);
+    if (itemType === 'skill') this._prepareSkillData(itemData);
+    if (itemType === 'focus') this._prepareFocusData(itemData);
+  }
+  
+  /**
+   * Prepare weapon-specific data
+   * @param {Object} itemData The item data to prepare
+   * @private
+   */
+  _prepareWeaponData(itemData) {
+    const systemData = itemData.system;
+    
+    // Calculate attack bonus
+    if (this.actor) {
+      const actorData = this.actor.system;
+      
+      // Add attribute modifier to attack bonus
+      if (systemData.range === 'melee') {
+        systemData.totalAttackBonus = systemData.attackBonus + actorData.attributes.str.mod;
+      } else {
+        systemData.totalAttackBonus = systemData.attackBonus + actorData.attributes.dex.mod;
+      }
+      
+      // Format attack bonus for display
+      systemData.attackBonusDisplay = systemData.totalAttackBonus >= 0 
+        ? `+${systemData.totalAttackBonus}` 
+        : systemData.totalAttackBonus.toString();
+    }
+  }
+  
+  /**
+   * Prepare armor-specific data
+   * @param {Object} itemData The item data to prepare
+   * @private
+   */
+  _prepareArmorData(itemData) {
+    const systemData = itemData.system;
+    
+    // Calculate any armor-specific data here
+  }
+  
+  /**
+   * Prepare skill-specific data
+   * @param {Object} itemData The item data to prepare
+   * @private
+   */
+  _prepareSkillData(itemData) {
+    const systemData = itemData.system;
+    
+    // Calculate any skill-specific data here
+  }
+  
+  /**
+   * Prepare focus-specific data
+   * @param {Object} itemData The item data to prepare
+   * @private
+   */
+  _prepareFocusData(itemData) {
+    const systemData = itemData.system;
+    
+    // Calculate any focus-specific data here
   }
 
   /**
@@ -214,5 +283,28 @@ export class CWNItem extends Item {
       chatData.roll = roll;
       return ChatMessage.create(chatData);
     }
+  }
+  
+  /**
+   * Show the item description in chat
+   */
+  async showDescription() {
+    if (!this.actor) return;
+    
+    const cardData = {
+      item: this,
+      description: this.system.description
+    };
+    
+    const template = "systems/cwn-system/templates/chat/item-card.hbs";
+    const html = await renderTemplate(template, cardData);
+    
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({actor: this.actor}),
+      content: html
+    };
+    
+    return ChatMessage.create(chatData);
   }
 } 

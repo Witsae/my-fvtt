@@ -48,6 +48,9 @@ Hooks.once("init", async function() {
 
   // Preload Handlebars templates
   await preloadHandlebarsTemplates();
+  
+  // Register custom enrichers for inline rolls and links
+  registerCustomEnrichers();
 });
 
 /* -------------------------------------------- */
@@ -73,6 +76,25 @@ function registerSystemSettings() {
     config: true,
     type: Boolean,
     default: true
+  });
+  
+  // Add additional settings for v12 compatibility
+  game.settings.register("cwn-system", "useCustomRollFormula", {
+    name: "Use Custom Roll Formula",
+    hint: "Use a custom formula for skill checks instead of the default 2d6.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+  });
+  
+  game.settings.register("cwn-system", "customRollFormula", {
+    name: "Custom Roll Formula",
+    hint: "The custom formula to use for skill checks (e.g., '3d6kh2' for 3d6 keep highest 2).",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "2d6"
   });
   
   console.log("CWN | System settings registered");
@@ -102,7 +124,86 @@ function registerHandlebarsHelpers() {
     return value.charAt(0).toUpperCase() + value.slice(1);
   });
   
+  // Add a helper to check if a value equals another value
+  Handlebars.registerHelper("eq", function(a, b) {
+    return a === b;
+  });
+  
+  // Add a helper to check if a value is greater than another value
+  Handlebars.registerHelper("gt", function(a, b) {
+    return a > b;
+  });
+  
+  // Add a helper to check if a value is less than another value
+  Handlebars.registerHelper("lt", function(a, b) {
+    return a < b;
+  });
+  
+  // Add a helper to check if a value is greater than or equal to another value
+  Handlebars.registerHelper("gte", function(a, b) {
+    return a >= b;
+  });
+  
+  // Add a helper to check if a value is less than or equal to another value
+  Handlebars.registerHelper("lte", function(a, b) {
+    return a <= b;
+  });
+  
+  // Add a helper to check if a value is not equal to another value
+  Handlebars.registerHelper("neq", function(a, b) {
+    return a !== b;
+  });
+  
+  // Add a helper to check if a value is in an array
+  Handlebars.registerHelper("includes", function(array, value) {
+    return Array.isArray(array) && array.includes(value);
+  });
+  
   console.log("CWN | Handlebars helpers registered");
+}
+
+/* -------------------------------------------- */
+/*  Custom Enrichers                            */
+/* -------------------------------------------- */
+
+function registerCustomEnrichers() {
+  console.log("CWN | Registering custom enrichers");
+  
+  // Register custom inline roll enricher
+  CONFIG.TextEditor.enrichers.push({
+    pattern: /\[\[(\/r|\/roll|\/gmroll|\/blindroll)?\s*([^\]]+)\]\]/gi,
+    enricher: (match, options) => {
+      const [command, formula] = match.slice(1, 3);
+      const rollData = options.rollData || {};
+      
+      const a = document.createElement("a");
+      a.classList.add("inline-roll");
+      a.dataset.formula = formula;
+      if (command) a.dataset.mode = command.replace(/^\//, "");
+      a.title = formula;
+      a.innerHTML = `<i class="fas fa-dice-d20"></i> ${formula}`;
+      
+      return a;
+    }
+  });
+  
+  // Register custom item link enricher
+  CONFIG.TextEditor.enrichers.push({
+    pattern: /@Item\[([^\]]+)\]/gi,
+    enricher: (match, options) => {
+      const itemName = match[1];
+      
+      const a = document.createElement("a");
+      a.classList.add("content-link");
+      a.dataset.type = "Item";
+      a.dataset.name = itemName;
+      a.innerHTML = `<i class="fas fa-suitcase"></i> ${itemName}`;
+      
+      return a;
+    }
+  });
+  
+  console.log("CWN | Custom enrichers registered");
 }
 
 /* -------------------------------------------- */
@@ -120,6 +221,26 @@ Hooks.once("ready", async function() {
   } catch (error) {
     console.error("CWN | Error accessing settings:", error);
   }
+  
+  // Add global chat command for rolling skills
+  game.CWN = {
+    rollSkill: (skillName, actorId) => {
+      const actor = game.actors.get(actorId);
+      if (!actor) {
+        ui.notifications.error("Actor not found");
+        return;
+      }
+      return actor.rollSkill(skillName);
+    },
+    rollSave: (saveId, actorId) => {
+      const actor = game.actors.get(actorId);
+      if (!actor) {
+        ui.notifications.error("Actor not found");
+        return;
+      }
+      return actor.rollSave(saveId);
+    }
+  };
 });
 
 /* -------------------------------------------- */
@@ -136,6 +257,64 @@ Hooks.on("canvasInit", function() {
 
 Hooks.on("renderChatMessage", (message, html, data) => {
   // Handle chat message rendering
+  
+  // Add event listener for inline rolls
+  html.find(".inline-roll").click(event => {
+    event.preventDefault();
+    const formula = event.currentTarget.dataset.formula;
+    const rollMode = event.currentTarget.dataset.mode || game.settings.get("core", "rollMode");
+    
+    const roll = new Roll(formula);
+    roll.toMessage({
+      flavor: `Rolling ${formula}`,
+      rollMode: rollMode
+    });
+  });
+  
+  // Add event listener for item links
+  html.find(".content-link[data-type='Item']").click(event => {
+    event.preventDefault();
+    const itemName = event.currentTarget.dataset.name;
+    const items = game.items.filter(i => i.name === itemName);
+    
+    if (items.length === 0) {
+      ui.notifications.warn(`No item found with name "${itemName}"`);
+      return;
+    }
+    
+    if (items.length === 1) {
+      items[0].sheet.render(true);
+    } else {
+      // If multiple items with the same name, show a dialog to choose
+      const content = `<p>Multiple items found with name "${itemName}". Choose one:</p>
+        <div class="form-group">
+          <select id="item-select">
+            ${items.map(i => `<option value="${i.id}">${i.name} (${i.type})</option>`).join("")}
+          </select>
+        </div>`;
+      
+      new Dialog({
+        title: "Choose Item",
+        content: content,
+        buttons: {
+          select: {
+            icon: '<i class="fas fa-check"></i>',
+            label: "Select",
+            callback: html => {
+              const itemId = html.find("#item-select").val();
+              const item = game.items.get(itemId);
+              if (item) item.sheet.render(true);
+            }
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: "Cancel"
+          }
+        },
+        default: "select"
+      }).render(true);
+    }
+  });
 });
 
 /* -------------------------------------------- */

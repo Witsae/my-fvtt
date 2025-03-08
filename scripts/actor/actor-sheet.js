@@ -262,8 +262,10 @@ export class CWNActorSheet extends ActorSheet {
     if (this.actor.isOwner) {
       let handler = ev => this._onDragStart(ev);
       html.find('li.item').each((i, li) => {
-        if (li.classList.contains("inventory-header")) return;
-        li.setAttribute("draggable", true);
+        // Ignore for the header row.
+        if (li.classList.contains("item-header")) return;
+        // Add draggable attribute and dragstart listener.
+        li.setAttribute("draggable", "true");
         li.addEventListener("dragstart", handler, false);
       });
     }
@@ -297,7 +299,7 @@ export class CWNActorSheet extends ActorSheet {
   }
 
   /**
-   * Display a dialog to confirm item deletion
+   * Shows a dialog to confirm item deletion
    * @param {Item} item The item to delete
    * @private
    */
@@ -323,31 +325,12 @@ export class CWNActorSheet extends ActorSheet {
   }
 
   /**
-   * Helper method to open an item sheet
+   * Opens the item sheet for the given item
    * @param {Item} item The item to open
    * @private
    */
   _openItemSheet(item) {
-    try {
-      console.log("CWN | Attempting to open item sheet for:", item);
-      console.log("CWN | Item sheet instance:", item.sheet);
-      console.log("CWN | Item type:", item.type);
-      console.log("CWN | Item data:", item);
-      
-      if (!item.sheet) {
-        console.warn("CWN | Item sheet not found, creating new sheet instance");
-        const ItemSheetClass = CONFIG.Item.sheetClasses.cwn?.CWNItemSheet || CONFIG.Item.sheetClass;
-        console.log("CWN | Using sheet class:", ItemSheetClass);
-        item.sheet = new ItemSheetClass(item);
-      }
-      
-      console.log("CWN | Rendering item sheet:", item.sheet);
-      const result = item.sheet.render(true);
-      console.log("CWN | Render result:", result);
-    } catch (error) {
-      console.error("CWN | Error opening item sheet:", error);
-      ui.notifications.error(`Error opening item sheet: ${error.message}`);
-    }
+    item.sheet.render(true);
   }
 
   /**
@@ -363,19 +346,9 @@ export class CWNActorSheet extends ActorSheet {
     // Handle item rolls.
     if (dataset.rollType) {
       if (dataset.rollType == 'item') {
-        const itemId = $(element).closest('.item').attr("data-item-id");
+        const itemId = element.closest('.item').dataset.itemId;
         const item = this.actor.items.get(itemId);
         if (item) return item.roll();
-      }
-      else if (dataset.rollType == 'attack') {
-        const itemId = $(element).closest('.item').attr("data-item-id");
-        const item = this.actor.items.get(itemId);
-        if (item) return item.rollAttack();
-      }
-      else if (dataset.rollType == 'damage') {
-        const itemId = $(element).closest('.item').attr("data-item-id");
-        const item = this.actor.items.get(itemId);
-        if (item) return item.rollDamage();
       }
     }
 
@@ -390,48 +363,45 @@ export class CWNActorSheet extends ActorSheet {
       });
       return roll;
     }
-
+    
     // Handle attribute rolls
-    if (dataset.rollAttribute) {
-      const attribute = dataset.rollAttribute;
-      const attributeObj = this.actor.system.attributes[attribute];
-      if (!attributeObj) return;
-
-      const label = game.i18n.format("CWN.AttributeCheck", {attribute: game.i18n.localize(CONFIG.CWN.attributes[attribute])});
-      const formula = `2d6 + ${attributeObj.mod}`;
-      
-      let roll = new Roll(formula);
-      roll.evaluate({async: true}).then(roll => {
+    if (dataset.attribute) {
+      const attribute = dataset.attribute;
+      const attrData = this.actor.system.attributes[attribute];
+      if (attrData) {
+        const formula = `1d20 + ${attrData.mod}`;
+        const label = game.i18n.format("CWN.AttributeCheck", {
+          attribute: game.i18n.localize(CONFIG.CWN.attributes[attribute])
+        });
+        
+        let roll = new Roll(formula, this.actor.getRollData());
         roll.toMessage({
           speaker: ChatMessage.getSpeaker({ actor: this.actor }),
           flavor: label,
           rollMode: game.settings.get('core', 'rollMode'),
         });
-      });
-      return roll;
+        return roll;
+      }
     }
-
-    // Handle skill rolls
-    if (dataset.rollSkill) {
-      return this.actor.rollSkill(dataset.rollSkill);
-    }
-
+    
     // Handle save rolls
-    if (dataset.rollSave) {
-      return this.actor.rollSave(dataset.rollSave);
+    if (dataset.save) {
+      const saveId = dataset.save;
+      return this.actor.rollSave(saveId);
     }
-
-    // Handle morale rolls
-    if (dataset.rollMorale) {
-      return this.actor.rollMorale();
+    
+    // Handle skill rolls
+    if (dataset.skill) {
+      const skillId = dataset.skill;
+      return this.actor.rollSkill(skillId);
     }
   }
 
   /** @override */
   _getHeaderButtons() {
-    const buttons = super._getHeaderButtons();
+    let buttons = super._getHeaderButtons();
     
-    // Add custom buttons for actor sheets
+    // Add custom buttons
     if (this.actor.isOwner) {
       buttons.unshift({
         label: "Effects",
@@ -445,74 +415,65 @@ export class CWNActorSheet extends ActorSheet {
   }
 
   /**
-   * Handle managing active effects
+   * Handle management of Active Effects
    * @param {Event} event The triggering event
    * @private
    */
   _onManageActiveEffects(event) {
     event.preventDefault();
-    const a = game.actors.get(this.actor.id);
-    new ActiveEffectConfig(a).render(true);
-  }
-
-  /** @override */
-  async _onDropItemCreate(itemData) {
-    // Override the default Item drop handler to handle duplicates
-    const type = itemData.type;
-    const name = itemData.name;
-    
-    // Check for duplicate items
-    const duplicate = this.actor.items.find(i => i.type === type && i.name === name);
-    if (duplicate) {
-      const updateData = {};
-      
-      // Handle stackable items
-      if (["gear"].includes(type)) {
-        const quantity = duplicate.system.quantity + (itemData.system.quantity || 1);
-        updateData["system.quantity"] = quantity;
-        await duplicate.update(updateData);
-        return duplicate;
-      }
-      
-      // Ask the user if they want to replace the existing item
-      const replace = await this._duplicateItemDialog(name);
-      if (replace) {
-        await duplicate.delete();
-      } else {
-        return null;
-      }
-    }
-    
-    // Create the owned item as normal
-    return super._onDropItemCreate(itemData);
+    new ActiveEffectConfig(this.actor).render(true);
   }
 
   /**
-   * Display a dialog for handling duplicate items
-   * @param {string} itemName The name of the duplicate item
-   * @returns {Promise<boolean>} Whether to replace the item
+   * Handle dropping of an item reference or item data onto an Actor Sheet
+   * @param {DragEvent} event     The concluding DragEvent which contains drop data
+   * @param {Object} data         The data transfer extracted from the event
+   * @return {Promise<Object>}    A data object which describes the result of the drop
+   * @private
+   */
+  async _onDropItemCreate(itemData) {
+    // Check if item already exists
+    const existingItem = this.actor.items.find(i => 
+      i.name === itemData.name && i.type === itemData.type
+    );
+    
+    if (existingItem) {
+      // Show dialog to ask if user wants to duplicate the item
+      return this._duplicateItemDialog(itemData.name);
+    }
+    
+    // Create the owned item
+    return this.actor.createEmbeddedDocuments("Item", [itemData]);
+  }
+
+  /**
+   * Shows a dialog to confirm item duplication
+   * @param {string} itemName The name of the item to duplicate
    * @private
    */
   async _duplicateItemDialog(itemName) {
-    return new Promise(resolve => {
-      const content = `<p>An item named "${itemName}" already exists on this Actor. Do you want to replace it?</p>`;
-      
+    return new Promise((resolve, reject) => {
       new Dialog({
-        title: "Duplicate Item",
-        content: content,
+        title: `Duplicate Item`,
+        content: `<p>An item named "${itemName}" already exists on this Actor. Do you want to create a duplicate?</p>`,
         buttons: {
-          replace: {
-            icon: '<i class="fas fa-check"></i>',
-            label: "Replace",
-            callback: () => resolve(true)
+          duplicate: {
+            icon: '<i class="fas fa-copy"></i>',
+            label: "Create Duplicate",
+            callback: () => {
+              resolve(true);
+            }
           },
           cancel: {
             icon: '<i class="fas fa-times"></i>',
             label: "Cancel",
-            callback: () => resolve(false)
+            callback: () => {
+              resolve(false);
+            }
           }
         },
-        default: "cancel"
+        default: "cancel",
+        close: () => resolve(false)
       }).render(true);
     });
   }

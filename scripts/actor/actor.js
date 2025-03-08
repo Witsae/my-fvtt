@@ -53,6 +53,16 @@ export class CWNActor extends Actor {
     // Calculate max system strain
     systemData.systemStrain.max = systemData.attributes.con.value / 2;
     if (systemData.systemStrain.max < 1) systemData.systemStrain.max = 1;
+    
+    // Calculate cyberware strain
+    const cyberware = this.items.filter(i => i.type === "cyberware");
+    let cyberwareStrain = 0;
+    
+    // Sum up cyberware strain
+    cyberwareStrain = cyberware.reduce((total, item) => total + Number(item.system.systemStrain), 0);
+    
+    systemData.systemStrain.max -= cyberwareStrain;
+    systemData.systemStrain.cyberware = cyberwareStrain;
 
     // Calculate saves
     systemData.saves.physical = 15 - systemData.level - Math.max(systemData.attributes.str.mod, systemData.attributes.con.mod);
@@ -110,6 +120,12 @@ export class CWNActor extends Actor {
     
     // Include items data for macros
     data.items = this.items.map(i => i.system);
+    
+    // Add itemTypes for easier access
+    data.itemTypes = {};
+    for (let [key, items] of Object.groupBy(this.items, i => i.type)) {
+      data.itemTypes[key] = items.map(i => i.system);
+    }
     
     return data;
   }
@@ -249,5 +265,14 @@ export class CWNActor extends Actor {
   async createEmbeddedItem(itemData) {
     const created = await this.createEmbeddedDocuments("Item", [itemData]);
     return created[0];
+  }
+  
+  /**
+   * Get a skill by name
+   * @param {string} skillName The name of the skill to find
+   * @returns {Item|null} The skill item or null if not found
+   */
+  getSkill(skillName) {
+    return this.items.find(i => i.type === "skill" && i.name.toLowerCase() === skillName.toLowerCase()) || null;
   }
 } 

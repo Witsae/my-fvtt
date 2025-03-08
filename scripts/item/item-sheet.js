@@ -203,6 +203,34 @@ export class CWNItemSheet extends ItemSheet {
           break;
       }
     });
+    
+    // Rollable elements
+    html.find('.rollable').click(this._onRoll.bind(this));
+  }
+
+  /**
+   * Handle clickable rolls
+   * @param {Event} event The originating click event
+   * @private
+   */
+  _onRoll(event) {
+    event.preventDefault();
+    const element = event.currentTarget;
+    const dataset = element.dataset;
+    
+    // Handle different roll types
+    if (dataset.rollType) {
+      switch (dataset.rollType) {
+        case 'attack':
+          this.item.rollAttack();
+          break;
+        case 'damage':
+          this.item.rollDamage();
+          break;
+        default:
+          this.item.roll();
+      }
+    }
   }
 
   /** @override */
@@ -220,8 +248,54 @@ export class CWNItemSheet extends ItemSheet {
       });
     }
     
+    // Add effects button
+    buttons.unshift({
+      label: "Effects",
+      class: "manage-effects",
+      icon: "fas fa-bolt",
+      onclick: ev => this._onManageActiveEffects(ev)
+    });
+    
     console.log("CWN | Header buttons:", buttons);
     return buttons;
+  }
+  
+  /**
+   * Handle management of Active Effects
+   * @param {Event} event The triggering event
+   * @private
+   */
+  _onManageActiveEffects(event) {
+    event.preventDefault();
+    new ActiveEffectConfig(this.item).render(true);
+  }
+
+  /** @override */
+  async _onDrop(event) {
+    const data = TextEditor.getDragEventData(event);
+    
+    // Handle dropping effects
+    if (data.type === "ActiveEffect") {
+      return this._onDropActiveEffect(event, data);
+    }
+    
+    return super._onDrop(event);
+  }
+  
+  /**
+   * Handle dropping an Active Effect on this item sheet
+   * @param {DragEvent} event The drag event
+   * @param {Object} data The dropped data
+   * @return {Promise}
+   * @private
+   */
+  async _onDropActiveEffect(event, data) {
+    const effect = await ActiveEffect.implementation.fromDropData(data);
+    if (!this.item.isOwner || !effect) return false;
+    
+    if (this.item.uuid === effect.parent?.uuid) return false;
+    
+    return ActiveEffect.create(effect.toObject(), {parent: this.item});
   }
 
   /** @override */
