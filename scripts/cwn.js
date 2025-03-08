@@ -26,24 +26,17 @@ Hooks.once("init", async function() {
   Actors.unregisterSheet("core", ActorSheet);
   Actors.registerSheet("cwn", CWNActorSheet, { makeDefault: true });
   
+  // 아이템 시트 등록
   console.log("CWN | Registering item sheet");
   Items.unregisterSheet("core", ItemSheet);
+  Items.registerSheet("cwn", CWNItemSheet, { makeDefault: true, label: "CWN.SheetClassItem" });
   
-  // Register the item sheet directly to CONFIG
-  CONFIG.Item.sheetClasses = CONFIG.Item.sheetClasses || {};
-  CONFIG.Item.sheetClasses.cwn = CONFIG.Item.sheetClasses.cwn || {};
-  CONFIG.Item.sheetClasses.cwn.CWNItemSheet = CWNItemSheet;
-  
-  // Then register it normally
-  Items.registerSheet("cwn", CWNItemSheet, { 
-    makeDefault: true, 
-    types: ["skill", "focus", "weapon", "armor", "gear", "cyberware", "drug", "asset", "power", "vehicle"] 
-  });
-  
+  // 아이템 시트 클래스 확인
   console.log("CWN | Item sheet classes after registration:", CONFIG.Item.sheetClasses);
 
-  // Add CWN config to CONFIG
+  // 아이템 클래스 맵 설정
   CONFIG.CWN = CWN;
+  CONFIG.CWN.ItemClassMap = ItemClassMap;
 
   // Register Handlebars helpers
   registerHandlebarsHelpers();
@@ -428,6 +421,13 @@ Hooks.on("renderDialog", (dialog, html, data) => {
     console.log("CWN | Modifying item creation dialog");
     console.log("CWN | Dialog data:", dialog.data);
     console.log("CWN | Dialog html:", html);
+    
+    // 기존 타입 필드 제거
+    const existingTypeField = html.find("select[name='type']").first().closest(".form-group");
+    if (existingTypeField.length) {
+      console.log("CWN | Removing existing type field");
+      existingTypeField.remove();
+    }
     
     // 타입 선택 드롭다운 추가
     const form = html.find("form");

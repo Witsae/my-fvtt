@@ -68,6 +68,13 @@ export class CWNItemSheet extends ItemSheet {
       context.type = this.item.type || "gear"; // 기본값으로 gear 설정
       console.log("CWN | Item type in getData:", context.type);
 
+      // 아이템 타입이 유효한지 확인
+      const validTypes = ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"];
+      if (!validTypes.includes(context.type)) {
+        console.warn(`CWN | Invalid item type: ${context.type}, defaulting to gear`);
+        context.type = "gear";
+      }
+
       // Prepare specific data for different item types
       this._prepareItemData(context);
 

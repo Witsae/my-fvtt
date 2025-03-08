@@ -143,13 +143,15 @@ export class CWNItem extends Item {
     console.log("CWN | Getting sheet for item:", this.name);
     if (!this._sheet) {
       console.log("CWN | No sheet instance exists, creating one");
-      // Use a direct reference to CWNItemSheet if available
-      const CWNItemSheet = CONFIG.Item.sheetClasses?.cwn?.CWNItemSheet;
+      
+      // CWNItemSheet 클래스 가져오기
+      const CWNItemSheet = CONFIG.Item.sheetClasses?.cwn?.base?.cls;
+      
       if (CWNItemSheet) {
         console.log("CWN | Creating CWNItemSheet instance");
         this._sheet = new CWNItemSheet(this);
       } else {
-        console.log("CWN | Creating default ItemSheet instance");
+        console.log("CWN | CWNItemSheet not found, creating default ItemSheet instance");
         this._sheet = new ItemSheet(this);
       }
       console.log("CWN | Created sheet instance:", this._sheet);
