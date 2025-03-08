@@ -37,7 +37,15 @@ export class CWNActor extends Actor {
     if (systemData.health.max < 1) systemData.health.max = 1;
 
     // Calculate max sanity if enabled
-    if (game.settings.get("cwn-system", "enableSanity")) {
+    try {
+      const enableSanity = game.settings.get("cwn-system", "enableSanity");
+      if (enableSanity) {
+        systemData.sanity.max = 10 + systemData.attributes.wis.mod;
+        if (systemData.sanity.max < 1) systemData.sanity.max = 1;
+      }
+    } catch (error) {
+      console.warn("CWN | Error accessing enableSanity setting, defaulting to enabled:", error);
+      // Default behavior if setting is not available
       systemData.sanity.max = 10 + systemData.attributes.wis.mod;
       if (systemData.sanity.max < 1) systemData.sanity.max = 1;
     }

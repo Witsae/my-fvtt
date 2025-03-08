@@ -23,24 +23,31 @@ Hooks.once("init", async function() {
   
   console.log("CWN | Registering item sheet");
   Items.unregisterSheet("core", ItemSheet);
+  
+  // Register the item sheet directly to CONFIG
+  CONFIG.Item.sheetClasses = CONFIG.Item.sheetClasses || {};
+  CONFIG.Item.sheetClasses.cwn = CONFIG.Item.sheetClasses.cwn || {};
+  CONFIG.Item.sheetClasses.cwn.CWNItemSheet = CWNItemSheet;
+  
+  // Then register it normally
   Items.registerSheet("cwn", CWNItemSheet, { 
     makeDefault: true, 
     types: ["skill", "focus", "weapon", "armor", "gear", "cyberware", "asset"] 
   });
   
-  console.log("CWN | Item sheet classes:", CONFIG.Item.sheetClasses);
+  console.log("CWN | Item sheet classes after registration:", CONFIG.Item.sheetClasses);
 
   // Add CWN config to CONFIG
   CONFIG.CWN = CWN;
 
-  // Preload Handlebars templates
-  await preloadHandlebarsTemplates();
+  // Register Handlebars helpers
+  registerHandlebarsHelpers();
 
   // Register system settings
   registerSystemSettings();
 
-  // Register Handlebars helpers
-  registerHandlebarsHelpers();
+  // Preload Handlebars templates
+  await preloadHandlebarsTemplates();
 });
 
 /* -------------------------------------------- */
@@ -48,6 +55,8 @@ Hooks.once("init", async function() {
 /* -------------------------------------------- */
 
 function registerSystemSettings() {
+  console.log("CWN | Registering system settings");
+  
   game.settings.register("cwn-system", "useModernCurrency", {
     name: "Use Modern Currency",
     hint: "Use modern currency (dollars) instead of traditional credits.",
@@ -65,6 +74,8 @@ function registerSystemSettings() {
     type: Boolean,
     default: true
   });
+  
+  console.log("CWN | System settings registered");
 }
 
 /* -------------------------------------------- */
@@ -72,6 +83,8 @@ function registerSystemSettings() {
 /* -------------------------------------------- */
 
 function registerHandlebarsHelpers() {
+  console.log("CWN | Registering Handlebars helpers");
+  
   // Add a helper to format numbers with commas
   Handlebars.registerHelper("numberFormat", function(value) {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -82,6 +95,14 @@ function registerHandlebarsHelpers() {
     const mod = Math.floor((value - 10) / 2);
     return mod >= 0 ? `+${mod}` : mod.toString();
   });
+  
+  // Add capitalize helper
+  Handlebars.registerHelper("capitalize", function(value) {
+    if (typeof value !== 'string') return '';
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  });
+  
+  console.log("CWN | Handlebars helpers registered");
 }
 
 /* -------------------------------------------- */
@@ -91,6 +112,14 @@ function registerHandlebarsHelpers() {
 Hooks.once("ready", async function() {
   console.log("CWN | Cities Without Number System Ready");
   console.log("CWN | Item sheet classes at ready:", CONFIG.Item.sheetClasses);
+  
+  // Verify settings are registered
+  try {
+    const enableSanity = game.settings.get("cwn-system", "enableSanity");
+    console.log("CWN | enableSanity setting:", enableSanity);
+  } catch (error) {
+    console.error("CWN | Error accessing settings:", error);
+  }
 });
 
 /* -------------------------------------------- */
