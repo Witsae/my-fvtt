@@ -18,7 +18,8 @@ export class CWNItemSheet extends ItemSheet {
       height: 480,
       resizable: true,
       scrollY: [".sheet-body"],
-      tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description" }]
+      tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description" }],
+      dragDrop: [{dragSelector: ".item-list .item", dropSelector: null}]
     });
   }
 
@@ -62,12 +63,75 @@ export class CWNItemSheet extends ItemSheet {
       // Add type for template
       context.type = this.item.type;
 
+      // Prepare specific data for different item types
+      this._prepareItemData(context);
+
       console.log("CWN | Final context for item sheet:", context);
       return context;
     } catch (error) {
       console.error("CWN | Error in ItemSheet getData:", error);
       throw error;
     }
+  }
+
+  /**
+   * Prepare data for different item types
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareItemData(context) {
+    // Handle different item types
+    if (this.item.type === 'weapon') {
+      this._prepareWeaponData(context);
+    } else if (this.item.type === 'armor') {
+      this._prepareArmorData(context);
+    } else if (this.item.type === 'skill') {
+      this._prepareSkillData(context);
+    } else if (this.item.type === 'focus') {
+      this._prepareFocusData(context);
+    }
+  }
+
+  /**
+   * Prepare weapon-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareWeaponData(context) {
+    // Add weapon range options
+    context.weaponRanges = CONFIG.CWN.weaponRanges;
+  }
+
+  /**
+   * Prepare armor-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareArmorData(context) {
+    // Add armor type options
+    context.armorTypes = CONFIG.CWN.armorTypes;
+  }
+
+  /**
+   * Prepare skill-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareSkillData(context) {
+    // Add skill category options
+    context.skillCategories = CONFIG.CWN.skillCategories;
+    // Add attribute options
+    context.attributes = CONFIG.CWN.attributes;
+  }
+
+  /**
+   * Prepare focus-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareFocusData(context) {
+    // Add focus level options
+    context.focusLevels = CONFIG.CWN.focusLevels;
   }
 
   /* -------------------------------------------- */
@@ -98,12 +162,64 @@ export class CWNItemSheet extends ItemSheet {
       tags.splice(index, 1);
       item.update({ "system.tags": tags });
     });
+
+    // Add item property
+    html.find('.property-add').click(ev => {
+      ev.preventDefault();
+      const item = this.item;
+      const properties = foundry.utils.deepClone(item.system.properties || []);
+      properties.push({
+        name: "",
+        value: ""
+      });
+      item.update({ "system.properties": properties });
+    });
+
+    // Delete item property
+    html.find('.property-delete').click(ev => {
+      ev.preventDefault();
+      const item = this.item;
+      const properties = foundry.utils.deepClone(item.system.properties || []);
+      const index = Number(ev.currentTarget.dataset.index);
+      properties.splice(index, 1);
+      item.update({ "system.properties": properties });
+    });
+
+    // Active Effect management
+    html.find(".effect-control").click(ev => {
+      const button = ev.currentTarget;
+      const effectId = button.closest(".effect").dataset.effectId;
+      const effect = this.item.effects.get(effectId);
+      
+      switch (button.dataset.action) {
+        case "toggle":
+          effect.update({disabled: !effect.disabled});
+          break;
+        case "edit":
+          effect.sheet.render(true);
+          break;
+        case "delete":
+          effect.delete();
+          break;
+      }
+    });
   }
 
   /** @override */
   _getHeaderButtons() {
     console.log("CWN | ItemSheet _getHeaderButtons called for:", this.item?.name);
     const buttons = super._getHeaderButtons();
+    
+    // Add custom buttons for item sheets
+    if (this.item.isOwned) {
+      buttons.unshift({
+        label: "Roll",
+        class: "roll-item",
+        icon: "fas fa-dice-d20",
+        onclick: () => this.item.roll()
+      });
+    }
+    
     console.log("CWN | Header buttons:", buttons);
     return buttons;
   }

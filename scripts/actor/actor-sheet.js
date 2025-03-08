@@ -11,7 +11,12 @@ export class CWNActorSheet extends ActorSheet {
       template: "systems/cwn-system/templates/actor/actor-sheet.hbs",
       width: 600,
       height: 600,
-      tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "features" }]
+      tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "features" }],
+      dragDrop: [
+        {dragSelector: ".item-list .item", dropSelector: null},
+        {dragSelector: ".actor-list .actor", dropSelector: null}
+      ],
+      scrollY: [".sheet-body", ".tab.skills", ".tab.items", ".tab.effects"]
     });
   }
 
@@ -52,6 +57,9 @@ export class CWNActorSheet extends ActorSheet {
 
     // Add roll data for TinyMCE editors.
     context.rollData = context.actor.getRollData();
+
+    // Add config data
+    context.config = CONFIG.CWN;
 
     return context;
   }
@@ -224,13 +232,28 @@ export class CWNActorSheet extends ActorSheet {
       const itemId = li.attr("data-item-id");
       const item = this.actor.items.get(itemId);
       if (item) {
-        item.delete();
-        li.slideUp(200, () => this.render(false));
+        this._deleteItemDialog(item);
       }
     });
 
     // Active Effect management
-    html.find(".effect-control").click(ev => onManageActiveEffect(ev, this.actor));
+    html.find(".effect-control").click(ev => {
+      const button = ev.currentTarget;
+      const effectId = button.closest(".effect").dataset.effectId;
+      const effect = this.actor.effects.get(effectId);
+      
+      switch (button.dataset.action) {
+        case "toggle":
+          effect.update({disabled: !effect.disabled});
+          break;
+        case "edit":
+          effect.sheet.render(true);
+          break;
+        case "delete":
+          effect.delete();
+          break;
+      }
+    });
 
     // Rollable abilities.
     html.find('.rollable').click(this._onRoll.bind(this));
@@ -271,6 +294,60 @@ export class CWNActorSheet extends ActorSheet {
 
     // Finally, create the item!
     return await Item.create(itemData, {parent: this.actor});
+  }
+
+  /**
+   * Display a dialog to confirm item deletion
+   * @param {Item} item The item to delete
+   * @private
+   */
+  _deleteItemDialog(item) {
+    const content = `<p>Are you sure you want to delete ${item.name}?</p>`;
+    
+    new Dialog({
+      title: `Delete ${item.name}`,
+      content: content,
+      buttons: {
+        delete: {
+          icon: '<i class="fas fa-trash"></i>',
+          label: "Delete",
+          callback: () => item.delete()
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "Cancel"
+        }
+      },
+      default: "cancel"
+    }).render(true);
+  }
+
+  /**
+   * Helper method to open an item sheet
+   * @param {Item} item The item to open
+   * @private
+   */
+  _openItemSheet(item) {
+    try {
+      console.log("CWN | Attempting to open item sheet for:", item);
+      console.log("CWN | Item sheet instance:", item.sheet);
+      console.log("CWN | Item type:", item.type);
+      console.log("CWN | Item data:", item);
+      
+      if (!item.sheet) {
+        console.warn("CWN | Item sheet not found, creating new sheet instance");
+        const ItemSheetClass = CONFIG.Item.sheetClasses.cwn?.CWNItemSheet || CONFIG.Item.sheetClass;
+        console.log("CWN | Using sheet class:", ItemSheetClass);
+        item.sheet = new ItemSheetClass(item);
+      }
+      
+      console.log("CWN | Rendering item sheet:", item.sheet);
+      const result = item.sheet.render(true);
+      console.log("CWN | Render result:", result);
+    } catch (error) {
+      console.error("CWN | Error opening item sheet:", error);
+      ui.notifications.error(`Error opening item sheet: ${error.message}`);
+    }
   }
 
   /**
@@ -350,31 +427,93 @@ export class CWNActorSheet extends ActorSheet {
     }
   }
 
+  /** @override */
+  _getHeaderButtons() {
+    const buttons = super._getHeaderButtons();
+    
+    // Add custom buttons for actor sheets
+    if (this.actor.isOwner) {
+      buttons.unshift({
+        label: "Effects",
+        class: "manage-effects",
+        icon: "fas fa-bolt",
+        onclick: ev => this._onManageActiveEffects(ev)
+      });
+    }
+    
+    return buttons;
+  }
+
   /**
-   * Helper method to open an item sheet
-   * @param {Item} item The item to open
+   * Handle managing active effects
+   * @param {Event} event The triggering event
    * @private
    */
-  _openItemSheet(item) {
-    try {
-      console.log("CWN | Attempting to open item sheet for:", item);
-      console.log("CWN | Item sheet instance:", item.sheet);
-      console.log("CWN | Item type:", item.type);
-      console.log("CWN | Item data:", item);
+  _onManageActiveEffects(event) {
+    event.preventDefault();
+    const a = game.actors.get(this.actor.id);
+    new ActiveEffectConfig(a).render(true);
+  }
+
+  /** @override */
+  async _onDropItemCreate(itemData) {
+    // Override the default Item drop handler to handle duplicates
+    const type = itemData.type;
+    const name = itemData.name;
+    
+    // Check for duplicate items
+    const duplicate = this.actor.items.find(i => i.type === type && i.name === name);
+    if (duplicate) {
+      const updateData = {};
       
-      if (!item.sheet) {
-        console.warn("CWN | Item sheet not found, creating new sheet instance");
-        const ItemSheetClass = CONFIG.Item.sheetClasses.cwn?.CWNItemSheet || CONFIG.Item.sheetClass;
-        console.log("CWN | Using sheet class:", ItemSheetClass);
-        item.sheet = new ItemSheetClass(item);
+      // Handle stackable items
+      if (["gear"].includes(type)) {
+        const quantity = duplicate.system.quantity + (itemData.system.quantity || 1);
+        updateData["system.quantity"] = quantity;
+        await duplicate.update(updateData);
+        return duplicate;
       }
       
-      console.log("CWN | Rendering item sheet:", item.sheet);
-      const result = item.sheet.render(true);
-      console.log("CWN | Render result:", result);
-    } catch (error) {
-      console.error("CWN | Error opening item sheet:", error);
-      ui.notifications.error(`Error opening item sheet: ${error.message}`);
+      // Ask the user if they want to replace the existing item
+      const replace = await this._duplicateItemDialog(name);
+      if (replace) {
+        await duplicate.delete();
+      } else {
+        return null;
+      }
     }
+    
+    // Create the owned item as normal
+    return super._onDropItemCreate(itemData);
+  }
+
+  /**
+   * Display a dialog for handling duplicate items
+   * @param {string} itemName The name of the duplicate item
+   * @returns {Promise<boolean>} Whether to replace the item
+   * @private
+   */
+  async _duplicateItemDialog(itemName) {
+    return new Promise(resolve => {
+      const content = `<p>An item named "${itemName}" already exists on this Actor. Do you want to replace it?</p>`;
+      
+      new Dialog({
+        title: "Duplicate Item",
+        content: content,
+        buttons: {
+          replace: {
+            icon: '<i class="fas fa-check"></i>',
+            label: "Replace",
+            callback: () => resolve(true)
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: "Cancel",
+            callback: () => resolve(false)
+          }
+        },
+        default: "cancel"
+      }).render(true);
+    });
   }
 } 

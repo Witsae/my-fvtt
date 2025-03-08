@@ -103,6 +103,18 @@ export class CWNActor extends Actor {
   }
 
   /**
+   * Override getRollData() to include items as d.items
+   */
+  getRollData() {
+    const data = super.getRollData();
+    
+    // Include items data for macros
+    data.items = this.items.map(i => i.system);
+    
+    return data;
+  }
+
+  /**
    * Roll a skill check
    * @param {string} skillId   The skill id (e.g. "athletics")
    * @param {Object} options   Options which configure how the skill check is rolled
@@ -227,5 +239,15 @@ export class CWNActor extends Actor {
     }
     
     return null;
+  }
+
+  /**
+   * Create a new item for this actor
+   * @param {Object} itemData The item data to create
+   * @returns {Promise<Item>} The created item
+   */
+  async createEmbeddedItem(itemData) {
+    const created = await this.createEmbeddedDocuments("Item", [itemData]);
+    return created[0];
   }
 } 
