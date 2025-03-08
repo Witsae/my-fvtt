@@ -19,38 +19,17 @@
   <section class="sheet-body">
     {{!-- Description Tab --}}
     <div class="tab description" data-group="primary" data-tab="description">
-      {{editor system.description target="system.description" button=true owner=owner editable=editable}}
+      {{> "systems/cwn-system/templates/item/parts/item-description.hbs"}}
     </div>
 
     {{!-- Attributes Tab --}}
     <div class="tab attributes" data-group="primary" data-tab="attributes">
-      {{> (concat "systems/cwn-system/templates/item/parts/item-" type "-attributes.hbs")}}
+      {{> "systems/cwn-system/templates/item/parts/item-attributes.hbs"}}
     </div>
 
     {{!-- Effects Tab --}}
     <div class="tab effects" data-group="primary" data-tab="effects">
-      <ol class="effects-list">
-        {{#each effects as |effect|}}
-        <li class="effect flexrow" data-effect-id="{{effect.id}}">
-          <div class="effect-name">
-            <h4>{{effect.label}}</h4>
-          </div>
-          <div class="effect-source">{{effect.sourceName}}</div>
-          <div class="effect-duration">{{effect.duration.label}}</div>
-          <div class="effect-controls">
-            <a class="effect-control" data-action="toggle" title="{{localize 'Toggle Effect'}}">
-              <i class="fas {{#if effect.disabled}}fa-check{{else}}fa-times{{/if}}"></i>
-            </a>
-            <a class="effect-control" data-action="edit" title="{{localize 'Edit Effect'}}">
-              <i class="fas fa-edit"></i>
-            </a>
-            <a class="effect-control" data-action="delete" title="{{localize 'Delete Effect'}}">
-              <i class="fas fa-trash"></i>
-            </a>
-          </div>
-        </li>
-        {{/each}}
-      </ol>
+      {{> "systems/cwn-system/templates/item/parts/item-effects.hbs"}}
     </div>
   </section>
 </form> 

@@ -2,7 +2,7 @@
   "id": "cwn-system",
   "title": "Cities Without Number",
   "description": "A system for playing Cities Without Number in the Foundry Virtual Tabletop environment.",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "compatibility": {
     "minimum": "11",
     "verified": "12",
