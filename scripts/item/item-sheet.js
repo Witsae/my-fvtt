@@ -58,8 +58,17 @@ export class CWNItemSheet extends ItemSheet {
       const context = await super.getData();
       console.log("CWN | Base context from super.getData():", context);
 
-      // Use a safe clone of the item data for further operations.
-      const itemData = context.item;
+      // 아이템 데이터 확인
+      if (!context.data) {
+        console.warn("CWN | No data in context, creating empty object");
+        context.data = {};
+      }
+
+      // Foundry V12에서는 context.data 대신 context.document.system을 사용
+      if (!context.system && context.document?.system) {
+        context.system = context.document.system;
+        console.log("CWN | Using document.system for context.system");
+      }
 
       // Retrieve the roll data for TinyMCE editors.
       context.rollData = {};
@@ -69,8 +78,14 @@ export class CWNItemSheet extends ItemSheet {
       }
 
       // Add the item's data to context.data for easier access, as well as flags.
-      context.system = itemData.system;
-      context.flags = itemData.flags;
+      if (!context.system) {
+        console.warn("CWN | No system data found, using empty object");
+        context.system = {};
+      }
+      
+      if (!context.flags && this.item?.flags) {
+        context.flags = this.item.flags;
+      }
 
       // Add config data
       context.config = CONFIG.CWN;
