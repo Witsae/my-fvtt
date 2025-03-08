@@ -3,7 +3,7 @@
   "name": "my-foundry-module",
   "title": "My Foundry Module",
   "description": "A custom module for Foundry VTT",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Witsae",
   "authors": [
     {
@@ -35,7 +35,7 @@
   ],
   "url": "https://github.com/Witsae/my-fvtt",
   "manifest": "https://raw.githubusercontent.com/Witsae/my-fvtt/main/module.json",
-  "download": "https://github.com/Witsae/my-fvtt/archive/refs/tags/v1.0.0.zip",
+  "download": "https://github.com/Witsae/my-fvtt/archive/refs/tags/v1.1.0.zip",
   "license": "MIT",
   "readme": "https://github.com/Witsae/my-fvtt/blob/main/README.md",
   "bugs": "https://github.com/Witsae/my-fvtt/issues",
