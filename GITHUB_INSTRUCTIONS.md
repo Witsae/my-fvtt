@@ -4,7 +4,7 @@
 
 2. 오른쪽 상단의 '+' 버튼을 클릭하고 'New repository'를 선택합니다.
 
-3. 저장소 이름을 'my-foundry-module'로 입력합니다 (원하는 다른 이름으로 변경 가능).
+3. 저장소 이름을 'my-fvtt'로 입력합니다.
 
 4. 설명(선택 사항)을 입력합니다.
 
@@ -17,7 +17,7 @@
 8. 저장소가 생성되면 GitHub에서 제공하는 명령어 중 "…or push an existing repository from the command line" 섹션의 명령어를 복사하여 터미널에서 실행합니다:
 
 ```
-git remote add origin https://github.com/yourusername/my-foundry-module.git
+git remote add origin https://github.com/yourusername/my-fvtt.git
 git branch -M main
 git push -u origin main
 ```
