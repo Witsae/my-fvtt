@@ -17,6 +17,9 @@ import { ItemClassMap } from "./items/index.js";
 Hooks.once("init", async function() {
   console.log("CWN | Initializing Cities Without Number System");
 
+  // CWNItemSheet를 전역 변수로 등록
+  globalThis.CWNItemSheet = CWNItemSheet;
+
   // Define custom Document classes
   CONFIG.Actor.documentClass = CWNActor;
   CONFIG.Item.documentClass = CWNItem;
@@ -29,7 +32,22 @@ Hooks.once("init", async function() {
   // 아이템 시트 등록
   console.log("CWN | Registering item sheet");
   Items.unregisterSheet("core", ItemSheet);
-  Items.registerSheet("cwn", CWNItemSheet, { makeDefault: true, label: "CWN.SheetClassItem" });
+  
+  // 직접 CONFIG에 아이템 시트 클래스 등록
+  CONFIG.Item.sheetClasses = CONFIG.Item.sheetClasses || {};
+  CONFIG.Item.sheetClasses.cwn = CONFIG.Item.sheetClasses.cwn || {};
+  CONFIG.Item.sheetClasses.cwn.base = {
+    id: "cwn",
+    label: "CWN.SheetClassItem",
+    cls: CWNItemSheet
+  };
+  
+  // 일반적인 방식으로도 등록
+  Items.registerSheet("cwn", CWNItemSheet, { 
+    makeDefault: true, 
+    label: "CWN.SheetClassItem",
+    types: ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"]
+  });
   
   // 아이템 시트 클래스 확인
   console.log("CWN | Item sheet classes after registration:", CONFIG.Item.sheetClasses);

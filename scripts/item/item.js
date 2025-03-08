@@ -144,8 +144,8 @@ export class CWNItem extends Item {
     if (!this._sheet) {
       console.log("CWN | No sheet instance exists, creating one");
       
-      // CWNItemSheet 클래스 가져오기
-      const CWNItemSheet = CONFIG.Item.sheetClasses?.cwn?.base?.cls;
+      // CWNItemSheet 클래스 가져오기 - 직접 import된 클래스 사용
+      const CWNItemSheet = CONFIG.Item.sheetClasses?.cwn?.base?.cls || globalThis.CWNItemSheet;
       
       if (CWNItemSheet) {
         console.log("CWN | Creating CWNItemSheet instance");

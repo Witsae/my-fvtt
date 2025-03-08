@@ -29,8 +29,19 @@ export class CWNItemSheet extends ItemSheet {
   /** @override */
   get template() {
     console.log("CWN | ItemSheet template getter called for:", this.item?.name, this.item?.type);
-    // 모든 아이템 타입에 대해 동일한 기본 템플릿을 사용합니다.
-    const template = "systems/cwn-system/templates/item/item-sheet.hbs";
+    
+    // 아이템 타입에 따른 템플릿 경로 설정
+    const type = this.item?.type || "gear";
+    
+    // 타입별 템플릿 파일이 있는지 확인
+    const typeTemplate = `systems/cwn-system/templates/item/item-${type}-sheet.hbs`;
+    
+    // 기본 템플릿 경로
+    const defaultTemplate = "systems/cwn-system/templates/item/item-sheet.hbs";
+    
+    // 템플릿 경로 결정 - 항상 기본 템플릿 사용
+    const template = defaultTemplate;
+    
     console.log("CWN | Using template:", template);
     return template;
   }
