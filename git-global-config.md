@@ -4,7 +4,7 @@
 
 ```bash
 git config --global user.name "Witsae"
-git config --global user.email "witsae@example.com"
+git config --global user.email "aoraoooo@gmail.com"
 ```
 
 ## 설정 확인하기
@@ -26,7 +26,7 @@ git config --global user.email
 git filter-branch --env-filter '
 OLD_EMAIL="your-old-email@example.com"
 CORRECT_NAME="Witsae"
-CORRECT_EMAIL="witsae@example.com"
+CORRECT_EMAIL="aoraoooo@gmail.com"
 
 if [ "$GIT_COMMITTER_EMAIL" = "$OLD_EMAIL" ]
 then
