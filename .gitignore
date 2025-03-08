@@ -1,0 +1,26 @@
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# 에디터 파일
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 노드 모듈
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# 빌드 파일
+dist/
+build/
+
+# 로그 파일
+logs/
+*.log
+
+# 임시 파일
+tmp/
+temp/ 

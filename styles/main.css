@@ -1,0 +1,22 @@
+/* 모듈 스타일 */
+.my-module-class {
+  color: #4a4a4a;
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #dbdbdb;
+}
+
+/* 모듈 버튼 스타일 */
+.my-module-button {
+  background-color: #3273dc;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.my-module-button:hover {
+  background-color: #276cda;
+} 

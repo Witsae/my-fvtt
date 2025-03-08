@@ -1,0 +1,19 @@
+{
+  "name": "my-foundry-module",
+  "title": "My Foundry Module",
+  "description": "A custom module for Foundry VTT",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "minimumCoreVersion": "0.8.0",
+  "compatibleCoreVersion": "10",
+  "scripts": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/main.css"
+  ],
+  "packs": [],
+  "url": "https://github.com/yourusername/my-foundry-module",
+  "manifest": "https://raw.githubusercontent.com/yourusername/my-foundry-module/main/module.json",
+  "download": "https://github.com/yourusername/my-foundry-module/archive/refs/tags/v1.0.0.zip"
+} 
