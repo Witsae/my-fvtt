@@ -23,19 +23,19 @@ export class CWNAsset extends CWNItem {
     const damage = isOffense ? systemData.attackDamage : systemData.counter;
     
     if (!damage && isOffense) {
-      ui.notifications?.info("자산에 대한 데미지 굴림이 없습니다.");
+      ui.notifications?.info(game.i18n.localize("CWN.Errors.NoDamage"));
       return null;
     }
     
     const attackType = isOffense ? systemData.attackSource : systemData.assetType;
     
     if (!this.actor) {
-      ui.notifications?.error("자산은 팩션과 연결되어야 합니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.AssetFaction"));
       return null;
     }
     
     if (this.actor.type != "faction") {
-      ui.notifications?.error("자산은 팩션과 연결되어야 합니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.AssetFaction"));
       return null;
     }
     
@@ -79,7 +79,7 @@ export class CWNAsset extends CWNItem {
    */
   async _attack(isOffense = true) {
     if (!this.actor) {
-      ui.notifications?.error("액터가 없는 아이템으로 굴림을 시도했습니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.NoActor"));
       return;
     }
     
@@ -90,7 +90,9 @@ export class CWNAsset extends CWNItem {
     const [hitRoll, damageRoll] = rolls;
     
     // 제목 생성
-    const actionType = isOffense ? "공격" : "방어";
+    const actionType = isOffense ? 
+      game.i18n.localize("CWN.Dialogs.Attack") : 
+      game.i18n.localize("CWN.Dialogs.Defense");
     const title = `${this.name} - ${actionType}`;
     
     // 템플릿 데이터 준비
@@ -127,7 +129,7 @@ export class CWNAsset extends CWNItem {
    */
   async roll(shiftKey = false) {
     if (!this.actor) {
-      ui.notifications?.error("액터가 없는 아이템으로 굴림을 시도했습니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.NoActor"));
       return;
     }
     
@@ -150,29 +152,29 @@ export class CWNAsset extends CWNItem {
     
     // 대화 상자 생성
     this.popUpDialog = new ValidatedDialog({
-      title: `${this.name} 자산 액션`,
+      title: game.i18n.format("CWN.Dialogs.AssetAction", {name: this.name}),
       content: html,
       buttons: {
         attack: {
           icon: '<i class="fas fa-fist-raised"></i>',
-          label: "공격",
+          label: game.i18n.localize("CWN.Dialogs.Attack"),
           callback: () => this._attack(true),
           condition: !!this.system.attackDamage
         },
         counter: {
           icon: '<i class="fas fa-shield-alt"></i>',
-          label: "방어",
+          label: game.i18n.localize("CWN.Dialogs.Defense"),
           callback: () => this._attack(false),
           condition: !!this.system.counter
         },
         info: {
           icon: '<i class="fas fa-info-circle"></i>',
-          label: "정보",
+          label: game.i18n.localize("CWN.Dialogs.Info"),
           callback: () => this._showInfo()
         },
         cancel: {
           icon: '<i class="fas fa-times"></i>',
-          label: "취소"
+          label: game.i18n.localize("CWN.Dialogs.Cancel")
         }
       },
       default: this.system.attackDamage ? "attack" : "info"
@@ -201,27 +203,27 @@ export class CWNAsset extends CWNItem {
     }
     
     // 자산 정보 추가
-    content += `<div><strong>유형:</strong> ${item.system.assetType}</div>`;
-    content += `<div><strong>등급:</strong> ${item.system.rating}</div>`;
+    content += `<div><strong>${game.i18n.localize("CWN.Type")}:</strong> ${item.system.assetType}</div>`;
+    content += `<div><strong>${game.i18n.localize("CWN.Rating")}:</strong> ${item.system.rating}</div>`;
     
     if (item.system.cost) {
-      content += `<div><strong>비용:</strong> ${item.system.cost}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Cost")}:</strong> ${item.system.cost}</div>`;
     }
     
     if (item.system.upkeep) {
-      content += `<div><strong>유지비:</strong> ${item.system.upkeep}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Upkeep")}:</strong> ${item.system.upkeep}</div>`;
     }
     
     if (item.system.hp?.max) {
-      content += `<div><strong>HP:</strong> ${item.system.hp.value}/${item.system.hp.max}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.HP")}:</strong> ${item.system.hp.value}/${item.system.hp.max}</div>`;
     }
     
     if (item.system.attackDamage) {
-      content += `<div><strong>공격 데미지:</strong> ${item.system.attackDamage}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Attack")}:</strong> ${item.system.attackDamage}</div>`;
     }
     
     if (item.system.counter) {
-      content += `<div><strong>방어 데미지:</strong> ${item.system.counter}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Dialogs.Defense")}:</strong> ${item.system.counter}</div>`;
     }
     
     // 채팅 메시지 생성

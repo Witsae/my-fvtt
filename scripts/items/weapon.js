@@ -70,12 +70,12 @@ export class CWNWeapon extends CWNItem {
    */
   async rollAttack(damageBonus = 0, stat = 0, skillMod = 0, modifier = 0, useBurst = false) {
     if (!this.actor) {
-      ui.notifications?.error("액터가 없는 아이템으로 공격 굴림을 시도했습니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.NoActor"));
       return;
     }
     
     if (!this.hasAmmo) {
-      ui.notifications?.error(`${this.name}의 탄약이 부족합니다!`);
+      ui.notifications?.error(game.i18n.format("CWN.Errors.NoAmmo", {name: this.name}));
       return;
     }
     
@@ -121,9 +121,13 @@ export class CWNWeapon extends CWNItem {
     const damageRoll = await new Roll(damageFormula).evaluate({async: true});
     
     // 채팅 메시지 생성
-    const weaponType = this.system.range === "melee" ? "근접" : "원거리";
-    const burstText = useBurst ? " (연사)" : "";
-    const flavor = `${this.name} - ${weaponType} 공격${burstText}`;
+    const weaponType = this.system.range === "melee" ? 
+      game.i18n.localize("CWN.WeaponRangeMelee") : 
+      game.i18n.localize("CWN.WeaponRangeRifle");
+    
+    const flavor = useBurst ? 
+      game.i18n.format("CWN.Chat.WeaponAttackBurst", {name: this.name, type: weaponType}) : 
+      game.i18n.format("CWN.Chat.WeaponAttack", {name: this.name, type: weaponType});
     
     // 템플릿 데이터 준비
     const templateData = {
@@ -160,7 +164,7 @@ export class CWNWeapon extends CWNItem {
    */
   async roll(shiftKey = false) {
     if (!this.actor) {
-      ui.notifications?.error("액터가 없는 아이템으로 굴림을 시도했습니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.NoActor"));
       return;
     }
     
@@ -217,17 +221,17 @@ export class CWNWeapon extends CWNItem {
     
     // 대화 상자 생성
     this.popUpDialog = new ValidatedDialog({
-      title: `${this.name} 공격`,
+      title: game.i18n.format("CWN.Dialogs.WeaponAttack", {name: this.name}),
       content: html,
       buttons: {
         roll: {
           icon: '<i class="fas fa-dice-d20"></i>',
-          label: "굴림",
+          label: game.i18n.localize("CWN.Dialogs.Roll"),
           callback: _rollWeapon
         },
         cancel: {
           icon: '<i class="fas fa-times"></i>',
-          label: "취소"
+          label: game.i18n.localize("CWN.Dialogs.Cancel")
         }
       },
       default: "roll"

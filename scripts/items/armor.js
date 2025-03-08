@@ -35,7 +35,7 @@ export class CWNArmor extends CWNItem {
    */
   async roll(shiftKey = false) {
     if (!this.actor) {
-      ui.notifications?.error("액터가 없는 아이템으로 굴림을 시도했습니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.NoActor"));
       return;
     }
     
@@ -49,26 +49,26 @@ export class CWNArmor extends CWNItem {
     }
     
     // 방어구 정보 추가
-    content += `<div><strong>AC:</strong> ${item.system.ac}</div>`;
+    content += `<div><strong>${game.i18n.localize("CWN.AC")}:</strong> ${item.system.ac}</div>`;
     
     if (item.system.settings.useCWNArmor && item.system.meleeAc) {
-      content += `<div><strong>근접 AC:</strong> ${item.system.meleeAc}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Chat.MeleeAC")}:</strong> ${item.system.meleeAc}</div>`;
     }
     
     if (item.system.settings.useTrauma && item.system.traumaDiePenalty) {
-      content += `<div><strong>트라우마 주사위 페널티:</strong> ${item.system.traumaDiePenalty}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Chat.TraumaDiePenalty")}:</strong> ${item.system.traumaDiePenalty}</div>`;
     }
     
     if (item.system.type) {
-      content += `<div><strong>유형:</strong> ${item.system.type}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Type")}:</strong> ${item.system.type}</div>`;
     }
     
     if (item.system.encumbrance) {
-      content += `<div><strong>무게:</strong> ${item.system.encumbrance}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Weight")}:</strong> ${item.system.encumbrance}</div>`;
     }
     
     if (item.system.price) {
-      content += `<div><strong>가격:</strong> ${item.system.price}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Price")}:</strong> ${item.system.price}</div>`;
     }
     
     // 채팅 메시지 생성

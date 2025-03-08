@@ -37,7 +37,7 @@ export class CWNSkill extends CWNItem {
     await roll.evaluate({async: true});
     
     // 제목 생성
-    const title = `기술 판정: ${statShortName}/${skillName}`;
+    const title = game.i18n.format("CWN.SkillCheck", {skill: skillName});
     
     // 채팅 메시지 생성
     roll.toMessage({
@@ -57,10 +57,10 @@ export class CWNSkill extends CWNItem {
     const template = "systems/cwn-system/templates/dialogs/skill-roll.hbs";
     
     if (!this.actor) {
-      ui.notifications?.error("액터가 없는 아이템으로 굴림을 시도했습니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.NoActor"));
       return;
     } else if (this.actor.type != "character") {
-      ui.notifications?.error("캐릭터가 아닌 액터로 기술 굴림을 시도했습니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.NonCharacter"));
       return;
     }
     
@@ -115,17 +115,17 @@ export class CWNSkill extends CWNItem {
     
     // 대화 상자 생성
     this.popUpDialog = new ValidatedDialog({
-      title: `${skillName} 기술 판정`,
+      title: game.i18n.format("CWN.Dialogs.SkillRoll", {name: skillName}),
       content: html,
       buttons: {
         roll: {
           icon: '<i class="fas fa-dice-d20"></i>',
-          label: "굴림",
+          label: game.i18n.localize("CWN.Dialogs.Roll"),
           callback: _doRoll
         },
         cancel: {
           icon: '<i class="fas fa-times"></i>',
-          label: "취소"
+          label: game.i18n.localize("CWN.Dialogs.Cancel")
         }
       },
       default: "roll"
