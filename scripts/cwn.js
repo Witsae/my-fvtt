@@ -532,11 +532,11 @@ Hooks.on("renderItemSheet", (app, html, data) => {
     // 기본 탭 구조 추가
     const tabsHtml = `
       <nav class="sheet-tabs tabs" data-group="primary">
-        <a class="item" data-tab="description">설명</a>
+        <a class="item active" data-tab="description">설명</a>
         <a class="item" data-tab="attributes">속성</a>
       </nav>
       <section class="sheet-body">
-        <div class="tab description" data-group="primary" data-tab="description">
+        <div class="tab description active" data-group="primary" data-tab="description">
           <div class="editor-content">
             <textarea name="system.description">${data.document?.system?.description || ''}</textarea>
           </div>
@@ -554,9 +554,26 @@ Hooks.on("renderItemSheet", (app, html, data) => {
     
     html.find('form').append(tabsHtml);
     
-    // 탭 초기화
-    app._tabs = app._createTabHandlers();
-    app._tabs[0].activate("description");
+    // 탭 초기화 - 안전하게 처리
+    try {
+      // 탭 핸들러가 이미 존재하는지 확인
+      if (app._tabs && Array.isArray(app._tabs) && app._tabs.length > 0) {
+        console.log("CWN | Tabs already exist, activating description tab");
+        app._tabs[0].activate("description");
+      } else {
+        console.log("CWN | Creating new tab handlers");
+        // 탭 핸들러가 없으면 수동으로 탭 기능 활성화
+        html.find('.tabs a.item').click(function() {
+          const tab = $(this).data("tab");
+          html.find('.tabs a.item').removeClass("active");
+          html.find(`.tabs a.item[data-tab="${tab}"]`).addClass("active");
+          html.find('.tab').removeClass("active");
+          html.find(`.tab[data-tab="${tab}"]`).addClass("active");
+        });
+      }
+    } catch (error) {
+      console.error("CWN | Error initializing tabs:", error);
+    }
   }
 });
 
