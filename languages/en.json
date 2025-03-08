@@ -116,6 +116,9 @@
     "Gear": "Gear",
     "Cyberware": "Cyberware",
     "Assets": "Assets",
+    "Attributes": "Attributes",
+    "Saves": "Saves",
+    "Items": "Items",
     
     "AddItem": "Add Item",
     "EditItem": "Edit Item",

@@ -123,9 +123,24 @@ export class CWNActor extends Actor {
     
     // Add itemTypes for easier access
     data.itemTypes = {};
-    for (let [key, items] of Object.groupBy(this.items, i => i.type)) {
+    // 이전 코드: Object.groupBy 사용
+    // for (let [key, items] of Object.groupBy(this.items, i => i.type)) {
+    //   data.itemTypes[key] = items.map(i => i.system);
+    // }
+    
+    // 새로운 코드: 수동으로 그룹화
+    const itemsByType = {};
+    this.items.forEach(item => {
+      if (!itemsByType[item.type]) {
+        itemsByType[item.type] = [];
+      }
+      itemsByType[item.type].push(item);
+    });
+    
+    // 그룹화된 아이템을 data.itemTypes에 추가
+    Object.entries(itemsByType).forEach(([key, items]) => {
       data.itemTypes[key] = items.map(i => i.system);
-    }
+    });
     
     return data;
   }

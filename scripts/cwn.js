@@ -37,7 +37,7 @@ Hooks.once("init", async function() {
   // Then register it normally
   Items.registerSheet("cwn", CWNItemSheet, { 
     makeDefault: true, 
-    types: ["skill", "focus", "weapon", "armor", "gear", "cyberware", "asset"] 
+    types: ["skill", "focus", "weapon", "armor", "gear", "cyberware", "drug", "asset"] 
   });
   
   console.log("CWN | Item sheet classes after registration:", CONFIG.Item.sheetClasses);

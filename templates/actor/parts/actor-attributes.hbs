@@ -1,0 +1,18 @@
+<div class="attributes">
+  <div class="attributes-header">
+    <h3 class="box-title">{{localize "CWN.Attributes"}}</h3>
+  </div>
+  <div class="attributes-body">
+    <div class="attribute-list">
+      {{#each data.system.attributes as |attribute key|}}
+      <div class="attribute-item" data-attribute="{{key}}">
+        <div class="attribute-name">{{localize (concat "CWN.Attribute" key)}}</div>
+        <div class="attribute-value">
+          <input type="text" name="system.attributes.{{key}}.value" value="{{attribute.value}}" data-dtype="Number" />
+        </div>
+        <div class="attribute-mod">{{numberFormat attribute.mod decimals=0 sign=true}}</div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</div> 

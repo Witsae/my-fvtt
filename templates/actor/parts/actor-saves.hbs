@@ -1,0 +1,18 @@
+<div class="saves">
+  <div class="saves-header">
+    <h3 class="box-title">{{localize "CWN.Saves"}}</h3>
+  </div>
+  <div class="saves-body">
+    <div class="save-list">
+      {{#each data.system.saves as |save key|}}
+      <div class="save-item" data-save="{{key}}">
+        <div class="save-name">{{localize (concat "CWN.Save" key)}}</div>
+        <div class="save-value">
+          <input type="text" name="system.saves.{{key}}.value" value="{{save.value}}" data-dtype="Number" />
+        </div>
+        <div class="save-roll"><a class="roll-save"><i class="fas fa-dice-d20"></i></a></div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</div> 

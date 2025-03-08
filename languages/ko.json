@@ -105,6 +105,9 @@
     "Gear": "장비",
     "Cyberware": "사이버웨어",
     "Assets": "자산",
+    "Attributes": "속성",
+    "Saves": "내성",
+    "Items": "아이템",
     
     "AddItem": "아이템 추가",
     "EditItem": "아이템 편집",

@@ -1,0 +1,16 @@
+<div class="skills">
+  <div class="skills-header">
+    <h3 class="box-title">{{localize "CWN.Skills"}}</h3>
+  </div>
+  <div class="skills-body">
+    <div class="skill-list">
+      {{#each skills as |skill|}}
+      <div class="skill-item" data-item-id="{{skill._id}}">
+        <div class="skill-name">{{skill.name}}</div>
+        <div class="skill-rank">{{skill.system.rank}}</div>
+        <div class="skill-roll"><a class="roll-skill"><i class="fas fa-dice-d20"></i></a></div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</div> 
