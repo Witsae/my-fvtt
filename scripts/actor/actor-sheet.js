@@ -8,7 +8,7 @@ export class CWNActorSheet extends ActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["cwn", "sheet", "actor"],
-      template: "systems/my-fvtt-cwn/templates/actor/actor-sheet.hbs",
+      template: "systems/cwn-system/templates/actor/actor-sheet.hbs",
       width: 600,
       height: 600,
       tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "features" }]
@@ -17,7 +17,7 @@ export class CWNActorSheet extends ActorSheet {
 
   /** @override */
   get template() {
-    return `systems/my-fvtt-cwn/templates/actor/actor-${this.actor.type}-sheet.hbs`;
+    return `systems/cwn-system/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
 
   /* -------------------------------------------- */
@@ -167,6 +167,7 @@ export class CWNActorSheet extends ActorSheet {
 
     // Render the item sheet for viewing/editing prior to the editable check.
     html.find('.item-edit').click(ev => {
+      ev.preventDefault();
       const li = $(ev.currentTarget).closest(".item");
       const itemId = li.attr("data-item-id");
       const item = this.actor.items.get(itemId);
@@ -177,12 +178,45 @@ export class CWNActorSheet extends ActorSheet {
 
     // Item name click to open sheet
     html.find('.item-name').click(ev => {
+      ev.preventDefault();
       if ($(ev.target).hasClass('rollable')) return;
+      
       const li = $(ev.currentTarget).closest(".item");
       const itemId = li.attr("data-item-id");
       const item = this.actor.items.get(itemId);
+      
       if (item) {
-        item.sheet.render(true);
+        const sheet = item.sheet;
+        if (sheet) {
+          sheet.render(true);
+        } else {
+          console.error("Item sheet not found for item:", item);
+        }
+      } else {
+        console.error("Item not found with ID:", itemId);
+      }
+    });
+
+    // Direct item click handler
+    html.find('li.item').click(ev => {
+      // Skip if clicking on controls
+      if ($(ev.target).closest('.item-controls').length) return;
+      if ($(ev.target).hasClass('rollable')) return;
+      
+      // Get the item
+      const li = $(ev.currentTarget);
+      const itemId = li.attr("data-item-id");
+      const item = this.actor.items.get(itemId);
+      
+      if (item) {
+        const sheet = item.sheet;
+        if (sheet) {
+          sheet.render(true);
+        } else {
+          console.error("Item sheet not found for item:", item);
+        }
+      } else {
+        console.error("Item not found with ID:", itemId);
       }
     });
 

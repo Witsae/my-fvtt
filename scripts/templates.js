@@ -6,19 +6,19 @@
 export async function preloadHandlebarsTemplates() {
   const templatePaths = [
     // Actor partials
-    "systems/my-fvtt-cwn/templates/actor/parts/actor-attributes.hbs",
-    "systems/my-fvtt-cwn/templates/actor/parts/actor-skills.hbs",
-    "systems/my-fvtt-cwn/templates/actor/parts/actor-items.hbs",
-    "systems/my-fvtt-cwn/templates/actor/parts/actor-features.hbs",
-    "systems/my-fvtt-cwn/templates/actor/parts/actor-biography.hbs",
-    "systems/my-fvtt-cwn/templates/actor/parts/actor-saves.hbs",
-    "systems/my-fvtt-cwn/templates/actor/parts/actor-effects.hbs",
+    "systems/cwn-system/templates/actor/parts/actor-attributes.hbs",
+    "systems/cwn-system/templates/actor/parts/actor-skills.hbs",
+    "systems/cwn-system/templates/actor/parts/actor-items.hbs",
+    "systems/cwn-system/templates/actor/parts/actor-features.hbs",
+    "systems/cwn-system/templates/actor/parts/actor-biography.hbs",
+    "systems/cwn-system/templates/actor/parts/actor-saves.hbs",
+    "systems/cwn-system/templates/actor/parts/actor-effects.hbs",
     
     // Item partials
-    "systems/my-fvtt-cwn/templates/item/parts/item-header.hbs",
-    "systems/my-fvtt-cwn/templates/item/parts/item-description.hbs",
-    "systems/my-fvtt-cwn/templates/item/parts/item-attributes.hbs",
-    "systems/my-fvtt-cwn/templates/item/parts/item-effects.hbs"
+    "systems/cwn-system/templates/item/parts/item-header.hbs",
+    "systems/cwn-system/templates/item/parts/item-description.hbs",
+    "systems/cwn-system/templates/item/parts/item-attributes.hbs",
+    "systems/cwn-system/templates/item/parts/item-effects.hbs"
   ];
 
   return loadTemplates(templatePaths);

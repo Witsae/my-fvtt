@@ -10,13 +10,15 @@ export class CWNItemSheet extends ItemSheet {
       classes: ["cwn", "sheet", "item"],
       width: 520,
       height: 480,
+      resizable: true,
+      scrollY: [".sheet-body"],
       tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description" }]
     });
   }
 
   /** @override */
   get template() {
-    const path = "systems/my-fvtt-cwn/templates/item";
+    const path = "systems/cwn-system/templates/item";
     return `${path}/item-${this.item.type}-sheet.hbs`;
   }
 
@@ -63,7 +65,7 @@ export class CWNItemSheet extends ItemSheet {
     html.find('.tag-add').click(ev => {
       ev.preventDefault();
       const item = this.item;
-      const tags = item.system.tags || [];
+      const tags = foundry.utils.deepClone(item.system.tags || []);
       tags.push("");
       item.update({ "system.tags": tags });
     });
@@ -72,7 +74,7 @@ export class CWNItemSheet extends ItemSheet {
     html.find('.tag-delete').click(ev => {
       ev.preventDefault();
       const item = this.item;
-      const tags = item.system.tags || [];
+      const tags = foundry.utils.deepClone(item.system.tags || []);
       const index = Number(ev.currentTarget.dataset.index);
       tags.splice(index, 1);
       item.update({ "system.tags": tags });

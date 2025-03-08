@@ -41,7 +41,7 @@ Hooks.once("init", async function() {
 /* -------------------------------------------- */
 
 function registerSystemSettings() {
-  game.settings.register("my-fvtt-cwn", "useModernCurrency", {
+  game.settings.register("cwn-system", "useModernCurrency", {
     name: "Use Modern Currency",
     hint: "Use modern currency (dollars) instead of traditional credits.",
     scope: "world",
@@ -50,7 +50,7 @@ function registerSystemSettings() {
     default: false
   });
 
-  game.settings.register("my-fvtt-cwn", "enableSanity", {
+  game.settings.register("cwn-system", "enableSanity", {
     name: "Enable Sanity",
     hint: "Enable the Sanity mechanic for characters.",
     scope: "world",

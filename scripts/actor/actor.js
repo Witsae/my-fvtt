@@ -37,7 +37,7 @@ export class CWNActor extends Actor {
     if (systemData.health.max < 1) systemData.health.max = 1;
 
     // Calculate max sanity if enabled
-    if (game.settings.get("my-fvtt-cwn", "enableSanity")) {
+    if (game.settings.get("cwn-system", "enableSanity")) {
       systemData.sanity.max = 10 + systemData.attributes.wis.mod;
       if (systemData.sanity.max < 1) systemData.sanity.max = 1;
     }
