@@ -125,9 +125,9 @@ export class CWNItem extends Item {
     console.log("CWN | Getting sheetClass for CWNItem");
     
     // First try to get from CONFIG directly
-    if (CONFIG.Item.sheetClasses?.cwn?.CWNItemSheet) {
-      console.log("CWN | Found sheet class in CONFIG.Item.sheetClasses.cwn.CWNItemSheet");
-      return CONFIG.Item.sheetClasses.cwn.CWNItemSheet;
+    if (CONFIG.Item.sheetClasses?.cwn?.base) {
+      console.log("CWN | Found sheet class in CONFIG.Item.sheetClasses.cwn.base");
+      return CONFIG.Item.sheetClasses.cwn.base.cls;
     }
     
     // Fallback to default ItemSheet
@@ -136,26 +136,44 @@ export class CWNItem extends Item {
   }
 
   /**
-   * Get the sheet instance for this item, creating it if it doesn't exist
+   * Get the sheet instance for this item
    * @override
    */
   get sheet() {
     console.log("CWN | Getting sheet for item:", this.name);
-    if (!this._sheet) {
-      console.log("CWN | No sheet instance exists, creating one");
-      
-      // CWNItemSheet 클래스 가져오기 - 직접 import된 클래스 사용
-      const CWNItemSheet = CONFIG.Item.sheetClasses?.cwn?.base?.cls || globalThis.CWNItemSheet;
-      
-      if (CWNItemSheet) {
-        console.log("CWN | Creating CWNItemSheet instance");
-        this._sheet = new CWNItemSheet(this);
-      } else {
-        console.log("CWN | CWNItemSheet not found, creating default ItemSheet instance");
-        this._sheet = new ItemSheet(this);
-      }
-      console.log("CWN | Created sheet instance:", this._sheet);
+    
+    // If a sheet is already defined, return it
+    if (this._sheet) {
+      console.log("CWN | Sheet instance already exists:", this._sheet);
+      return this._sheet;
     }
+    
+    // No sheet exists, create one
+    console.log("CWN | No sheet instance exists, creating one");
+    
+    // Try to get the appropriate sheet class
+    let SheetClass = null;
+    
+    // First check if there's a type-specific sheet class
+    if (CONFIG.Item.sheetClasses?.cwn?.[this.type]) {
+      console.log(`CWN | Found type-specific sheet class for ${this.type}`);
+      SheetClass = CONFIG.Item.sheetClasses.cwn[this.type].cls;
+    } 
+    // Otherwise use the base sheet class
+    else if (CONFIG.Item.sheetClasses?.cwn?.base) {
+      console.log("CWN | Using base sheet class");
+      SheetClass = CONFIG.Item.sheetClasses.cwn.base.cls;
+    }
+    // Fallback to default
+    else {
+      console.log("CWN | Using default ItemSheet class");
+      SheetClass = ItemSheet;
+    }
+    
+    console.log("CWN | Creating CWNItemSheet instance");
+    this._sheet = new SheetClass(this);
+    console.log("CWN | Created sheet instance:", this._sheet);
+    
     return this._sheet;
   }
 

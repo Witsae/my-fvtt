@@ -29,24 +29,11 @@ export class CWNItemSheet extends ItemSheet {
   /** @override */
   get template() {
     console.log("CWN | ItemSheet template getter called for:", this.item?.name, this.item?.type);
-    
-    // 아이템 타입에 따른 템플릿 경로 설정
-    const type = this.item?.type || "gear";
-    
-    // 타입별 템플릿 파일이 있는지 확인
-    const typeTemplate = `systems/cwn-system/templates/item/item-${type}-sheet.hbs`;
-    
-    // 기본 템플릿 경로
-    const defaultTemplate = "systems/cwn-system/templates/item/item-sheet.hbs";
-    
-    // 템플릿 경로 결정 - 항상 기본 템플릿 사용
-    const template = defaultTemplate;
-    
-    console.log("CWN | Using template:", template);
-    return template;
+    // 모든 아이템 타입에 대해 기본 템플릿 사용
+    const path = "systems/cwn-system/templates/item/item-sheet.hbs";
+    console.log("CWN | Using template:", path);
+    return path;
   }
-
-  /* -------------------------------------------- */
 
   /** @override */
   async getData() {
@@ -58,17 +45,8 @@ export class CWNItemSheet extends ItemSheet {
       const context = await super.getData();
       console.log("CWN | Base context from super.getData():", context);
 
-      // 아이템 데이터 확인
-      if (!context.data) {
-        console.warn("CWN | No data in context, creating empty object");
-        context.data = {};
-      }
-
-      // Foundry V12에서는 context.data 대신 context.document.system을 사용
-      if (!context.system && context.document?.system) {
-        context.system = context.document.system;
-        console.log("CWN | Using document.system for context.system");
-      }
+      // Foundry V12에서는 context.document를 사용
+      const itemData = context.document;
 
       // Retrieve the roll data for TinyMCE editors.
       context.rollData = {};
@@ -77,15 +55,9 @@ export class CWNItemSheet extends ItemSheet {
         context.rollData = actor.getRollData();
       }
 
-      // Add the item's data to context.data for easier access, as well as flags.
-      if (!context.system) {
-        console.warn("CWN | No system data found, using empty object");
-        context.system = {};
-      }
-      
-      if (!context.flags && this.item?.flags) {
-        context.flags = this.item.flags;
-      }
+      // Add the item's data to context for easier access, as well as flags.
+      context.system = itemData.system;
+      context.flags = itemData.flags;
 
       // Add config data
       context.config = CONFIG.CWN;

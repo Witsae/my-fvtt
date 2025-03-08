@@ -36,17 +36,29 @@ Hooks.once("init", async function() {
   // 직접 CONFIG에 아이템 시트 클래스 등록
   CONFIG.Item.sheetClasses = CONFIG.Item.sheetClasses || {};
   CONFIG.Item.sheetClasses.cwn = CONFIG.Item.sheetClasses.cwn || {};
+  
+  // 기본 아이템 시트 등록
   CONFIG.Item.sheetClasses.cwn.base = {
     id: "cwn",
     label: "CWN.SheetClassItem",
     cls: CWNItemSheet
   };
   
+  // 각 아이템 타입별로 시트 클래스 등록
+  const itemTypes = ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"];
+  itemTypes.forEach(type => {
+    CONFIG.Item.sheetClasses.cwn[type] = {
+      id: `cwn.${type}`,
+      label: `CWN.SheetClassItem.${type}`,
+      cls: CWNItemSheet
+    };
+  });
+  
   // 일반적인 방식으로도 등록
   Items.registerSheet("cwn", CWNItemSheet, { 
     makeDefault: true, 
     label: "CWN.SheetClassItem",
-    types: ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"]
+    types: itemTypes
   });
   
   // 아이템 시트 클래스 확인
