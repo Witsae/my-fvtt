@@ -84,6 +84,6 @@
   "secondaryTokenAttribute": "sanity",
   "url": "https://github.com/Witsae/my-fvtt",
   "manifest": "https://raw.githubusercontent.com/Witsae/my-fvtt/main/system.json",
-  "download": "https://github.com/Witsae/my-fvtt/archive/refs/heads/main.zip",
+  "download": "https://github.com/Witsae/my-fvtt/archive/refs/tags/v1.3.10.zip",
   "license": "LICENSE"
 } 
