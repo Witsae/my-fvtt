@@ -89,6 +89,18 @@ export class CWNItemSheet extends ItemSheet {
       this._prepareSkillData(context);
     } else if (this.item.type === 'focus') {
       this._prepareFocusData(context);
+    } else if (this.item.type === 'gear') {
+      this._prepareGearData(context);
+    } else if (this.item.type === 'cyberware') {
+      this._prepareCyberwareData(context);
+    } else if (this.item.type === 'drug') {
+      this._prepareDrugData(context);
+    } else if (this.item.type === 'asset') {
+      this._prepareAssetData(context);
+    } else if (this.item.type === 'power') {
+      this._preparePowerData(context);
+    } else if (this.item.type === 'vehicle') {
+      this._prepareVehicleData(context);
     }
   }
 
@@ -132,6 +144,66 @@ export class CWNItemSheet extends ItemSheet {
   _prepareFocusData(context) {
     // Add focus level options
     context.focusLevels = CONFIG.CWN.focusLevels;
+  }
+
+  /**
+   * Prepare gear-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareGearData(context) {
+    // Add gear type options
+    context.gearTypes = CONFIG.CWN.gearTypes;
+  }
+
+  /**
+   * Prepare cyberware-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareCyberwareData(context) {
+    // Add cyberware type options
+    context.cyberwareTypes = CONFIG.CWN.cyberwareTypes;
+  }
+
+  /**
+   * Prepare drug-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareDrugData(context) {
+    // Add drug type options
+    context.drugTypes = CONFIG.CWN.drugTypes;
+  }
+
+  /**
+   * Prepare asset-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareAssetData(context) {
+    // Add asset type options
+    context.assetTypes = CONFIG.CWN.assetTypes;
+  }
+
+  /**
+   * Prepare power-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _preparePowerData(context) {
+    // Add power type options
+    context.powerTypes = CONFIG.CWN.powerTypes;
+  }
+
+  /**
+   * Prepare vehicle-specific data
+   * @param {Object} context The context data for the template
+   * @private
+   */
+  _prepareVehicleData(context) {
+    // Add vehicle type options
+    context.vehicleTypes = CONFIG.CWN.vehicleTypes;
   }
 
   /* -------------------------------------------- */

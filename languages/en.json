@@ -78,6 +78,33 @@
     "WeaponTagShock": "Shock",
     "WeaponTagTwoHanded": "Two-Handed",
     
+    "GearTypeGeneral": "General",
+    "GearTypeTool": "Tool",
+    "GearTypeMedical": "Medical",
+    "GearTypeElectronic": "Electronic",
+    "GearTypeSurvival": "Survival",
+    "GearTypeClothing": "Clothing",
+    "GearTypeOther": "Other",
+    
+    "CyberwareTypeImplant": "Implant",
+    "CyberwareTypeEnhancement": "Enhancement",
+    "CyberwareTypeReplacement": "Replacement",
+    "CyberwareTypeOther": "Other",
+    
+    "DrugTypeMedical": "Medical",
+    "DrugTypeCombat": "Combat",
+    "DrugTypeRecreational": "Recreational",
+    "DrugTypeOther": "Other",
+    
+    "PowerTypePsychic": "Psychic",
+    "PowerTypeMagic": "Magic",
+    "PowerTypeOther": "Other",
+    
+    "VehicleTypeGround": "Ground",
+    "VehicleTypeAir": "Air",
+    "VehicleTypeWater": "Water",
+    "VehicleTypeOther": "Other",
+    
     "SkillCheck": "{skill} Skill Check",
     "AttributeCheck": "{attribute} Check",
     "SaveCheck": "{save} Save",

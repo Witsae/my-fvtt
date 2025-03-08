@@ -96,4 +96,46 @@ CWN.weaponTags = {
   smart: "CWN.WeaponTagSmart",
   shock: "CWN.WeaponTagShock",
   twoHanded: "CWN.WeaponTagTwoHanded"
+};
+
+// Gear Types
+CWN.gearTypes = {
+  general: "CWN.GearTypeGeneral",
+  tool: "CWN.GearTypeTool",
+  medical: "CWN.GearTypeMedical",
+  electronic: "CWN.GearTypeElectronic",
+  survival: "CWN.GearTypeSurvival",
+  clothing: "CWN.GearTypeClothing",
+  other: "CWN.GearTypeOther"
+};
+
+// Cyberware Types
+CWN.cyberwareTypes = {
+  implant: "CWN.CyberwareTypeImplant",
+  enhancement: "CWN.CyberwareTypeEnhancement",
+  replacement: "CWN.CyberwareTypeReplacement",
+  other: "CWN.CyberwareTypeOther"
+};
+
+// Drug Types
+CWN.drugTypes = {
+  medical: "CWN.DrugTypeMedical",
+  combat: "CWN.DrugTypeCombat",
+  recreational: "CWN.DrugTypeRecreational",
+  other: "CWN.DrugTypeOther"
+};
+
+// Power Types
+CWN.powerTypes = {
+  psychic: "CWN.PowerTypePsychic",
+  magic: "CWN.PowerTypeMagic",
+  other: "CWN.PowerTypeOther"
+};
+
+// Vehicle Types
+CWN.vehicleTypes = {
+  ground: "CWN.VehicleTypeGround",
+  air: "CWN.VehicleTypeAir",
+  water: "CWN.VehicleTypeWater",
+  other: "CWN.VehicleTypeOther"
 }; 

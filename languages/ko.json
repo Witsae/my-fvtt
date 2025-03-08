@@ -67,6 +67,33 @@
     "WeaponTagShock": "충격",
     "WeaponTagTwoHanded": "양손",
     
+    "GearTypeGeneral": "일반",
+    "GearTypeTool": "도구",
+    "GearTypeMedical": "의료",
+    "GearTypeElectronic": "전자",
+    "GearTypeSurvival": "생존",
+    "GearTypeClothing": "의류",
+    "GearTypeOther": "기타",
+    
+    "CyberwareTypeImplant": "임플란트",
+    "CyberwareTypeEnhancement": "강화",
+    "CyberwareTypeReplacement": "대체",
+    "CyberwareTypeOther": "기타",
+    
+    "DrugTypeMedical": "의료",
+    "DrugTypeCombat": "전투",
+    "DrugTypeRecreational": "오락",
+    "DrugTypeOther": "기타",
+    
+    "PowerTypePsychic": "초능력",
+    "PowerTypeMagic": "마법",
+    "PowerTypeOther": "기타",
+    
+    "VehicleTypeGround": "지상",
+    "VehicleTypeAir": "공중",
+    "VehicleTypeWater": "수상",
+    "VehicleTypeOther": "기타",
+    
     "SkillCheck": "{skill} 기술 판정",
     "AttributeCheck": "{attribute} 판정",
     "SaveCheck": "{save} 내성",

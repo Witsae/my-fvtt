@@ -1,0 +1,40 @@
+<div class="form-group">
+  <label>{{localize "CWN.Level"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.level" value="{{system.level}}" min="1" max="9" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Effort"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.effort" value="{{system.effort}}" min="0" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Range"}}</label>
+  <div class="form-fields">
+    <input type="text" name="system.range" value="{{system.range}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Duration"}}</label>
+  <div class="form-fields">
+    <input type="text" name="system.duration" value="{{system.duration}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Tags"}}</label>
+  <div class="form-fields tag-list">
+    {{#each system.tags as |tag index|}}
+    <div class="tag-entry">
+      <input type="text" name="system.tags.{{index}}" value="{{tag}}" />
+      <a class="tag-delete" data-index="{{index}}"><i class="fas fa-trash"></i></a>
+    </div>
+    {{/each}}
+    <a class="tag-add"><i class="fas fa-plus"></i> {{localize "Add Tag"}}</a>
+  </div>
+</div> 

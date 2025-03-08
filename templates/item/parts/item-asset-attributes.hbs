@@ -1,0 +1,77 @@
+<div class="form-group">
+  <label>{{localize "CWN.Type"}}</label>
+  <div class="form-fields">
+    <select name="system.type">
+      {{#select system.type}}
+      <option value=""></option>
+      {{#each config.assetTypes as |name key|}}
+      <option value="{{key}}">{{localize name}}</option>
+      {{/each}}
+      {{/select}}
+    </select>
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Rating"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.rating" value="{{system.rating}}" min="0" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.HP"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.hp.value" value="{{system.hp.value}}" min="0" />
+    /
+    <input type="number" name="system.hp.max" value="{{system.hp.max}}" min="0" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Force"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.force" value="{{system.force}}" min="0" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Cunning"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.cunning" value="{{system.cunning}}" min="0" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Wealth"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.wealth" value="{{system.wealth}}" min="0" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Cost"}}</label>
+  <div class="form-fields">
+    <input type="text" name="system.cost" value="{{system.cost}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Upkeep"}}</label>
+  <div class="form-fields">
+    <input type="text" name="system.upkeep" value="{{system.upkeep}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Tags"}}</label>
+  <div class="form-fields tag-list">
+    {{#each system.tags as |tag index|}}
+    <div class="tag-entry">
+      <input type="text" name="system.tags.{{index}}" value="{{tag}}" />
+      <a class="tag-delete" data-index="{{index}}"><i class="fas fa-trash"></i></a>
+    </div>
+    {{/each}}
+    <a class="tag-add"><i class="fas fa-plus"></i> {{localize "Add Tag"}}</a>
+  </div>
+</div> 

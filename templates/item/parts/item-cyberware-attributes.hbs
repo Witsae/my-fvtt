@@ -1,0 +1,40 @@
+<div class="form-group">
+  <label>{{localize "CWN.SystemStrain"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.systemStrain" value="{{system.systemStrain}}" min="0" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Location"}}</label>
+  <div class="form-fields">
+    <select name="system.location">
+      {{#select system.location}}
+      <option value=""></option>
+      {{#each config.cyberwareLocations as |name key|}}
+      <option value="{{key}}">{{localize name}}</option>
+      {{/each}}
+      {{/select}}
+    </select>
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Price"}}</label>
+  <div class="form-fields">
+    <input type="text" name="system.price" value="{{system.price}}" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Tags"}}</label>
+  <div class="form-fields tag-list">
+    {{#each system.tags as |tag index|}}
+    <div class="tag-entry">
+      <input type="text" name="system.tags.{{index}}" value="{{tag}}" />
+      <a class="tag-delete" data-index="{{index}}"><i class="fas fa-trash"></i></a>
+    </div>
+    {{/each}}
+    <a class="tag-add"><i class="fas fa-plus"></i> {{localize "Add Tag"}}</a>
+  </div>
+</div> 
