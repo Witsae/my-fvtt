@@ -1,12 +1,12 @@
 import { CWNItem } from "../item/item.js";
 
 /**
- * 사이버웨어 아이템 클래스
+ * 약물 아이템 클래스
  * @extends {CWNItem}
  */
-export class CWNCyberware extends CWNItem {
+export class CWNDrug extends CWNItem {
   /**
-   * 사이버웨어 정보를 채팅에 표시합니다.
+   * 약물 정보를 채팅에 표시합니다.
    * @param {boolean} shiftKey Shift 키 누름 여부
    * @returns {Promise<void>}
    * @override
@@ -24,13 +24,25 @@ export class CWNCyberware extends CWNItem {
     // 설명 추가
     if (item.system.description) {
       content += `<div class="flavor-text">${item.system.description}</div>`;
+    } else {
+      content += `<div class="flavor-text">${game.i18n.localize("CWN.Chat.NoDescription")}</div>`;
     }
     
-    // 사이버웨어 정보 추가
-    content += `<div><strong>${game.i18n.localize("CWN.Chat.SystemStrain")}:</strong> ${item.system.systemStrain}</div>`;
+    // 약물 정보 추가
+    if (item.system.duration) {
+      content += `<div><strong>${game.i18n.localize("CWN.Duration")}:</strong> ${item.system.duration}</div>`;
+    }
     
-    if (item.system.location) {
-      content += `<div><strong>${game.i18n.localize("CWN.Location")}:</strong> ${item.system.location}</div>`;
+    if (item.system.effect) {
+      content += `<div><strong>${game.i18n.localize("CWN.Effect")}:</strong> ${item.system.effect}</div>`;
+    }
+    
+    if (item.system.sideEffect) {
+      content += `<div><strong>${game.i18n.localize("CWN.SideEffect")}:</strong> ${item.system.sideEffect}</div>`;
+    }
+    
+    if (item.system.overdose) {
+      content += `<div><strong>${game.i18n.localize("CWN.Overdose")}:</strong> ${item.system.overdose}</div>`;
     }
     
     // 태그 추가

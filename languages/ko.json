@@ -133,6 +133,48 @@
     "Cunning": "책략",
     "Wealth": "재산",
     "Goal": "목표",
-    "FactionType": "세력 유형"
+    "FactionType": "세력 유형",
+    "Duration": "지속시간",
+    "Effect": "효과",
+    "SideEffect": "부작용",
+    "Overdose": "과다복용",
+    
+    "Errors": {
+      "NoActor": "액터가 없는 아이템으로 굴림을 시도했습니다",
+      "NoAmmo": "{name}의 탄약이 부족합니다!",
+      "NonCharacter": "캐릭터가 아닌 액터로 기술 굴림을 시도했습니다",
+      "AssetFaction": "자산은 팩션과 연결되어야 합니다",
+      "NoDamage": "자산에 대한 데미지 굴림이 없습니다"
+    },
+    
+    "Dialogs": {
+      "WeaponAttack": "{name} 공격",
+      "SkillRoll": "{name} 기술 판정",
+      "AssetAction": "{name} 자산 액션",
+      "Roll": "굴림",
+      "Cancel": "취소",
+      "Attack": "공격",
+      "Defense": "방어",
+      "Info": "정보"
+    },
+    
+    "Chat": {
+      "WeaponAttack": "{name} - {type} 공격",
+      "WeaponAttackBurst": "{name} - {type} 공격 (연사)",
+      "Reroll": "재굴림",
+      "ApplyDamage": "피해 적용",
+      "ApplyHealing": "회복 적용",
+      "NoDescription": "설명 없음",
+      "Level1": "레벨 1",
+      "Level2": "레벨 2",
+      "MeleeAC": "근접 방어등급",
+      "TraumaDiePenalty": "트라우마 주사위 페널티",
+      "SystemStrain": "시스템 부담"
+    },
+    
+    "Tooltips": {
+      "SelectToken": "토큰을 선택해주세요",
+      "SelectTarget": "대상을 선택해주세요"
+    }
   }
 } 

@@ -144,6 +144,48 @@
     "Cunning": "Cunning",
     "Wealth": "Wealth",
     "Goal": "Goal",
-    "FactionType": "Faction Type"
+    "FactionType": "Faction Type",
+    "Duration": "Duration",
+    "Effect": "Effect",
+    "SideEffect": "Side Effect",
+    "Overdose": "Overdose",
+    
+    "Errors": {
+      "NoActor": "Cannot roll without an actor",
+      "NoAmmo": "{name} is out of ammo!",
+      "NonCharacter": "Cannot roll skill with non-character actor",
+      "AssetFaction": "Asset must be associated with a faction",
+      "NoDamage": "No damage to roll for asset"
+    },
+    
+    "Dialogs": {
+      "WeaponAttack": "{name} Attack",
+      "SkillRoll": "{name} Skill Check",
+      "AssetAction": "{name} Asset Action",
+      "Roll": "Roll",
+      "Cancel": "Cancel",
+      "Attack": "Attack",
+      "Defense": "Defense",
+      "Info": "Info"
+    },
+    
+    "Chat": {
+      "WeaponAttack": "{name} - {type} Attack",
+      "WeaponAttackBurst": "{name} - {type} Attack (Burst)",
+      "Reroll": "Reroll",
+      "ApplyDamage": "Apply Damage",
+      "ApplyHealing": "Apply Healing",
+      "NoDescription": "No Description",
+      "Level1": "Level 1",
+      "Level2": "Level 2",
+      "MeleeAC": "Melee AC",
+      "TraumaDiePenalty": "Trauma Die Penalty",
+      "SystemStrain": "System Strain"
+    },
+    
+    "Tooltips": {
+      "SelectToken": "Select a token first",
+      "SelectTarget": "Select a target"
+    }
   }
 } 

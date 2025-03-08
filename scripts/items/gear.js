@@ -13,7 +13,7 @@ export class CWNGear extends CWNItem {
    */
   async roll(shiftKey = false) {
     if (!this.actor) {
-      ui.notifications?.error("액터가 없는 아이템으로 굴림을 시도했습니다.");
+      ui.notifications?.error(game.i18n.localize("CWN.Errors.NoActor"));
       return;
     }
     
@@ -24,28 +24,26 @@ export class CWNGear extends CWNItem {
     // 설명 추가
     if (item.system.description) {
       content += `<div class="flavor-text">${item.system.description}</div>`;
+    } else {
+      content += `<div class="flavor-text">${game.i18n.localize("CWN.Chat.NoDescription")}</div>`;
     }
     
     // 장비 정보 추가
-    if (item.system.quantity > 1) {
-      content += `<div><strong>수량:</strong> ${item.system.quantity}</div>`;
+    if (item.system.type) {
+      content += `<div><strong>${game.i18n.localize("CWN.Type")}:</strong> ${item.system.type}</div>`;
     }
     
-    if (item.system.encumbrance) {
-      content += `<div><strong>무게:</strong> ${item.system.encumbrance}</div>`;
+    if (item.system.weight) {
+      content += `<div><strong>${game.i18n.localize("CWN.Weight")}:</strong> ${item.system.weight}</div>`;
     }
     
     if (item.system.price) {
-      content += `<div><strong>가격:</strong> ${item.system.price}</div>`;
-    }
-    
-    if (item.system.location) {
-      content += `<div><strong>위치:</strong> ${item.system.location}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Price")}:</strong> ${item.system.price}</div>`;
     }
     
     // 태그 추가
     if (item.system.tags && item.system.tags.length > 0) {
-      content += `<div><strong>태그:</strong> ${item.system.tags.join(", ")}</div>`;
+      content += `<div><strong>${game.i18n.localize("CWN.Tags")}:</strong> ${item.system.tags.join(", ")}</div>`;
     }
     
     // 채팅 메시지 생성
