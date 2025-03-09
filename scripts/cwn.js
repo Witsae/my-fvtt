@@ -1118,8 +1118,13 @@ function _registerItemCategoryLocalization() {
   };
   
   // 개발 모드에서만 로그 출력
-  if (game.settings.get("core", "debugMode")) {
-    console.log("CWN | 아이템 분류 로컬라이제이션 키:", localizationData);
+  try {
+    const debugMode = game.settings.get("core", "debugMode");
+    if (debugMode) {
+      console.log("CWN | 아이템 분류 로컬라이제이션 키:", localizationData);
+    }
+  } catch (error) {
+    console.warn("CWN | 디버그 모드 설정을 확인할 수 없습니다:", error);
   }
 }
 
@@ -1178,4 +1183,95 @@ CWN._initializeStyles = function() {
   document.head.appendChild(styleElement);
   
   console.log("CWN | 시스템 스타일 초기화 완료");
-}; 
+};
+
+// 아이템 카테고리 정의
+CWNItem.categories = {
+  weapon: {
+    label: "CWN.ItemCategory.Weapons",
+    types: ["weapon"],
+    icon: "fas fa-sword"
+  },
+  armor: {
+    label: "CWN.ItemCategory.Armor",
+    types: ["armor"],
+    icon: "fas fa-shield"
+  },
+  equipment: {
+    label: "CWN.ItemCategory.Equipment",
+    types: ["gear"],
+    icon: "fas fa-backpack"
+  },
+  cyberware: {
+    label: "CWN.ItemCategory.Cyberware",
+    types: ["cyberware"],
+    icon: "fas fa-microchip"
+  },
+  skills: {
+    label: "CWN.ItemCategory.Skills",
+    types: ["skill"],
+    icon: "fas fa-book"
+  },
+  foci: {
+    label: "CWN.ItemCategory.Foci",
+    types: ["focus"],
+    icon: "fas fa-eye"
+  },
+  powers: {
+    label: "CWN.ItemCategory.Powers",
+    types: ["power"],
+    icon: "fas fa-bolt"
+  },
+  other: {
+    label: "CWN.ItemCategory.Other",
+    types: ["drug", "asset", "vehicle"],
+    icon: "fas fa-box"
+  }
+};
+
+// 아이템 태그 카테고리 정의
+CWNItem.tagCategories = {
+  weaponType: {
+    label: "CWN.TagCategory.WeaponType",
+    tags: ["melee", "ranged", "thrown", "explosive"]
+  },
+  weaponProperty: {
+    label: "CWN.TagCategory.WeaponProperty",
+    tags: ["accurate", "area", "blast", "burst", "concealed", "daze", "fixed", "heavy", "reload", "silent", "smart", "shock", "twoHanded"]
+  },
+  armorType: {
+    label: "CWN.TagCategory.ArmorType",
+    tags: ["light", "medium", "heavy", "powered", "shield"]
+  },
+  equipmentType: {
+    label: "CWN.TagCategory.EquipmentType",
+    tags: ["general", "tool", "medical", "electronic", "survival", "clothing"]
+  },
+  cyberwareType: {
+    label: "CWN.TagCategory.CyberwareType",
+    tags: ["implant", "enhancement", "replacement"]
+  }
+};
+
+/**
+ * 아이템 매크로 실행 함수
+ * @param {string} itemName 아이템 이름
+ */
+function rollItemMacro(itemName) {
+  const speaker = ChatMessage.getSpeaker();
+  let actor;
+  
+  if (speaker.token) actor = game.actors.tokens[speaker.token];
+  if (!actor) actor = game.actors.get(speaker.actor);
+  
+  if (!actor) {
+    return ui.notifications.warn(`${game.i18n.localize("CWN.Warnings.NoActorSelected")}`);
+  }
+  
+  const item = actor.items.find(i => i.name === itemName);
+  if (!item) {
+    return ui.notifications.warn(`${actor.name}${game.i18n.localize("CWN.Warnings.DoesNotHaveItem")}${itemName}`);
+  }
+  
+  return item.roll();
+} 

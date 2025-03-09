@@ -230,8 +230,31 @@ export class CWNItemSheet extends ItemSheet {
     }
     
     // 무기 범위 옵션 추가
-    context.weaponRanges = CONFIG.CWN.weaponRanges;
-    context.weaponTags = CONFIG.CWN.weaponTags;
+    context.weaponRanges = CONFIG.CWN?.weaponRanges || {
+      melee: "CWN.WeaponRangeMelee",
+      thrown: "CWN.WeaponRangeThrown",
+      pistol: "CWN.WeaponRangePistol",
+      rifle: "CWN.WeaponRangeRifle",
+      shotgun: "CWN.WeaponRangeShotgun",
+      heavy: "CWN.WeaponRangeHeavy"
+    };
+    
+    // 무기 태그 옵션 추가
+    context.weaponTags = CONFIG.CWN?.weaponTags || {
+      accurate: "CWN.WeaponTagAccurate",
+      area: "CWN.WeaponTagArea",
+      blast: "CWN.WeaponTagBlast",
+      burst: "CWN.WeaponTagBurst",
+      concealed: "CWN.WeaponTagConcealed",
+      daze: "CWN.WeaponTagDaze",
+      fixed: "CWN.WeaponTagFixed",
+      heavy: "CWN.WeaponTagHeavy",
+      reload: "CWN.WeaponTagReload",
+      silent: "CWN.WeaponTagSilent",
+      smart: "CWN.WeaponTagSmart",
+      shock: "CWN.WeaponTagShock",
+      twoHanded: "CWN.WeaponTagTwoHanded"
+    };
     
     console.log("CWN | 무기 데이터 준비 완료:", context.system);
   }

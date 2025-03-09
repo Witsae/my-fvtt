@@ -164,7 +164,46 @@ export class CWNActorSheet extends ActorSheet {
    * @private
    */
   _groupItemsByCategory(items) {
-    return game.cwn.CWNItem.groupItemsByCategory(items);
+    console.log("CWN | 아이템 카테고리별 그룹화 시작");
+    
+    // 카테고리 정의 확인
+    if (!CWNItem.categories) {
+      console.error("CWN | 아이템 카테고리 정의를 찾을 수 없습니다.");
+      return {};
+    }
+    
+    // 결과 객체 초기화
+    const result = {};
+    
+    // 각 카테고리 초기화
+    Object.entries(CWNItem.categories).forEach(([key, category]) => {
+      result[key] = {
+        label: category.label,
+        icon: category.icon,
+        items: []
+      };
+    });
+    
+    // 아이템을 해당 카테고리에 할당
+    items.forEach(item => {
+      let assigned = false;
+      
+      // 아이템 타입에 맞는 카테고리 찾기
+      Object.entries(CWNItem.categories).forEach(([key, category]) => {
+        if (category.types.includes(item.type)) {
+          result[key].items.push(item);
+          assigned = true;
+        }
+      });
+      
+      // 할당되지 않은 아이템은 기타 카테고리에 추가
+      if (!assigned) {
+        result.other.items.push(item);
+      }
+    });
+    
+    console.log("CWN | 아이템 카테고리별 그룹화 완료:", result);
+    return result;
   }
   
   /**
