@@ -1,14 +1,24 @@
 <div class="form-group">
   <label>{{localize "CWN.Level"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.level" value="{{system.level}}" min="1" max="3" />
-  </div>
+  <input type="number" name="system.level" value="{{system.level}}" data-dtype="Number" min="1" max="2"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Prerequisites"}}</label>
-  <div class="form-fields">
-    <input type="text" name="system.prerequisites" value="{{system.prerequisites}}" />
+  <input type="text" name="system.prerequisites" value="{{system.prerequisites}}" data-dtype="String"/>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.LevelEffects"}}</label>
+  <div class="level-effects">
+    <div class="form-group">
+      <label>{{localize "CWN.Level"}} 1</label>
+      <textarea name="system.levelEffects.level1" rows="3">{{system.levelEffects.level1}}</textarea>
+    </div>
+    <div class="form-group">
+      <label>{{localize "CWN.Level"}} 2</label>
+      <textarea name="system.levelEffects.level2" rows="3">{{system.levelEffects.level2}}</textarea>
+    </div>
   </div>
 </div>
 

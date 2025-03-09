@@ -252,146 +252,188 @@
 }
 
 .cwn.sheet.item .sheet-header {
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.5em;
-}
-
-.cwn.sheet.item .sheet-header h1 input {
-  margin: 6px 2% 0 0;
-  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .cwn.sheet.item .sheet-header .profile-img {
-  flex: 0 0 84px;
-  height: 84px;
-  border: none;
+  flex: 0 0 100px;
+  height: 100px;
+  margin-right: 10px;
+  border: 1px solid #999;
 }
 
-.cwn.sheet.item .sheet-header .details {
-  flex: 0 0 90px;
+.cwn.sheet.item .sheet-header .header-details {
+  flex: 1;
 }
 
-.cwn.sheet.item .sheet-header .details label {
-  flex: 0 0 20px;
-}
-
-.cwn.sheet.item .sheet-header .tag-list {
+.cwn.sheet.item .sheet-header h1 input {
+  width: 100%;
+  height: 30px;
   margin: 0;
-  height: 24px;
-  overflow: auto;
-  list-style: none;
-  padding: 1px;
+}
+
+.cwn.sheet.item .sheet-tabs {
   display: flex;
   flex-wrap: wrap;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #AAA;
 }
 
-.cwn.sheet.item .sheet-header .tag-list .tag {
-  background: var(--color-primary);
-  border-radius: 5px;
-  color: white;
-  padding: 1px 5px;
-  height: 18px;
-  box-shadow: 0 0 3px var(--color-shadow);
-  margin: 0 2px;
+.cwn.sheet.item .sheet-tabs .item {
+  padding: 5px 10px;
+  margin-right: 5px;
+  border: 1px solid #AAA;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  background: rgba(0, 0, 0, 0.05);
+  cursor: pointer;
 }
 
-.cwn.sheet.item .sheet-header .tag-list .tag i {
-  font-size: 8px;
-  vertical-align: top;
-  color: rgba(255, 255, 255, 0.8);
+.cwn.sheet.item .sheet-tabs .item.active {
+  background: #FFF;
+  border-bottom: 1px solid #FFF;
+  margin-bottom: -1px;
+  font-weight: bold;
 }
 
 .cwn.sheet.item .sheet-body {
+  overflow-y: auto;
+}
+
+.cwn.sheet.item .tab {
+  display: none;
+}
+
+.cwn.sheet.item .tab.active {
+  display: block;
+}
+
+.cwn.sheet.item .item-description {
+  height: 200px;
+  margin-bottom: 10px;
+}
+
+.cwn.sheet.item .item-attributes {
+  margin-bottom: 10px;
+}
+
+.cwn.sheet.item .form-group {
   display: flex;
-  flex-direction: column;
-  height: calc(100% - 120px);
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 5px;
 }
 
-.cwn.sheet.item .sheet-body .stats {
-  flex: 0 0 auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  padding: 0.5em;
-  margin-bottom: 0.5em;
+.cwn.sheet.item .form-group label {
+  flex: 0 0 120px;
+  font-weight: bold;
 }
 
-.cwn.sheet.item .sheet-body .stats .form-group {
-  margin: 0.25em 0;
+.cwn.sheet.item .form-group input,
+.cwn.sheet.item .form-group select,
+.cwn.sheet.item .form-group textarea {
+  flex: 1;
+  height: 28px;
+  border: 1px solid #AAA;
+  border-radius: 3px;
+  padding: 0 5px;
+}
+
+.cwn.sheet.item .form-group textarea {
+  height: auto;
+  min-height: 60px;
+}
+
+/* 태그 스타일 */
+.cwn.sheet.item .tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex: 1;
+}
+
+.cwn.sheet.item .tag {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  padding: 2px 5px;
+}
+
+.cwn.sheet.item .tag-text {
+  margin-right: 5px;
+}
+
+.cwn.sheet.item .tag-delete {
+  cursor: pointer;
+  color: #AA0000;
+}
+
+.cwn.sheet.item .tag-input-container {
   display: flex;
   align-items: center;
 }
 
-.cwn.sheet.item .sheet-body .stats .form-group label {
-  flex: 0 0 120px;
-  font-weight: bold;
-  color: var(--color-secondary);
+.cwn.sheet.item .tag-input {
+  height: 24px;
+  border: 1px solid #AAA;
+  border-radius: 3px;
+  padding: 0 5px;
+  margin-right: 5px;
 }
 
-.cwn.sheet.item .sheet-body .stats .form-group input,
-.cwn.sheet.item .sheet-body .stats .form-group select {
-  flex: 1;
-}
-
-.cwn.sheet.item .sheet-body .description {
-  flex: 1;
-  margin-top: 0.5em;
-}
-
-.cwn.sheet.item .sheet-body .description .editor {
-  height: 100%;
-  min-height: 200px;
-}
-
-.cwn.sheet.item .sheet-body .description .editor .editor-content {
-  height: 100%;
-  min-height: 200px;
-}
-
-.cwn.sheet.item .sheet-body .item-footer {
+.cwn.sheet.item .tag-add {
+  height: 24px;
+  width: 24px;
+  padding: 0;
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 0.5em;
-  padding-top: 0.5em;
-  border-top: 1px solid var(--color-border);
 }
 
-/* Item specific styles */
-.cwn.sheet.item .sheet-body .skill-details {
-  flex-basis: 32%;
-  flex-grow: 0;
-}
-
-.cwn.sheet.item .sheet-body .skill-details label {
-  flex: 0 0 60px;
-}
-
-.cwn.sheet.item .sheet-body .skill-details .form-group {
-  justify-content: space-around;
-}
-
-.cwn.sheet.item .sheet-body .skill-details .form-fields {
-  flex-basis: 35%;
-  flex-grow: 0;
-}
-
-.cwn.sheet.item .sheet-body .stats .form-fields.attack-type {
-  text-align: center;
-  padding: 2px;
-  padding-left: 8px;
-  font-size: 15px;
-}
-
-.cwn.sheet.item .sheet-body .stats .form-fields.attack-type a {
-  color: var(--color-secondary);
-}
-
-.cwn.sheet.item .sheet-body .stats .form-fields.attack-type a.active,
-.cwn.sheet.item .sheet-body .stats .form-group.attack-type a:hover {
-  color: var(--color-accent);
-}
-
-.cwn.sheet.item .sheet-body .stats .block-input {
+/* 탄약 컨트롤 스타일 */
+.cwn.sheet.item .ammo-controls {
   display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.cwn.sheet.item .ammo-controls input {
+  width: 50px;
+  margin-right: 5px;
+}
+
+.cwn.sheet.item .ammo-controls span {
+  margin: 0 5px;
+}
+
+.cwn.sheet.item .ammo-control {
+  height: 24px;
+  width: 24px;
+  padding: 0;
+  margin-left: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 레벨 효과 스타일 */
+.cwn.sheet.item .level-effects {
+  flex: 1;
+}
+
+.cwn.sheet.item .level-effects .form-group {
   flex-direction: column;
-  text-align: center;
+  align-items: flex-start;
+}
+
+.cwn.sheet.item .level-effects .form-group label {
+  margin-bottom: 5px;
+}
+
+.cwn.sheet.item .level-effects .form-group textarea {
+  width: 100%;
 } 

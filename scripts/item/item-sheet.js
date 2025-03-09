@@ -13,7 +13,7 @@ export class CWNItemSheet extends ItemSheet {
   /** @override */
   static get defaultOptions() {
     console.log("CWN | ItemSheet defaultOptions called");
-    const options = foundry.utils.mergeObject(super.defaultOptions, {
+    const options = mergeObject(super.defaultOptions, {
       classes: ["cwn", "sheet", "item"],
       width: 520,
       height: 480,
@@ -30,10 +30,9 @@ export class CWNItemSheet extends ItemSheet {
   get template() {
     console.log("CWN | ItemSheet template getter called for:", this.item?.name, this.item?.type);
     
-    // 기본 템플릿 경로 - Foundry 기본 템플릿 사용
-    const path = "templates/sheets/item-sheet.html";
+    const path = "systems/cwn-system/templates/item";
     console.log("CWN | Using template path:", path);
-    return path;
+    return `${path}/item-${this.item.type}-sheet.hbs`;
   }
 
   /** @override */
@@ -47,7 +46,8 @@ export class CWNItemSheet extends ItemSheet {
       console.log("CWN | Base context from super.getData():", context);
 
       // Foundry V12에서는 context.document를 사용
-      const itemData = context.document;
+      const itemData = this.item;
+      const source = itemData.toObject();
       console.log("CWN | Item document data:", itemData);
 
       // Retrieve the roll data for TinyMCE editors.
@@ -59,6 +59,7 @@ export class CWNItemSheet extends ItemSheet {
 
       // Add the item's data to context for easier access, as well as flags.
       context.system = itemData.system;
+      context.source = source.system;
       context.flags = itemData.flags;
       
       // 시스템 데이터 확인
@@ -149,6 +150,7 @@ export class CWNItemSheet extends ItemSheet {
     console.log("CWN | _prepareWeaponData called");
     // Add weapon range options
     context.weaponRanges = CONFIG.CWN.weaponRanges;
+    context.weaponTags = CONFIG.CWN.weaponTags;
   }
 
   /**
@@ -206,6 +208,7 @@ export class CWNItemSheet extends ItemSheet {
     console.log("CWN | _prepareCyberwareData called");
     // Add cyberware type options
     context.cyberwareTypes = CONFIG.CWN.cyberwareTypes;
+    context.cyberwareLocations = CONFIG.CWN.cyberwareLocations;
   }
 
   /**

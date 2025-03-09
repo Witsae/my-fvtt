@@ -1,43 +1,43 @@
 <div class="form-group">
   <label>{{localize "CWN.Damage"}}</label>
-  <div class="form-fields">
-    <input type="text" name="system.damage" value="{{system.damage}}" />
-  </div>
+  <input type="text" name="system.damage" value="{{system.damage}}" data-dtype="String"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Range"}}</label>
-  <div class="form-fields">
-    <select name="system.range">
-      {{#select system.range}}
-      {{#each config.weaponRanges as |name key|}}
-      <option value="{{key}}">{{localize name}}</option>
-      {{/each}}
-      {{/select}}
-    </select>
-  </div>
+  <select name="system.range">
+    {{#select system.range}}
+    {{#each weaponRanges as |label key|}}
+    <option value="{{key}}">{{localize label}}</option>
+    {{/each}}
+    {{/select}}
+  </select>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.AttackBonus"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.attackBonus" value="{{system.attackBonus}}" />
-  </div>
+  <input type="number" name="system.attackBonus" value="{{system.attackBonus}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">
-  <label>{{localize "CWN.SkillBonus"}}</label>
-  <div class="form-fields">
-    <input type="checkbox" name="system.skillBonus" {{checked system.skillBonus}} />
-  </div>
+  <label>{{localize "CWN.Attribute"}}</label>
+  <select name="system.attribute">
+    {{#select system.attribute}}
+    <option value="str">{{localize "CWN.AttributeStr"}}</option>
+    <option value="dex">{{localize "CWN.AttributeDex"}}</option>
+    {{/select}}
+  </select>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Ammo"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.ammo.value" value="{{system.ammo.value}}" />
+  <div class="ammo-controls">
+    <input type="number" name="system.ammo.value" value="{{system.ammo.value}}" data-dtype="Number"/>
     <span>/</span>
-    <input type="number" name="system.ammo.max" value="{{system.ammo.max}}" />
+    <input type="number" name="system.ammo.max" value="{{system.ammo.max}}" data-dtype="Number"/>
+    <button type="button" class="ammo-control" data-action="decrease"><i class="fas fa-minus"></i></button>
+    <button type="button" class="ammo-control" data-action="increase"><i class="fas fa-plus"></i></button>
+    <button type="button" class="ammo-control" data-action="reload"><i class="fas fa-sync"></i></button>
   </div>
 </div>
 
@@ -50,29 +50,23 @@
 
 <div class="form-group">
   <label>{{localize "CWN.Weight"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.weight" value="{{system.weight}}" step="0.1" />
-  </div>
+  <input type="number" name="system.weight" value="{{system.weight}}" data-dtype="Number" step="0.1"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Price"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.price" value="{{system.price}}" />
-  </div>
+  <input type="number" name="system.price" value="{{system.price}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Location"}}</label>
-  <div class="form-fields">
-    <select name="system.location">
-      {{#select system.location}}
-      {{#each config.itemLocations as |name key|}}
-      <option value="{{key}}">{{localize name}}</option>
-      {{/each}}
-      {{/select}}
-    </select>
-  </div>
+  <select name="system.location">
+    {{#select system.location}}
+    {{#each itemLocations as |label key|}}
+    <option value="{{key}}">{{localize label}}</option>
+    {{/each}}
+    {{/select}}
+  </select>
 </div>
 
 <div class="form-group">
@@ -84,20 +78,16 @@
 
 <div class="form-group">
   <label>{{localize "CWN.Tags"}}</label>
-  <div class="form-fields tag-list">
-    {{#each system.tags as |tag i|}}
-    <div class="tag-input">
-      <select name="system.tags.{{i}}">
-        {{#select tag}}
-        <option value=""></option>
-        {{#each ../config.weaponTags as |name key|}}
-        <option value="{{key}}">{{localize name}}</option>
-        {{/each}}
-        {{/select}}
-      </select>
-      <a class="tag-delete" data-index="{{i}}"><i class="fas fa-times"></i></a>
+  <div class="tags-container">
+    {{#each system.tags as |tag tagIndex|}}
+    <div class="tag">
+      <span class="tag-text">{{tag}}</span>
+      <a class="tag-delete" data-tag-index="{{tagIndex}}"><i class="fas fa-times"></i></a>
     </div>
     {{/each}}
-    <button type="button" class="tag-add"><i class="fas fa-plus"></i> {{localize "Add Tag"}}</button>
+    <div class="tag-input-container">
+      <input type="text" class="tag-input" placeholder="{{localize 'CWN.AddTag'}}"/>
+      <button type="button" class="tag-add"><i class="fas fa-plus"></i></button>
+    </div>
   </div>
 </div> 

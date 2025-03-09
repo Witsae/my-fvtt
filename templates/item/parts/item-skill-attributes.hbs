@@ -1,35 +1,33 @@
 <div class="form-group">
   <label>{{localize "CWN.Level"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.level" value="{{system.level}}" min="0" max="5" />
-  </div>
+  <input type="number" name="system.level" value="{{system.level}}" data-dtype="Number" min="0" max="6"/>
 </div>
 
 <div class="form-group">
-  <label>{{localize "Attribute"}}</label>
-  <div class="form-fields">
-    <select name="system.attribute">
-      {{#select system.attribute}}
-      <option value="none">{{localize "None"}}</option>
-      {{#each config.attributes as |name key|}}
-      <option value="{{key}}">{{localize name}}</option>
-      {{/each}}
-      {{/select}}
-    </select>
-  </div>
+  <label>{{localize "CWN.Attribute"}}</label>
+  <select name="system.attribute">
+    {{#select system.attribute}}
+    {{#each attributes as |label key|}}
+    <option value="{{key}}">{{localize label}}</option>
+    {{/each}}
+    {{/select}}
+  </select>
 </div>
 
 <div class="form-group">
-  <label>{{localize "Category"}}</label>
-  <div class="form-fields">
-    <select name="system.category">
-      {{#select system.category}}
-      {{#each config.skillCategories as |name key|}}
-      <option value="{{key}}">{{localize name}}</option>
-      {{/each}}
-      {{/select}}
-    </select>
-  </div>
+  <label>{{localize "CWN.SkillCategory"}}</label>
+  <select name="system.category">
+    {{#select system.category}}
+    {{#each skillCategories as |label key|}}
+    <option value="{{key}}">{{localize label}}</option>
+    {{/each}}
+    {{/select}}
+  </select>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.SkillSpecialty"}}</label>
+  <input type="text" name="system.specialty" value="{{system.specialty}}" data-dtype="String"/>
 </div>
 
 <div class="form-group">
