@@ -92,6 +92,29 @@ export class CWNItemSheet extends ItemSheet {
       
       // 템플릿 경로 설정
       context.attributesTemplate = attributesTemplatePath;
+      
+      // 총 무게 및 가격 계산
+      if (['weapon', 'armor', 'gear', 'cyberware', 'drug'].includes(itemData.type)) {
+        // 수량이 있는 경우 총 무게 및 가격 계산
+        const quantity = itemData.system.quantity || 1;
+        const weight = itemData.system.weight || 0;
+        const price = itemData.system.price || 0;
+        
+        context.totalWeight = (quantity * weight).toFixed(1);
+        context.totalPrice = (quantity * price).toFixed(0);
+        
+        console.log(`CWN | 총 무게: ${context.totalWeight}, 총 가격: ${context.totalPrice}`);
+      }
+      
+      // 장착된 아이템 처리 (사이버웨어, 차량)
+      if (['cyberware', 'vehicle'].includes(itemData.type)) {
+        // 장착된 아이템 배열이 없으면 초기화
+        if (!itemData.system.mountedItems) {
+          itemData.system.mountedItems = [];
+        }
+        
+        console.log(`CWN | 장착된 아이템 수: ${itemData.system.mountedItems.length}`);
+      }
     }
     
     console.log("CWN | 최종 아이템 시트 데이터:", context);
@@ -557,6 +580,10 @@ export class CWNItemSheet extends ItemSheet {
         });
       }
       
+      // 이미지 관리
+      html.find('.item-image').click(this._onItemImageClick.bind(this));
+      html.find('.item-image-reset').click(this._onItemImageReset.bind(this));
+      
       // 입력 필드 포커스 시 전체 선택
       const inputs = html.find("input");
       inputs.focus(ev => ev.currentTarget.select());
@@ -606,6 +633,9 @@ export class CWNItemSheet extends ItemSheet {
           return effect.update({disabled: !effect.disabled});
       }
     });
+    
+    // 장착된 아이템 관리
+    html.find('.mounted-item-delete').click(this._onMountedItemDelete.bind(this));
   }
 
   /**
@@ -645,22 +675,27 @@ export class CWNItemSheet extends ItemSheet {
     // Add custom buttons for item sheets
     if (this.item.isOwned) {
       buttons.unshift({
-        label: "Roll",
-        class: "roll-item",
-        icon: "fas fa-dice-d20",
-        onclick: () => this.item.roll()
+        label: "복제",
+        class: "item-duplicate",
+        icon: "fas fa-copy",
+        onclick: () => this._onDuplicateItem()
+      });
+    } else {
+      buttons.unshift({
+        label: "복제",
+        class: "item-duplicate",
+        icon: "fas fa-copy",
+        onclick: () => this._onDuplicateItem()
       });
     }
     
-    // Add active effects management button
-    if (game.user.isGM || this.item.isOwner) {
-      buttons.unshift({
-        label: "Effects",
-        class: "manage-effects",
-        icon: "fas fa-bolt",
-        onclick: ev => this._onManageActiveEffects(ev)
-      });
-    }
+    // 효과 관리 버튼 추가
+    buttons.unshift({
+      label: "효과",
+      class: "manage-effects",
+      icon: "fas fa-bolt",
+      onclick: ev => this._onManageActiveEffects(ev)
+    });
     
     return buttons;
   }
@@ -678,25 +713,137 @@ export class CWNItemSheet extends ItemSheet {
 
   /** @override */
   async _onDrop(event) {
-    console.log("CWN | ItemSheet _onDrop called");
+    console.log("CWN | 아이템 시트에 드롭 이벤트 발생");
     event.preventDefault();
     
-    // Get dropped data
+    // 드롭된 데이터 파싱
     let data;
     try {
       data = JSON.parse(event.dataTransfer.getData('text/plain'));
-      console.log("CWN | Dropped data:", data);
+      console.log("CWN | 드롭된 데이터:", data);
     } catch (err) {
-      console.error("CWN | Error parsing dropped data:", err);
+      console.error("CWN | 드롭된 데이터 파싱 오류:", err);
       return false;
     }
     
-    // Handle dropped active effects
-    if (data.type === "ActiveEffect") {
-      return this._onDropActiveEffect(event, data);
+    // 아이템 타입에 따른 처리
+    switch (data.type) {
+      case "Item":
+        return this._onDropItem(event, data);
+      case "ActiveEffect":
+        return this._onDropActiveEffect(event, data);
+      default:
+        console.log(`CWN | 지원하지 않는 드롭 타입: ${data.type}`);
+        return false;
+    }
+  }
+  
+  /**
+   * 아이템 드롭 처리
+   * @param {DragEvent} event 드래그 이벤트
+   * @param {Object} data 드롭 데이터
+   * @private
+   */
+  async _onDropItem(event, data) {
+    console.log("CWN | 아이템 드롭 처리:", data);
+    
+    // 현재 아이템 타입 확인
+    const currentType = this.item.type;
+    
+    // 드롭된 아이템 가져오기
+    const droppedItem = await fromUuid(data.uuid);
+    if (!droppedItem) {
+      console.error("CWN | 드롭된 아이템을 찾을 수 없음:", data.uuid);
+      return false;
     }
     
+    console.log(`CWN | 드롭된 아이템: ${droppedItem.name}, 타입: ${droppedItem.type}`);
+    
+    // 아이템 타입별 처리
+    switch (currentType) {
+      case "cyberware":
+        // 사이버웨어에 아이템 장착 처리
+        if (droppedItem.type === "weapon" || droppedItem.type === "gear") {
+          return this._addItemToCyberware(droppedItem);
+        }
+        break;
+      case "vehicle":
+        // 차량에 아이템 장착 처리
+        if (droppedItem.type === "weapon" || droppedItem.type === "gear") {
+          return this._addItemToVehicle(droppedItem);
+        }
+        break;
+      default:
+        console.log(`CWN | ${currentType} 타입에는 아이템을 드롭할 수 없습니다.`);
+        return false;
+    }
+    
+    console.log("CWN | 아이템 드롭 처리 완료");
     return false;
+  }
+  
+  /**
+   * 사이버웨어에 아이템 추가
+   * @param {Item} item 추가할 아이템
+   * @private
+   */
+  async _addItemToCyberware(item) {
+    console.log(`CWN | 사이버웨어 ${this.item.name}에 아이템 ${item.name} 추가 시도`);
+    
+    // 사이버웨어 데이터 가져오기
+    const cyberwareData = foundry.utils.deepClone(this.item.system);
+    
+    // 장착된 아이템 배열이 없으면 생성
+    if (!cyberwareData.mountedItems) {
+      cyberwareData.mountedItems = [];
+    }
+    
+    // 아이템 데이터 추가
+    cyberwareData.mountedItems.push({
+      id: item.id,
+      name: item.name,
+      img: item.img,
+      type: item.type
+    });
+    
+    // 사이버웨어 업데이트
+    await this.item.update({ "system.mountedItems": cyberwareData.mountedItems });
+    
+    ui.notifications.info(`${item.name}이(가) ${this.item.name}에 장착되었습니다.`);
+    console.log(`CWN | 사이버웨어에 아이템 추가 완료`);
+    return true;
+  }
+  
+  /**
+   * 차량에 아이템 추가
+   * @param {Item} item 추가할 아이템
+   * @private
+   */
+  async _addItemToVehicle(item) {
+    console.log(`CWN | 차량 ${this.item.name}에 아이템 ${item.name} 추가 시도`);
+    
+    // 차량 데이터 가져오기
+    const vehicleData = foundry.utils.deepClone(this.item.system);
+    
+    // 장착된 아이템 배열이 없으면 생성
+    if (!vehicleData.mountedItems) {
+      vehicleData.mountedItems = [];
+    }
+    
+    // 아이템 데이터 추가
+    vehicleData.mountedItems.push({
+      id: item.id,
+      name: item.name,
+      img: item.img,
+      type: item.type
+    });
+    
+    // 차량 업데이트
+    await this.item.update({ "system.mountedItems": vehicleData.mountedItems });
+    
+    ui.notifications.info(`${item.name}이(가) ${this.item.name}에 장착되었습니다.`);
+    console.log(`CWN | 차량에 아이템 추가 완료`);
+    return true;
   }
 
   /**
@@ -776,5 +923,102 @@ export class CWNItemSheet extends ItemSheet {
     
     // 업데이트
     await this.item.update({ "system.ammo": ammo });
+  }
+
+  /**
+   * 아이템 복제 핸들러
+   * @private
+   */
+  async _onDuplicateItem() {
+    console.log("CWN | 아이템 복제 요청:", this.item.name);
+    const duplicatedItem = await this.item.duplicate();
+    
+    if (duplicatedItem) {
+      ui.notifications.info(`아이템 "${this.item.name}"이(가) 복제되었습니다.`);
+      
+      // 복제된 아이템이 월드 아이템인 경우 시트 열기
+      if (!this.item.isOwned) {
+        duplicatedItem.sheet.render(true);
+      }
+    } else {
+      ui.notifications.error(`아이템 "${this.item.name}" 복제 중 오류가 발생했습니다.`);
+    }
+  }
+
+  /**
+   * 아이템 이미지 클릭 핸들러
+   * @param {Event} event 이벤트 객체
+   * @private
+   */
+  async _onItemImageClick(event) {
+    console.log("CWN | 아이템 이미지 클릭");
+    event.preventDefault();
+    
+    const current = this.item.img;
+    const fp = new FilePicker({
+      type: "image",
+      current: current,
+      callback: path => {
+        console.log(`CWN | 새 이미지 경로: ${path}`);
+        this.item.update({ img: path });
+      },
+      top: this.position.top + 40,
+      left: this.position.left + 10
+    });
+    
+    return fp.browse();
+  }
+  
+  /**
+   * 아이템 이미지 초기화 핸들러
+   * @param {Event} event 이벤트 객체
+   * @private
+   */
+  async _onItemImageReset(event) {
+    console.log("CWN | 아이템 이미지 초기화");
+    event.preventDefault();
+    
+    const defaultIcon = CWNItem.defaultIcons[this.item.type] || "icons/svg/item-bag.svg";
+    console.log(`CWN | 기본 이미지로 재설정: ${defaultIcon}`);
+    
+    return this.item.update({ img: defaultIcon });
+  }
+  
+  /**
+   * 장착된 아이템 삭제 핸들러
+   * @param {Event} event 이벤트 객체
+   * @private
+   */
+  async _onMountedItemDelete(event) {
+    console.log("CWN | 장착된 아이템 삭제 요청");
+    event.preventDefault();
+    
+    const itemId = event.currentTarget.dataset.itemId;
+    console.log(`CWN | 삭제할 아이템 ID: ${itemId}`);
+    
+    // 아이템 타입에 따라 처리
+    if (this.item.type === "cyberware") {
+      const cyberwareData = foundry.utils.deepClone(this.item.system);
+      
+      if (cyberwareData.mountedItems) {
+        const index = cyberwareData.mountedItems.findIndex(i => i.id === itemId);
+        if (index !== -1) {
+          const removedItem = cyberwareData.mountedItems.splice(index, 1)[0];
+          await this.item.update({ "system.mountedItems": cyberwareData.mountedItems });
+          ui.notifications.info(`${removedItem.name}이(가) ${this.item.name}에서 제거되었습니다.`);
+        }
+      }
+    } else if (this.item.type === "vehicle") {
+      const vehicleData = foundry.utils.deepClone(this.item.system);
+      
+      if (vehicleData.mountedItems) {
+        const index = vehicleData.mountedItems.findIndex(i => i.id === itemId);
+        if (index !== -1) {
+          const removedItem = vehicleData.mountedItems.splice(index, 1)[0];
+          await this.item.update({ "system.mountedItems": vehicleData.mountedItems });
+          ui.notifications.info(`${removedItem.name}이(가) ${this.item.name}에서 제거되었습니다.`);
+        }
+      }
+    }
   }
 } 

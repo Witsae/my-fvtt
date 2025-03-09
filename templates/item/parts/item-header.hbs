@@ -1,8 +1,21 @@
-<div class="item-header">
-  <div class="item-name">
-    <h3>{{item.name}}</h3>
+<header class="sheet-header">
+  <div class="profile-img-container">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
+    {{#if editable}}
+    <div class="image-controls">
+      <button class="item-image-reset" title="{{localize 'CWN.ResetImage'}}">
+        <i class="fas fa-undo"></i>
+      </button>
+    </div>
+    {{/if}}
   </div>
-  <div class="item-type">
-    <span>{{localize (concat "CWN." type)}}</span>
+  <div class="header-details">
+    <h1 class="charname">
+      <input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'CWN.Name'}}" />
+    </h1>
+    <div class="item-subtitle">
+      <h4 class="item-type">{{localize (concat "CWN.ItemType." type)}}</h4>
+      <span class="item-status">{{#if system.equipped}}<span class="equipped">{{localize "CWN.Equipped"}}</span>{{/if}}</span>
+    </div>
   </div>
-</div> 
+</header> 

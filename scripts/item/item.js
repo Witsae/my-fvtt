@@ -10,6 +10,12 @@ export class CWNItem extends Item {
   static async create(data, options = {}) {
     console.log("CWN | CWNItem.create 호출됨:", data, options);
     
+    // 기본 이미지 설정
+    if (data.img === undefined || data.img === null) {
+      data.img = this.defaultIcons[data.type] || "icons/svg/item-bag.svg";
+      console.log(`CWN | 아이템 기본 이미지 설정: ${data.img}`);
+    }
+    
     // 부모 클래스의 create 메서드 호출
     console.log("CWN | 부모 클래스의 create 메서드 호출");
     const item = await super.create(data, options);
@@ -18,6 +24,24 @@ export class CWNItem extends Item {
     console.log("CWN | 아이템 생성 완료:", item);
     
     return item;
+  }
+  
+  /**
+   * 아이템 타입별 기본 아이콘 정의
+   */
+  static get defaultIcons() {
+    return {
+      weapon: "icons/svg/sword.svg",
+      armor: "icons/svg/shield.svg",
+      skill: "icons/svg/book.svg",
+      focus: "icons/svg/eye.svg",
+      gear: "icons/svg/backpack.svg",
+      cyberware: "icons/svg/robot.svg",
+      drug: "icons/svg/potion.svg",
+      asset: "icons/svg/coins.svg",
+      power: "icons/svg/explosion.svg",
+      vehicle: "icons/svg/tank.svg"
+    };
   }
   
   /**
@@ -784,5 +808,36 @@ export class CWNItem extends Item {
     };
     
     ChatMessage.create(chatData);
+  }
+
+  /**
+   * 아이템 복제 메서드
+   * @returns {Promise<CWNItem>} 복제된 아이템
+   */
+  async duplicate() {
+    console.log(`CWN | 아이템 복제 시작: ${this.name}`);
+    
+    // 아이템 데이터 복제
+    const itemData = this.toObject();
+    
+    // 복제된 아이템 이름 수정
+    itemData.name = `${itemData.name} (복사본)`;
+    console.log(`CWN | 복제된 아이템 이름: ${itemData.name}`);
+    
+    // 새 아이템 생성
+    let newItem;
+    if (this.actor) {
+      // 액터에 속한 아이템인 경우 해당 액터에 추가
+      console.log(`CWN | 액터 ${this.actor.name}에 아이템 복제`);
+      newItem = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+      newItem = newItem[0];
+    } else {
+      // 독립 아이템인 경우 월드 아이템으로 생성
+      console.log(`CWN | 월드 아이템으로 복제`);
+      newItem = await CWNItem.create(itemData);
+    }
+    
+    console.log(`CWN | 아이템 복제 완료:`, newItem);
+    return newItem;
   }
 } 
