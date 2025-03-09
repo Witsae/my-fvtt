@@ -16,8 +16,22 @@ import { onManageActiveEffect, prepareActiveEffectCategories } from "./utils/eff
 /* -------------------------------------------- */
 
 Hooks.once("init", async function() {
-  console.log("CWN | Initializing Cities Without Number System");
-
+  console.log("CWN | 시스템 초기화 시작");
+  
+  // 액터 시트 등록 확인
+  console.log("CWN | 액터 시트 등록:", {
+    "baseClass": ActorSheet,
+    "cwnClass": CWNActorSheet,
+    "defaultClasses": CONFIG.Actor.sheetClasses
+  });
+  
+  // 아이템 시트 등록 확인
+  console.log("CWN | 아이템 시트 등록:", {
+    "baseClass": ItemSheet,
+    "cwnClass": CWNItemSheet,
+    "defaultClasses": CONFIG.Item.sheetClasses
+  });
+  
   // CWNItemSheet를 전역 변수로 등록
   globalThis.CWNItemSheet = CWNItemSheet;
 
@@ -28,23 +42,23 @@ Hooks.once("init", async function() {
 
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet);
-  Actors.registerSheet("cwn", CWNActorSheet, { makeDefault: true });
+  Actors.registerSheet("cwn-system", CWNActorSheet, { makeDefault: true });
   
   // 아이템 시트 등록
   console.log("CWN | Registering item sheet");
   Items.unregisterSheet("core", ItemSheet);
   
   // 아이템 시트 클래스 등록 - v12 호환성 개선
-  Items.registerSheet("cwn", CWNItemSheet, { 
+  Items.registerSheet("cwn-system", CWNItemSheet, { 
     makeDefault: true, 
     label: "CWN.SheetClassItem",
     types: ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"]
   });
   
   // 아이템 시트 클래스 설정
-  CONFIG.Item.sheetClasses.cwn = CONFIG.Item.sheetClasses.cwn || {};
-  CONFIG.Item.sheetClasses.cwn.base = {
-    id: "cwn",
+  CONFIG.Item.sheetClasses["cwn-system"] = CONFIG.Item.sheetClasses["cwn-system"] || {};
+  CONFIG.Item.sheetClasses["cwn-system"].base = {
+    id: "cwn-system",
     label: "CWN.SheetClassItem",
     cls: CWNItemSheet
   };
@@ -52,8 +66,8 @@ Hooks.once("init", async function() {
   // 아이템 타입별 시트 클래스 설정
   const itemTypes = ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"];
   itemTypes.forEach(type => {
-    CONFIG.Item.sheetClasses.cwn[type] = {
-      id: `cwn.${type}`,
+    CONFIG.Item.sheetClasses["cwn-system"][type] = {
+      id: `cwn-system.${type}`,
       label: `CWN.SheetClassItem.${type}`,
       cls: CWNItemSheet
     };
@@ -80,7 +94,9 @@ Hooks.once("init", async function() {
   
   // Foundry v12 호환성을 위한 매크로 등록
   registerMacros();
-
+  
+  console.log("CWN | 시트 등록 완료");
+  
   // 게임 전역 객체에 CWN 클래스 등록
   game.cwn = {
     CWN,
@@ -430,6 +446,19 @@ Hooks.once("ready", async function() {
   
   // 아이템 분류 시스템 초기화
   _initializeItemCategories();
+  
+  // 시스템 정보 확인
+  console.log("CWN | 시스템 준비 완료");
+  console.log("CWN | 시스템 정보:", {
+    id: game.system.id,
+    data: game.system,
+    moduleData: game.modules
+  });
+  
+  // 시스템 ID가 'cwn-system'이 아닌 경우 경고
+  if (game.system.id !== 'cwn-system') {
+    console.warn(`CWN | 시스템 ID가 예상과 다릅니다: ${game.system.id} (예상: cwn-system)`);
+  }
 });
 
 /**

@@ -22,7 +22,33 @@ export class CWNActorSheet extends ActorSheet {
 
   /** @override */
   get template() {
-    return `systems/cwn-system/templates/actor/actor-${this.actor.type}-sheet.hbs`;
+    console.log(`CWN | 액터 시트 템플릿 요청 - 액터: "${this.actor?.name}", 타입: "${this.actor?.type}"`);
+    
+    // 액터 타입이 없는 경우 기본 템플릿 반환
+    if (!this.actor?.type) {
+      console.warn("CWN | 액터에 타입이 없어 기본 템플릿 사용");
+      return `systems/cwn-system/templates/actor/actor-sheet.hbs`;
+    }
+    
+    // 시스템 ID 가져오기
+    const systemId = game.system.id;
+    console.log(`CWN | 현재 시스템 ID: "${systemId}"`);
+    
+    // 액터 타입별 템플릿 경로
+    const templatePath = `systems/${systemId}/templates/actor/actor-${this.actor.type}-sheet.hbs`;
+    
+    console.log(`CWN | 사용할 템플릿 경로: "${templatePath}"`);
+    
+    // 템플릿 파일 존재 여부 확인
+    fetch(templatePath)
+      .then(response => {
+        console.log(`CWN | 템플릿 파일 존재 여부: ${response.ok ? "존재함" : "존재하지 않음"}`);
+      })
+      .catch(error => {
+        console.error(`CWN | 템플릿 파일 확인 중 오류:`, error);
+      });
+    
+    return templatePath;
   }
 
   /* -------------------------------------------- */

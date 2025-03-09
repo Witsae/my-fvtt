@@ -1,6 +1,5 @@
 /**
- * Define a set of template paths to pre-load
- * Pre-loaded templates are compiled and cached for fast access when rendering
+ * 핸들바 템플릿 사전 로딩
  * @return {Promise}
  */
 export async function preloadHandlebarsTemplates() {
@@ -47,10 +46,28 @@ export async function preloadHandlebarsTemplates() {
     "systems/cwn-system/templates/item/parts/item-drug-attributes.hbs",
     "systems/cwn-system/templates/item/parts/item-asset-attributes.hbs",
     "systems/cwn-system/templates/item/parts/item-power-attributes.hbs",
-    "systems/cwn-system/templates/item/parts/item-vehicle-attributes.hbs"
+    "systems/cwn-system/templates/item/parts/item-vehicle-attributes.hbs",
+    
+    // 액터 시트 템플릿
+    "systems/cwn-system/templates/actor/actor-sheet.hbs",
+    "systems/cwn-system/templates/actor/actor-character-sheet.hbs",
+    "systems/cwn-system/templates/actor/actor-npc-sheet.hbs",
+    "systems/cwn-system/templates/actor/actor-faction-sheet.hbs"
   ];
 
   console.log("CWN | 로딩할 템플릿 경로:", templatePaths);
+  
+  // 각 템플릿 경로 존재 여부 확인
+  for (const path of templatePaths) {
+    fetch(path)
+      .then(response => {
+        console.log(`CWN | 템플릿 파일 확인: ${path} - ${response.ok ? "존재함" : "존재하지 않음"}`);
+      })
+      .catch(error => {
+        console.error(`CWN | 템플릿 파일 확인 중 오류: ${path}`, error);
+      });
+  }
+  
   const result = await loadTemplates(templatePaths);
   console.log("CWN | 템플릿 사전 로딩 완료");
   return result;
