@@ -174,11 +174,13 @@
     "Crew": "승무원",
     
     "Errors": {
-      "NoActor": "액터가 없는 아이템으로 굴림을 시도했습니다",
+      "NoActor": "액터가 없는 상태로 굴림을 시도했습니다.",
+      "NonCharacter": "캐릭터가 아닌 액터로 기술 굴림을 시도했습니다.",
+      "NoWeapon": "{name} 무기를 찾을 수 없습니다.",
       "NoAmmo": "{name}의 탄약이 부족합니다!",
-      "NonCharacter": "캐릭터가 아닌 액터로 기술 굴림을 시도했습니다",
-      "AssetFaction": "자산은 팩션과 연결되어야 합니다",
-      "NoDamage": "자산에 대한 데미지 굴림이 없습니다"
+      "NoDamage": "자산에 대한 데미지 굴림이 없습니다.",
+      "AssetFaction": "자산은 팩션과 연결되어야 합니다.",
+      "NoAttribute": "{name} 능력치를 찾을 수 없습니다."
     },
     
     "Dialogs": {
@@ -209,6 +211,13 @@
     "Tooltips": {
       "SelectToken": "토큰을 선택해주세요",
       "SelectTarget": "대상을 선택해주세요"
+    },
+    
+    "Macros": {
+      "AttributeRoll": "{attribute} 판정",
+      "SaveRoll": "{save} 내성",
+      "SkillRoll": "{skill} 기술",
+      "WeaponAttack": "{weapon} 공격"
     }
   }
 } 

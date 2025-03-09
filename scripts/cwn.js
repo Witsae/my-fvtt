@@ -79,6 +79,9 @@ Hooks.once("init", async function() {
   
   // Register custom enrichers for inline rolls and links
   registerCustomEnrichers();
+  
+  // Foundry v12 호환성을 위한 매크로 등록
+  registerMacros();
 });
 
 /* -------------------------------------------- */
@@ -275,6 +278,99 @@ function registerCustomEnrichers() {
 }
 
 /* -------------------------------------------- */
+/*  Macros Registration                         */
+/* -------------------------------------------- */
+
+function registerMacros() {
+  console.log("CWN | Registering macros");
+  
+  // 능력치 굴림 매크로
+  game.macros = game.macros || {};
+  
+  // 능력치 굴림 매크로
+  game.macros.rollAttribute = (attributeName, actorId) => {
+    const actor = actorId ? game.actors.get(actorId) : _getSelectedActor();
+    if (!actor) {
+      ui.notifications.warn(game.i18n.localize("CWN.Errors.NoActor"));
+      return null;
+    }
+    
+    const attrData = actor.system.attributes[attributeName];
+    if (!attrData) {
+      ui.notifications.warn(game.i18n.format("CWN.Errors.NoAttribute", {name: attributeName}));
+      return null;
+    }
+    
+    const formula = `1d20 + ${attrData.mod}`;
+    const label = game.i18n.format("CWN.AttributeCheck", {
+      attribute: game.i18n.localize(CONFIG.CWN.attributes[attributeName])
+    });
+    
+    const roll = new Roll(formula, actor.getRollData());
+    roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      flavor: label,
+      rollMode: game.settings.get('core', 'rollMode'),
+    });
+    
+    return roll;
+  };
+  
+  // 내성 굴림 매크로
+  game.macros.rollSave = (saveId, actorId) => {
+    const actor = actorId ? game.actors.get(actorId) : _getSelectedActor();
+    if (!actor) {
+      ui.notifications.warn(game.i18n.localize("CWN.Errors.NoActor"));
+      return null;
+    }
+    
+    return actor.rollSave(saveId);
+  };
+  
+  // 기술 굴림 매크로
+  game.macros.rollSkill = (skillName, actorId) => {
+    const actor = actorId ? game.actors.get(actorId) : _getSelectedActor();
+    if (!actor) {
+      ui.notifications.warn(game.i18n.localize("CWN.Errors.NoActor"));
+      return null;
+    }
+    
+    return actor.rollSkill(skillName);
+  };
+  
+  // 무기 공격 매크로
+  game.macros.rollWeaponAttack = (weaponName, actorId) => {
+    const actor = actorId ? game.actors.get(actorId) : _getSelectedActor();
+    if (!actor) {
+      ui.notifications.warn(game.i18n.localize("CWN.Errors.NoActor"));
+      return null;
+    }
+    
+    const weapon = actor.items.find(i => i.type === "weapon" && i.name === weaponName);
+    if (!weapon) {
+      ui.notifications.warn(game.i18n.format("CWN.Errors.NoWeapon", {name: weaponName}));
+      return null;
+    }
+    
+    return weapon.roll();
+  };
+  
+  // 선택된 액터 가져오기 헬퍼 함수
+  function _getSelectedActor() {
+    // 선택된 토큰의 액터 반환
+    const controlled = canvas.tokens?.controlled;
+    if (controlled && controlled.length === 1) {
+      return controlled[0].actor;
+    }
+    
+    // 선택된 토큰이 없으면 사용자의 캐릭터 반환
+    return game.user.character;
+  }
+  
+  console.log("CWN | Macros registered successfully");
+}
+
+/* -------------------------------------------- */
 /*  Ready Hook                                  */
 /* -------------------------------------------- */
 
@@ -308,10 +404,63 @@ Hooks.once("ready", async function() {
       }
       return actor.rollSave(saveId);
     },
+    rollAttribute: (attributeName, actorId) => {
+      return game.macros.rollAttribute(attributeName, actorId);
+    },
+    rollWeaponAttack: (weaponName, actorId) => {
+      return game.macros.rollWeaponAttack(weaponName, actorId);
+    },
     ValidatedDialog,
     ItemClassMap
   };
+  
+  // 매크로 바로가기 등록
+  if (game.user.isGM) {
+    createMacroShortcuts();
+  }
 });
+
+/**
+ * 자주 사용하는 매크로 바로가기를 생성합니다.
+ */
+async function createMacroShortcuts() {
+  // 이미 매크로가 있는지 확인
+  const existingMacros = game.macros.filter(m => m.name.startsWith("CWN:"));
+  if (existingMacros.length > 0) {
+    console.log("CWN | Macro shortcuts already exist");
+    return;
+  }
+  
+  console.log("CWN | Creating macro shortcuts");
+  
+  // 능력치 굴림 매크로 생성
+  const attributes = ["str", "dex", "con", "int", "wis", "cha"];
+  for (const attr of attributes) {
+    const name = CONFIG.CWN.attributes[attr];
+    await Macro.create({
+      name: `CWN: ${name} 판정`,
+      type: "script",
+      img: `icons/svg/d20-grey.svg`,
+      command: `game.cwn.rollAttribute("${attr}");`,
+      flags: { "cwn-system": { type: "attribute", attribute: attr } }
+    });
+  }
+  
+  // 내성 굴림 매크로 생성
+  const saves = ["physical", "evasion", "mental", "luck"];
+  for (const save of saves) {
+    const name = game.i18n.localize(`CWN.Save${save.capitalize()}`);
+    await Macro.create({
+      name: `CWN: ${name} 내성`,
+      type: "script",
+      img: `icons/svg/shield.svg`,
+      command: `game.cwn.rollSave("${save}");`,
+      flags: { "cwn-system": { type: "save", save: save } }
+    });
+  }
+  
+  console.log("CWN | Macro shortcuts created successfully");
+}
 
 /* -------------------------------------------- */
 /*  Canvas Initialization                       */

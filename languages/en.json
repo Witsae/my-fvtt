@@ -185,11 +185,13 @@
     "Crew": "Crew",
     
     "Errors": {
-      "NoActor": "Cannot roll without an actor",
+      "NoActor": "No actor available for this roll.",
+      "NonCharacter": "Attempted to make a skill roll with a non-character actor.",
+      "NoWeapon": "Could not find weapon named {name}.",
       "NoAmmo": "{name} is out of ammo!",
-      "NonCharacter": "Cannot roll skill with non-character actor",
-      "AssetFaction": "Asset must be associated with a faction",
-      "NoDamage": "No damage to roll for asset"
+      "NoDamage": "No damage roll available for this asset.",
+      "AssetFaction": "Assets must be linked to a faction.",
+      "NoAttribute": "Could not find attribute {name}."
     },
     
     "Dialogs": {
@@ -220,6 +222,13 @@
     "Tooltips": {
       "SelectToken": "Select a token first",
       "SelectTarget": "Select a target"
+    },
+    
+    "Macros": {
+      "AttributeRoll": "{attribute} Check",
+      "SaveRoll": "{save} Save",
+      "SkillRoll": "{skill} Check",
+      "WeaponAttack": "{weapon} Attack"
     }
   }
 } 
