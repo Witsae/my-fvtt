@@ -4,25 +4,18 @@
  */
 export class CWNItem extends Item {
   /**
-   * 아이템 타입에 따라 적절한 클래스를 반환합니다.
-   * @param {Object} data 아이템 데이터
-   * @returns {CWNItem} 아이템 인스턴스
+   * 아이템 생성 메서드
+   * @param {Object|Object[]} data 아이템 데이터 또는 데이터 배열
+   * @param {Object} [options={}] 생성 옵션
+   * @returns {Promise<CWNItem|CWNItem[]>} 생성된 아이템 또는 아이템 배열
    * @static
    */
-  static create(data, options) {
-    // 아이템 타입에 따라 적절한 클래스 사용
-    const itemType = data.type;
+  static async create(data, options = {}) {
+    console.log("CWN | CWNItem.create 호출됨:", data, options);
     
-    // 아이템 클래스 매핑 가져오기
-    const ItemClassMap = game.cwn?.ItemClassMap;
-    
-    // 적절한 클래스가 있으면 해당 클래스로 생성
-    if (ItemClassMap && itemType in ItemClassMap) {
-      return new ItemClassMap[itemType](data, options);
-    }
-    
-    // 기본 클래스로 생성
-    return new CWNItem(data, options);
+    // 부모 클래스의 create 메서드 호출 (Item.createDocuments)
+    console.log("CWN | 부모 클래스의 create 메서드 호출");
+    return await super.create(data, options);
   }
   
   /**

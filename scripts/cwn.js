@@ -735,9 +735,13 @@ Hooks.on("renderDialog", (dialog, html, data) => {
       }
       
       console.log("CWN | 아이템 생성 데이터:", itemData);
+      console.log("CWN | Item.create 메서드 호출 전");
       
       try {
-        // 아이템 생성
+        // Foundry VTT v12에서 Item.create 메서드 사용
+        console.log("CWN | Item.create 메서드 호출 시도");
+        
+        // 아이템 생성 시도
         const item = await Item.create(itemData);
         console.log("CWN | 아이템 생성 성공:", item);
         
@@ -745,9 +749,19 @@ Hooks.on("renderDialog", (dialog, html, data) => {
         if (item) {
           console.log("CWN | 아이템 시트 열기 시도");
           item.sheet.render(true);
+        } else {
+          console.error("CWN | 아이템이 생성되었지만 null 또는 undefined입니다.");
+          ui.notifications.error("아이템이 생성되었지만 시트를 열 수 없습니다.");
         }
       } catch (error) {
         console.error("CWN | 아이템 생성 중 오류 발생:", error);
+        
+        // 오류 세부 정보 로깅
+        console.error("CWN | 오류 이름:", error.name);
+        console.error("CWN | 오류 메시지:", error.message);
+        console.error("CWN | 오류 스택:", error.stack);
+        
+        ui.notifications.error(`아이템 생성 중 오류 발생: ${error.message}`);
       }
       
       dialog.close();
