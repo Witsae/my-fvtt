@@ -840,4 +840,247 @@ export class CWNItem extends Item {
     console.log(`CWN | 아이템 복제 완료:`, newItem);
     return newItem;
   }
+
+  /**
+   * 아이템 카테고리 정의
+   * @returns {Object} 아이템 카테고리 정의
+   */
+  static get categories() {
+    return {
+      weapon: {
+        label: "CWN.ItemCategory.Weapon",
+        types: ["weapon"],
+        icon: "fas fa-sword"
+      },
+      armor: {
+        label: "CWN.ItemCategory.Armor",
+        types: ["armor"],
+        icon: "fas fa-shield"
+      },
+      gear: {
+        label: "CWN.ItemCategory.Gear",
+        types: ["gear"],
+        icon: "fas fa-backpack"
+      },
+      skill: {
+        label: "CWN.ItemCategory.Skill",
+        types: ["skill"],
+        icon: "fas fa-book"
+      },
+      focus: {
+        label: "CWN.ItemCategory.Focus",
+        types: ["focus"],
+        icon: "fas fa-eye"
+      },
+      tech: {
+        label: "CWN.ItemCategory.Tech",
+        types: ["cyberware", "drug"],
+        icon: "fas fa-microchip"
+      },
+      asset: {
+        label: "CWN.ItemCategory.Asset",
+        types: ["asset"],
+        icon: "fas fa-coins"
+      },
+      power: {
+        label: "CWN.ItemCategory.Power",
+        types: ["power"],
+        icon: "fas fa-bolt"
+      },
+      vehicle: {
+        label: "CWN.ItemCategory.Vehicle",
+        types: ["vehicle"],
+        icon: "fas fa-car"
+      }
+    };
+  }
+  
+  /**
+   * 아이템 태그 정의
+   * @returns {Object} 아이템 태그 정의
+   */
+  static get tagCategories() {
+    return {
+      common: {
+        label: "CWN.TagCategory.Common",
+        tags: ["valuable", "rare", "heavy", "light", "fragile"]
+      },
+      weapon: {
+        label: "CWN.TagCategory.Weapon",
+        tags: ["melee", "ranged", "thrown", "reload", "burst", "blast", "shock"]
+      },
+      armor: {
+        label: "CWN.TagCategory.Armor",
+        tags: ["light", "medium", "heavy", "powered", "sealed", "stealthy"]
+      },
+      tech: {
+        label: "CWN.TagCategory.Tech",
+        tags: ["implant", "external", "illegal", "military", "medical", "utility"]
+      }
+    };
+  }
+  
+  /**
+   * 아이템 필터링 메서드
+   * @param {Array} items 필터링할 아이템 배열
+   * @param {Object} filters 필터 옵션
+   * @returns {Array} 필터링된 아이템 배열
+   */
+  static filterItems(items, filters = {}) {
+    console.log("CWN | 아이템 필터링 시작:", filters);
+    
+    // 필터가 없으면 원본 배열 반환
+    if (!filters || Object.keys(filters).length === 0) {
+      return items;
+    }
+    
+    // 필터링 로직
+    let filtered = [...items];
+    
+    // 타입 필터
+    if (filters.types && filters.types.length > 0) {
+      filtered = filtered.filter(item => filters.types.includes(item.type));
+      console.log(`CWN | 타입 필터 적용 후 아이템 수: ${filtered.length}`);
+    }
+    
+    // 카테고리 필터
+    if (filters.categories && filters.categories.length > 0) {
+      const validTypes = [];
+      filters.categories.forEach(cat => {
+        if (this.categories[cat]) {
+          validTypes.push(...this.categories[cat].types);
+        }
+      });
+      
+      if (validTypes.length > 0) {
+        filtered = filtered.filter(item => validTypes.includes(item.type));
+        console.log(`CWN | 카테고리 필터 적용 후 아이템 수: ${filtered.length}`);
+      }
+    }
+    
+    // 태그 필터
+    if (filters.tags && filters.tags.length > 0) {
+      filtered = filtered.filter(item => {
+        const itemTags = item.system.tags || [];
+        return filters.tags.some(tag => itemTags.includes(tag));
+      });
+      console.log(`CWN | 태그 필터 적용 후 아이템 수: ${filtered.length}`);
+    }
+    
+    // 검색어 필터
+    if (filters.search && filters.search.trim() !== "") {
+      const search = filters.search.toLowerCase().trim();
+      filtered = filtered.filter(item => {
+        const name = item.name.toLowerCase();
+        const desc = (item.system.description || "").toLowerCase();
+        return name.includes(search) || desc.includes(search);
+      });
+      console.log(`CWN | 검색어 필터 적용 후 아이템 수: ${filtered.length}`);
+    }
+    
+    // 장착 상태 필터
+    if (filters.equipped !== undefined) {
+      filtered = filtered.filter(item => {
+        return (item.system.equipped === true) === filters.equipped;
+      });
+      console.log(`CWN | 장착 상태 필터 적용 후 아이템 수: ${filtered.length}`);
+    }
+    
+    console.log("CWN | 아이템 필터링 완료:", filtered);
+    return filtered;
+  }
+  
+  /**
+   * 아이템 정렬 메서드
+   * @param {Array} items 정렬할 아이템 배열
+   * @param {Object} sortOptions 정렬 옵션
+   * @returns {Array} 정렬된 아이템 배열
+   */
+  static sortItems(items, sortOptions = {}) {
+    console.log("CWN | 아이템 정렬 시작:", sortOptions);
+    
+    // 정렬 옵션이 없으면 원본 배열 반환
+    if (!sortOptions || Object.keys(sortOptions).length === 0) {
+      return items;
+    }
+    
+    // 정렬 로직
+    const sorted = [...items];
+    
+    // 정렬 필드와 방향
+    const field = sortOptions.field || "name";
+    const direction = sortOptions.direction || "asc";
+    const dirMod = direction === "asc" ? 1 : -1;
+    
+    sorted.sort((a, b) => {
+      let aValue, bValue;
+      
+      // 필드에 따른 값 추출
+      if (field === "name") {
+        aValue = a.name;
+        bValue = b.name;
+      } else if (field === "type") {
+        aValue = a.type;
+        bValue = b.type;
+      } else if (field.startsWith("system.")) {
+        const systemField = field.substring(7);
+        aValue = foundry.utils.getProperty(a.system, systemField);
+        bValue = foundry.utils.getProperty(b.system, systemField);
+      }
+      
+      // 값 비교
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return aValue.localeCompare(bValue) * dirMod;
+      } else if (typeof aValue === "number" && typeof bValue === "number") {
+        return (aValue - bValue) * dirMod;
+      } else {
+        return 0;
+      }
+    });
+    
+    console.log("CWN | 아이템 정렬 완료:", sorted);
+    return sorted;
+  }
+  
+  /**
+   * 아이템을 카테고리별로 그룹화하는 메서드
+   * @param {Array} items 그룹화할 아이템 배열
+   * @returns {Object} 카테고리별로 그룹화된 아이템
+   */
+  static groupItemsByCategory(items) {
+    console.log("CWN | 아이템 카테고리별 그룹화 시작");
+    
+    const grouped = {};
+    
+    // 카테고리 초기화
+    Object.keys(this.categories).forEach(cat => {
+      grouped[cat] = {
+        label: this.categories[cat].label,
+        icon: this.categories[cat].icon,
+        items: []
+      };
+    });
+    
+    // 아이템 분류
+    items.forEach(item => {
+      // 아이템 타입에 맞는 카테고리 찾기
+      const category = Object.keys(this.categories).find(cat => 
+        this.categories[cat].types.includes(item.type)
+      );
+      
+      if (category) {
+        grouped[category].items.push(item);
+      }
+    });
+    
+    // 빈 카테고리 제거 옵션
+    // Object.keys(grouped).forEach(cat => {
+    //   if (grouped[cat].items.length === 0) {
+    //     delete grouped[cat];
+    //   }
+    // });
+    
+    console.log("CWN | 아이템 카테고리별 그룹화 완료:", grouped);
+    return grouped;
+  }
 } 

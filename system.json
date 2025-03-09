@@ -1,89 +1,39 @@
 {
-  "id": "cwn-system",
+  "name": "cwn-system",
   "title": "Cities Without Number",
   "description": "A system for playing Cities Without Number in the Foundry Virtual Tabletop environment.",
-  "version": "1.3.27",
+  "version": "1.3.28",
+  "author": "Witsae",
+  "minimumCoreVersion": "10",
+  "compatibleCoreVersion": "12",
   "compatibility": {
-    "minimum": "11",
+    "minimum": "10",
     "verified": "12",
     "maximum": "12"
   },
-  "authors": [
-    {
-      "name": "Witsae",
-      "url": "https://github.com/Witsae",
-      "discord": "witsae"
-    }
-  ],
-  "esmodules": [
-    "scripts/cwn.js"
-  ],
-  "styles": [
-    "styles/cwn.css"
-  ],
   "scripts": [],
-  "packs": [
-    {
-      "name": "skills",
-      "label": "Skills",
-      "system": "cwn-system",
-      "path": "./packs/skills.db",
-      "type": "Item"
-    },
-    {
-      "name": "foci",
-      "label": "Foci",
-      "system": "cwn-system",
-      "path": "./packs/foci.db",
-      "type": "Item"
-    },
-    {
-      "name": "weapons",
-      "label": "Weapons",
-      "system": "cwn-system",
-      "path": "./packs/weapons.db",
-      "type": "Item"
-    },
-    {
-      "name": "armor",
-      "label": "Armor",
-      "system": "cwn-system",
-      "path": "./packs/armor.db",
-      "type": "Item"
-    },
-    {
-      "name": "gear",
-      "label": "Gear",
-      "system": "cwn-system",
-      "path": "./packs/gear.db",
-      "type": "Item"
-    },
-    {
-      "name": "cyberware",
-      "label": "Cyberware",
-      "system": "cwn-system",
-      "path": "./packs/cyberware.db",
-      "type": "Item"
-    }
-  ],
+  "esmodules": ["scripts/cwn.js"],
+  "styles": ["styles/cwn.css"],
+  "packs": [],
   "languages": [
     {
       "lang": "en",
       "name": "English",
-      "path": "languages/en.json"
+      "path": "lang/en.json"
     },
     {
       "lang": "ko",
       "name": "Korean",
-      "path": "languages/ko.json"
+      "path": "lang/ko.json"
     }
   ],
+  "socket": false,
   "gridDistance": 5,
   "gridUnits": "ft",
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "sanity",
   "url": "https://github.com/Witsae/my-fvtt",
   "manifest": "https://raw.githubusercontent.com/Witsae/my-fvtt/main/system.json",
-  "download": "https://github.com/Witsae/my-fvtt/archive/refs/tags/v1.3.27.zip",
-  "license": "LICENSE"
+  "download": "https://github.com/Witsae/my-fvtt/archive/refs/tags/v1.3.28.zip",
+  "license": "LICENSE.txt"
 } 

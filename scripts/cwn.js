@@ -416,6 +416,9 @@ Hooks.once("ready", async function() {
   if (game.user.isGM) {
     createMacroShortcuts();
   }
+  
+  // 아이템 분류 시스템 초기화
+  this._initializeItemCategories();
 });
 
 /**
@@ -977,4 +980,78 @@ Hooks.on("updateItem", (item, changes, options, userId) => {
   console.log("CWN | Changes:", changes);
   console.log("CWN | Options:", options);
   console.log("CWN | User ID:", userId);
-}); 
+});
+
+/**
+ * 아이템 분류 시스템 초기화
+ * @private
+ */
+function _initializeItemCategories() {
+  console.log("CWN | 아이템 분류 시스템 초기화");
+  
+  // 아이템 카테고리 정의 확인
+  if (!CWNItem.categories) {
+    console.error("CWN | 아이템 카테고리 정의를 찾을 수 없습니다.");
+    return;
+  }
+  
+  // 아이템 태그 정의 확인
+  if (!CWNItem.tagCategories) {
+    console.error("CWN | 아이템 태그 정의를 찾을 수 없습니다.");
+    return;
+  }
+  
+  // 로컬라이제이션 키 등록
+  _registerItemCategoryLocalization();
+  
+  console.log("CWN | 아이템 분류 시스템 초기화 완료");
+}
+
+/**
+ * 아이템 분류 관련 로컬라이제이션 키 등록
+ * @private
+ */
+function _registerItemCategoryLocalization() {
+  // 카테고리 라벨 등록
+  const categoryLabels = {};
+  Object.entries(CWNItem.categories).forEach(([key, category]) => {
+    categoryLabels[category.label] = category.label.replace("CWN.ItemCategory.", "");
+  });
+  
+  // 태그 라벨 등록
+  const tagLabels = {};
+  Object.entries(CWNItem.tagCategories).forEach(([catKey, category]) => {
+    tagLabels[category.label] = category.label.replace("CWN.TagCategory.", "");
+    
+    category.tags.forEach(tag => {
+      const tagKey = `CWN.Tag.${tag.charAt(0).toUpperCase() + tag.slice(1)}`;
+      tagLabels[tagKey] = tag;
+    });
+  });
+  
+  // 기타 필요한 키 등록
+  const otherLabels = {
+    "CWN.SearchItems": "아이템 검색",
+    "CWN.All": "전체",
+    "CWN.Equipped": "장착됨",
+    "CWN.Categories": "카테고리",
+    "CWN.Tags": "태그",
+    "CWN.SortBy": "정렬",
+    "CWN.EquippedItems": "장착된 아이템",
+    "CWN.AllItems": "모든 아이템",
+    "CWN.Equip": "장착",
+    "CWN.Unequip": "해제"
+  };
+  
+  // 로컬라이제이션 데이터 병합
+  const localizationData = {
+    ...categoryLabels,
+    ...tagLabels,
+    ...otherLabels
+  };
+  
+  // 개발 모드에서만 로그 출력
+  if (game.settings.get("core", "debugMode")) {
+    console.log("CWN | 아이템 분류 로컬라이제이션 키:", localizationData);
+  }
+} 
