@@ -40,11 +40,23 @@ export class CWNItemSheet extends ItemSheet {
     const path = "systems/cwn-system/templates/item";
     const templatePath = `${path}/item-${this.item.type}-sheet.hbs`;
     
-    // 템플릿 파일 존재 여부 확인 (로깅만 수행)
     console.log(`CWN | 사용할 템플릿 경로: "${templatePath}"`);
     
-    // 기본 템플릿 사용 (모든 타입별 템플릿이 기본 템플릿을 포함하도록 설정되어 있음)
-    return "systems/cwn-system/templates/item/item-sheet.hbs";
+    try {
+      // 템플릿 파일 존재 여부 확인 시도
+      const templateExists = game.system.template.Item[this.item.type] !== undefined;
+      console.log(`CWN | 템플릿 존재 여부: ${templateExists}`);
+      
+      if (templateExists) {
+        return templatePath;
+      } else {
+        console.warn(`CWN | 템플릿 파일이 존재하지 않아 기본 템플릿 사용: ${templatePath}`);
+        return "systems/cwn-system/templates/item/item-sheet.hbs";
+      }
+    } catch (error) {
+      console.error(`CWN | 템플릿 확인 중 오류 발생:`, error);
+      return "systems/cwn-system/templates/item/item-sheet.hbs";
+    }
   }
 
   /** @override */
@@ -61,9 +73,17 @@ export class CWNItemSheet extends ItemSheet {
     context.system = itemData.system;
     context.type = itemData.type;
     
+    // 편집 권한 설정
+    context.editable = this.isEditable;
+    context.owner = this.item.isOwner;
+    
+    // 설정 데이터 추가
+    context.config = CONFIG.CWN;
+    
     // 아이템 타입별 추가 데이터 처리
     if (itemData.type) {
-      await this._prepareItemTypeSpecificData(context);
+      // 기존 메서드 호출
+      this._prepareItemData(context);
     }
     
     console.log("CWN | 최종 아이템 시트 데이터:", context);
@@ -73,59 +93,37 @@ export class CWNItemSheet extends ItemSheet {
   /**
    * 아이템 타입별 추가 데이터 준비
    * @param {Object} context 컨텍스트 데이터
-   * @private
    */
-  async _prepareItemTypeSpecificData(context) {
-    const itemType = context.type;
-    console.log(`CWN | 아이템 타입별 데이터 준비 - 타입: "${itemType}"`);
+  _prepareItemData(context) {
+    console.log(`CWN | 아이템 데이터 준비 시작 - 타입: "${context.type}"`);
     
-    // 무기 데이터 준비
-    if (itemType === "weapon") {
-      context.weaponTypes = CONFIG.CWN.weaponTypes;
-      context.weaponRanges = CONFIG.CWN.weaponRanges;
-      context.attributes = CONFIG.CWN.attributes;
-    }
-    // 방어구 데이터 준비
-    else if (itemType === "armor") {
-      context.armorTypes = CONFIG.CWN.armorTypes;
-    }
-    // 기술 데이터 준비
-    else if (itemType === "skill") {
-      context.attributes = CONFIG.CWN.attributes;
-      context.skillCategories = CONFIG.CWN.skillCategories;
-    }
-    // 특성 데이터 준비
-    else if (itemType === "focus") {
-      // 특성 관련 데이터
-    }
-    // 장비 데이터 준비
-    else if (itemType === "gear") {
-      context.gearTypes = CONFIG.CWN.gearTypes;
-      context.itemLocations = CONFIG.CWN.itemLocations;
-    }
-    // 사이버웨어 데이터 준비
-    else if (itemType === "cyberware") {
-      context.cyberwareTypes = CONFIG.CWN.cyberwareTypes;
-      context.bodyLocations = CONFIG.CWN.bodyLocations;
-    }
-    // 약물 데이터 준비
-    else if (itemType === "drug") {
-      context.drugTypes = CONFIG.CWN.drugTypes;
-    }
-    // 자산 데이터 준비
-    else if (itemType === "asset") {
-      context.assetTypes = CONFIG.CWN.assetTypes;
-    }
-    // 능력 데이터 준비
-    else if (itemType === "power") {
-      context.powerTypes = CONFIG.CWN.powerTypes;
-    }
-    // 차량 데이터 준비
-    else if (itemType === "vehicle") {
-      context.vehicleTypes = CONFIG.CWN.vehicleTypes;
+    // 아이템 타입에 따라 추가 데이터 설정
+    if (context.type === 'weapon') {
+      this._prepareWeaponData(context);
+    } else if (context.type === 'armor') {
+      this._prepareArmorData(context);
+    } else if (context.type === 'skill') {
+      this._prepareSkillData(context);
+    } else if (context.type === 'focus') {
+      this._prepareFocusData(context);
+    } else if (context.type === 'gear') {
+      this._prepareGearData(context);
+    } else if (context.type === 'cyberware') {
+      this._prepareCyberwareData(context);
+    } else if (context.type === 'drug') {
+      this._prepareDrugData(context);
+    } else if (context.type === 'asset') {
+      this._prepareAssetData(context);
+    } else if (context.type === 'power') {
+      this._preparePowerData(context);
+    } else if (context.type === 'vehicle') {
+      this._prepareVehicleData(context);
     }
     
-    console.log(`CWN | 아이템 타입별 데이터 준비 완료 - 타입: "${itemType}"`, context);
+    // 공통 데이터 설정
+    this._prepareCommonData(context);
+    
+    console.log(`CWN | 아이템 데이터 준비 완료 - 타입: "${context.type}"`);
   }
 
   /**
