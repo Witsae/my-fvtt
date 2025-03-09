@@ -84,6 +84,6 @@
   "secondaryTokenAttribute": "sanity",
   "url": "https://github.com/Witsae/my-fvtt",
   "manifest": "https://raw.githubusercontent.com/Witsae/my-fvtt/main/system.json",
-  "download": "https://github.com/Witsae/my-fvtt/archive/refs/tags/v1.3.31.zip",
+  "download": "https://github.com/Witsae/my-fvtt/releases/download/v1.3.31/cwn-system.zip",
   "license": "LICENSE"
 } 
