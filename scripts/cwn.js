@@ -800,6 +800,7 @@ Hooks.on("renderItemSheet", (app, html, data) => {
     // 시트 내용이 비어있는지 확인
     if (html.find('.sheet-body').length === 0) {
       console.warn("CWN | 아이템 시트 내용이 비어있습니다. 템플릿이 제대로 로드되지 않았을 수 있습니다.");
+      console.log("CWN | 템플릿 경로:", app.template);
       
       // 기본 시트 구조 추가
       const sheetContent = html.find('form');

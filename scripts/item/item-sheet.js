@@ -33,30 +33,23 @@ export class CWNItemSheet extends ItemSheet {
     // 아이템 타입이 없는 경우 기본 템플릿 반환
     if (!this.item?.type) {
       console.warn("CWN | 아이템에 타입이 없어 기본 템플릿 사용");
-      return "systems/cwn-system/templates/item/item-sheet.hbs";
+      return `templates/item/item-sheet.hbs`;
     }
     
+    // 시스템 ID 가져오기
+    const systemId = game.system.id;
+    console.log(`CWN | 현재 시스템 ID: "${systemId}"`);
+    
     // 아이템 타입별 템플릿 경로
-    const path = "systems/cwn-system/templates/item";
-    const templatePath = `${path}/item-${this.item.type}-sheet.hbs`;
+    const templatePath = `templates/item/item-${this.item.type}-sheet.hbs`;
     
     console.log(`CWN | 사용할 템플릿 경로: "${templatePath}"`);
     
-    try {
-      // 템플릿 파일 존재 여부 확인 시도
-      const templateExists = game.system.template.Item[this.item.type] !== undefined;
-      console.log(`CWN | 템플릿 존재 여부: ${templateExists}`);
-      
-      if (templateExists) {
-        return templatePath;
-      } else {
-        console.warn(`CWN | 템플릿 파일이 존재하지 않아 기본 템플릿 사용: ${templatePath}`);
-        return "systems/cwn-system/templates/item/item-sheet.hbs";
-      }
-    } catch (error) {
-      console.error(`CWN | 템플릿 확인 중 오류 발생:`, error);
-      return "systems/cwn-system/templates/item/item-sheet.hbs";
-    }
+    // 템플릿 경로 확인 (디버깅용)
+    console.log(`CWN | 로컬 템플릿 경로: "${templatePath}"`);
+    
+    // 항상 타입별 템플릿 경로 반환 (템플릿 파일은 기본 템플릿을 포함하도록 구성됨)
+    return templatePath;
   }
 
   /** @override */
@@ -82,8 +75,14 @@ export class CWNItemSheet extends ItemSheet {
     
     // 아이템 타입별 추가 데이터 처리
     if (itemData.type) {
+      console.log(`CWN | 아이템 타입별 데이터 준비 시작: ${itemData.type}`);
+      
       // 기존 메서드 호출
       this._prepareItemData(context);
+      
+      // 아이템 타입별 속성 템플릿 경로 설정
+      context.attributesTemplate = `templates/item/parts/item-${itemData.type}-attributes.hbs`;
+      console.log(`CWN | 속성 템플릿 경로: ${context.attributesTemplate}`);
     }
     
     console.log("CWN | 최종 아이템 시트 데이터:", context);

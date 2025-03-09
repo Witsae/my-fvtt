@@ -19,17 +19,21 @@
   <section class="sheet-body">
     {{!-- Description Tab --}}
     <div class="tab description" data-group="primary" data-tab="description">
-      {{> "systems/cwn-system/templates/item/parts/item-description.hbs"}}
+      {{> "templates/item/parts/item-description.hbs"}}
     </div>
 
     {{!-- Attributes Tab --}}
     <div class="tab attributes" data-group="primary" data-tab="attributes">
-      {{> "systems/cwn-system/templates/item/parts/item-attributes.hbs"}}
+      {{#if attributesTemplate}}
+        {{> (lookup . "attributesTemplate")}}
+      {{else}}
+        {{> "templates/item/parts/item-attributes.hbs"}}
+      {{/if}}
     </div>
 
     {{!-- Effects Tab --}}
     <div class="tab effects" data-group="primary" data-tab="effects">
-      {{> "systems/cwn-system/templates/item/parts/item-effects.hbs"}}
+      {{> "templates/item/parts/item-effects.hbs"}}
     </div>
   </section>
 </form> 
