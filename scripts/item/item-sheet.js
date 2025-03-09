@@ -28,11 +28,11 @@ export class CWNItemSheet extends ItemSheet {
 
   /** @override */
   get template() {
-    console.log("CWN | ItemSheet template getter called for:", this.item?.name, this.item?.type);
+    console.log(`CWN | 아이템 시트 템플릿 요청 - 아이템: "${this.item?.name}", 타입: "${this.item?.type}"`);
     
     // 아이템 타입이 없는 경우 기본 템플릿 반환
     if (!this.item?.type) {
-      console.warn("CWN | Item has no type, using default template");
+      console.warn("CWN | 아이템에 타입이 없어 기본 템플릿 사용");
       return "systems/cwn-system/templates/item/item-sheet.hbs";
     }
     
@@ -40,20 +40,23 @@ export class CWNItemSheet extends ItemSheet {
     const path = "systems/cwn-system/templates/item";
     const templatePath = `${path}/item-${this.item.type}-sheet.hbs`;
     
-    console.log("CWN | Using template path:", templatePath);
+    console.log(`CWN | 사용할 템플릿 경로: "${templatePath}"`);
     return templatePath;
   }
 
   /** @override */
   async getData() {
-    console.log("CWN | ItemSheet getData called for:", this.item?.name, this.item?.type);
+    console.log(`CWN | 아이템 시트 데이터 요청 - 아이템: "${this.item?.name}", 타입: "${this.item?.type}"`);
     
     // 기본 데이터 가져오기
     const context = await super.getData();
+    console.log("CWN | 기본 컨텍스트 데이터:", context);
     
     // v12 호환성: context.data 대신 context 사용
     const itemData = this.item;
     const source = itemData.toObject();
+    console.log("CWN | 아이템 데이터:", itemData);
+    console.log("CWN | 소스 데이터:", source);
     
     // 아이템 데이터 설정
     context.system = itemData.system;
@@ -73,173 +76,439 @@ export class CWNItemSheet extends ItemSheet {
     this._prepareItemData(context);
     
     // 디버깅 정보
-    console.log("CWN | Item sheet data:", context);
+    console.log("CWN | 최종 아이템 시트 데이터:", context);
     
     return context;
   }
 
   /**
-   * Prepare data for different item types
-   * @param {Object} context The context data for the template
-   * @private
+   * 아이템 타입별 추가 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareItemData(context) {
-    console.log("CWN | _prepareItemData called for type:", context.type);
+    console.log(`CWN | 아이템 데이터 준비 시작 - 타입: "${context.type}"`);
     
-    // 아이템 타입 확인
-    if (!context.type) {
-      console.warn("CWN | Item type is undefined in _prepareItemData");
-      context.type = "gear"; // 기본값 설정
-    }
-    
-    // 시스템 데이터 확인
-    if (!context.system) {
-      console.warn("CWN | System data is undefined in _prepareItemData");
-      context.system = {}; // 빈 객체로 초기화
-    }
-    
-    // Handle different item types
-    if (this.item.type === 'weapon') {
+    // 아이템 타입에 따라 추가 데이터 설정
+    if (context.type === 'weapon') {
       this._prepareWeaponData(context);
-    } else if (this.item.type === 'armor') {
+    } else if (context.type === 'armor') {
       this._prepareArmorData(context);
-    } else if (this.item.type === 'skill') {
+    } else if (context.type === 'skill') {
       this._prepareSkillData(context);
-    } else if (this.item.type === 'focus') {
+    } else if (context.type === 'focus') {
       this._prepareFocusData(context);
-    } else if (this.item.type === 'gear') {
+    } else if (context.type === 'gear') {
       this._prepareGearData(context);
-    } else if (this.item.type === 'cyberware') {
+    } else if (context.type === 'cyberware') {
       this._prepareCyberwareData(context);
-    } else if (this.item.type === 'drug') {
+    } else if (context.type === 'drug') {
       this._prepareDrugData(context);
-    } else if (this.item.type === 'asset') {
+    } else if (context.type === 'asset') {
       this._prepareAssetData(context);
-    } else if (this.item.type === 'power') {
+    } else if (context.type === 'power') {
       this._preparePowerData(context);
-    } else if (this.item.type === 'vehicle') {
+    } else if (context.type === 'vehicle') {
       this._prepareVehicleData(context);
-    } else {
-      console.warn("CWN | Unknown item type:", this.item.type);
     }
     
-    // 데이터 준비 후 최종 확인
-    console.log("CWN | Item data prepared for type:", context.type);
-    console.log("CWN | Final system data:", context.system);
+    // 공통 데이터 설정
+    this._prepareCommonData(context);
+    
+    console.log(`CWN | 아이템 데이터 준비 완료 - 타입: "${context.type}"`);
   }
 
   /**
-   * Prepare weapon-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 모든 아이템 타입에 공통적인 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
+   */
+  _prepareCommonData(context) {
+    console.log("CWN | 공통 데이터 준비 시작");
+    
+    // 태그 처리
+    if (context.system.tags) {
+      // 안전한 복제를 위해 배열 복사
+      context.system.tags = Array.from(context.system.tags || []);
+    } else {
+      // 태그가 없으면 빈 배열 생성
+      context.system.tags = [];
+    }
+    
+    // 아이템 위치 옵션
+    context.itemLocations = CONFIG.CWN.itemLocations;
+    
+    // 기타 공통 옵션들
+    context.attributes = CONFIG.CWN.attributes;
+    context.skillCategories = CONFIG.CWN.skillCategories;
+    context.weaponRanges = CONFIG.CWN.weaponRanges;
+    context.armorTypes = CONFIG.CWN.armorTypes;
+    context.cyberwareLocations = CONFIG.CWN.cyberwareLocations;
+    context.cyberwareTypes = CONFIG.CWN.cyberwareTypes;
+    context.drugTypes = CONFIG.CWN.drugTypes;
+    context.assetTypes = CONFIG.CWN.assetTypes;
+    context.powerTypes = CONFIG.CWN.powerTypes;
+    context.vehicleTypes = CONFIG.CWN.vehicleTypes;
+    
+    console.log("CWN | 공통 데이터 준비 완료");
+  }
+
+  /**
+   * 무기 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareWeaponData(context) {
-    console.log("CWN | _prepareWeaponData called");
-    // Add weapon range options
+    console.log("CWN | 무기 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (!context.system.damage) {
+      context.system.damage = "1d6";
+    }
+    
+    if (!context.system.range) {
+      context.system.range = "melee";
+    }
+    
+    if (context.system.attackBonus === undefined) {
+      context.system.attackBonus = 0;
+    }
+    
+    if (!context.system.attribute) {
+      context.system.attribute = "str";
+    }
+    
+    if (!context.system.ammo) {
+      context.system.ammo = { value: 0, max: 0 };
+    }
+    
+    if (context.system.equipped === undefined) {
+      context.system.equipped = false;
+    }
+    
+    // 무기 범위 옵션 추가
     context.weaponRanges = CONFIG.CWN.weaponRanges;
     context.weaponTags = CONFIG.CWN.weaponTags;
+    
+    console.log("CWN | 무기 데이터 준비 완료:", context.system);
   }
 
   /**
-   * Prepare armor-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 방어구 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareArmorData(context) {
-    console.log("CWN | _prepareArmorData called");
-    // Add armor type options
+    console.log("CWN | 방어구 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (context.system.ac === undefined) {
+      context.system.ac = 10;
+    }
+    
+    if (context.system.meleeAC === undefined) {
+      context.system.meleeAC = context.system.ac;
+    }
+    
+    if (!context.system.type) {
+      context.system.type = "light";
+    }
+    
+    if (context.system.traumaDiePenalty === undefined) {
+      context.system.traumaDiePenalty = 0;
+    }
+    
+    // 방어구 타입 옵션 추가
     context.armorTypes = CONFIG.CWN.armorTypes;
+    
+    console.log("CWN | 방어구 데이터 준비 완료:", context.system);
   }
 
   /**
-   * Prepare skill-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 기술 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareSkillData(context) {
-    console.log("CWN | _prepareSkillData called");
-    // Add skill category options
-    context.skillCategories = CONFIG.CWN.skillCategories;
-    // Add attribute options
+    console.log("CWN | 기술 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (context.system.level === undefined) {
+      context.system.level = 0;
+    }
+    
+    if (!context.system.attribute) {
+      context.system.attribute = "int";
+    }
+    
+    if (!context.system.category) {
+      context.system.category = "standard";
+    }
+    
+    if (!context.system.specialty) {
+      context.system.specialty = "";
+    }
+    
+    if (!context.system.source) {
+      context.system.source = "";
+    }
+    
+    // 속성 및 카테고리 옵션 추가
     context.attributes = CONFIG.CWN.attributes;
+    context.skillCategories = CONFIG.CWN.skillCategories;
+    
+    console.log("CWN | 기술 데이터 준비 완료:", context.system);
   }
 
   /**
-   * Prepare focus-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 특성 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareFocusData(context) {
-    console.log("CWN | _prepareFocusData called");
-    // Add focus level options
-    context.focusLevels = CONFIG.CWN.focusLevels;
+    console.log("CWN | 특성 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (context.system.level === undefined) {
+      context.system.level = 1;
+    }
+    
+    if (!context.system.prerequisites) {
+      context.system.prerequisites = "";
+    }
+    
+    if (!context.system.levelEffects) {
+      context.system.levelEffects = { level1: "", level2: "" };
+    }
+    
+    if (!context.system.source) {
+      context.system.source = "";
+    }
+    
+    console.log("CWN | 특성 데이터 준비 완료:", context.system);
   }
 
   /**
-   * Prepare gear-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 장비 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareGearData(context) {
-    console.log("CWN | _prepareGearData called");
-    // Add gear type options
+    console.log("CWN | 장비 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (!context.system.type) {
+      context.system.type = "general";
+    }
+    
+    if (context.system.quantity === undefined) {
+      context.system.quantity = 1;
+    }
+    
+    if (context.system.price === undefined) {
+      context.system.price = 0;
+    }
+    
+    if (context.system.weight === undefined) {
+      context.system.weight = 0.1;
+    }
+    
+    if (!context.system.location) {
+      context.system.location = "stowed";
+    }
+    
+    // 장비 타입 옵션 추가
     context.gearTypes = CONFIG.CWN.gearTypes;
+    
+    console.log("CWN | 장비 데이터 준비 완료:", context.system);
   }
 
   /**
-   * Prepare cyberware-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 사이버웨어 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareCyberwareData(context) {
-    console.log("CWN | _prepareCyberwareData called");
-    // Add cyberware type options
-    context.cyberwareTypes = CONFIG.CWN.cyberwareTypes;
+    console.log("CWN | 사이버웨어 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (context.system.systemStrain === undefined) {
+      context.system.systemStrain = 1;
+    }
+    
+    if (!context.system.location) {
+      context.system.location = "body";
+    }
+    
+    if (!context.system.type) {
+      context.system.type = "implant";
+    }
+    
+    if (context.system.price === undefined) {
+      context.system.price = 0;
+    }
+    
+    // 사이버웨어 위치 및 타입 옵션 추가
     context.cyberwareLocations = CONFIG.CWN.cyberwareLocations;
+    context.cyberwareTypes = CONFIG.CWN.cyberwareTypes;
+    
+    console.log("CWN | 사이버웨어 데이터 준비 완료:", context.system);
   }
 
   /**
-   * Prepare drug-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 약물 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareDrugData(context) {
-    console.log("CWN | _prepareDrugData called");
-    // Add drug type options
+    console.log("CWN | 약물 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (!context.system.duration) {
+      context.system.duration = "1 hour";
+    }
+    
+    if (!context.system.type) {
+      context.system.type = "medical";
+    }
+    
+    if (context.system.quantity === undefined) {
+      context.system.quantity = 1;
+    }
+    
+    if (context.system.price === undefined) {
+      context.system.price = 0;
+    }
+    
+    if (!context.system.effect) {
+      context.system.effect = "";
+    }
+    
+    if (!context.system.sideEffect) {
+      context.system.sideEffect = "";
+    }
+    
+    if (!context.system.overdose) {
+      context.system.overdose = "";
+    }
+    
+    // 약물 타입 옵션 추가
     context.drugTypes = CONFIG.CWN.drugTypes;
+    
+    console.log("CWN | 약물 데이터 준비 완료:", context.system);
   }
 
   /**
-   * Prepare asset-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 자산 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareAssetData(context) {
-    console.log("CWN | _prepareAssetData called");
-    // Add asset type options
+    console.log("CWN | 자산 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (context.system.rating === undefined) {
+      context.system.rating = 1;
+    }
+    
+    if (!context.system.type) {
+      context.system.type = "military";
+    }
+    
+    if (context.system.cost === undefined) {
+      context.system.cost = 1;
+    }
+    
+    if (context.system.maintenance === undefined) {
+      context.system.maintenance = 0;
+    }
+    
+    if (context.system.force === undefined) {
+      context.system.force = 0;
+    }
+    
+    if (context.system.cunning === undefined) {
+      context.system.cunning = 0;
+    }
+    
+    if (context.system.wealth === undefined) {
+      context.system.wealth = 0;
+    }
+    
+    if (!context.system.hp) {
+      context.system.hp = { value: 1, max: 1 };
+    }
+    
+    if (!context.system.upkeep) {
+      context.system.upkeep = "";
+    }
+    
+    // 자산 타입 옵션 추가
     context.assetTypes = CONFIG.CWN.assetTypes;
+    
+    console.log("CWN | 자산 데이터 준비 완료:", context.system);
   }
 
   /**
-   * Prepare power-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 능력 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _preparePowerData(context) {
-    console.log("CWN | _preparePowerData called");
-    // Add power type options
+    console.log("CWN | 능력 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (context.system.level === undefined) {
+      context.system.level = 1;
+    }
+    
+    if (!context.system.type) {
+      context.system.type = "psychic";
+    }
+    
+    if (context.system.cost === undefined) {
+      context.system.cost = 0;
+    }
+    
+    if (!context.system.range) {
+      context.system.range = "self";
+    }
+    
+    if (!context.system.duration) {
+      context.system.duration = "instant";
+    }
+    
+    // 능력 타입 옵션 추가
     context.powerTypes = CONFIG.CWN.powerTypes;
+    
+    console.log("CWN | 능력 데이터 준비 완료:", context.system);
   }
 
   /**
-   * Prepare vehicle-specific data
-   * @param {Object} context The context data for the template
-   * @private
+   * 차량 아이템 데이터 준비
+   * @param {Object} context 컨텍스트 데이터
    */
   _prepareVehicleData(context) {
-    console.log("CWN | _prepareVehicleData called");
-    // Add vehicle type options
+    console.log("CWN | 차량 데이터 준비 시작");
+    
+    // 기본값 설정
+    if (!context.system.type) {
+      context.system.type = "ground";
+    }
+    
+    if (context.system.speed === undefined) {
+      context.system.speed = 0;
+    }
+    
+    if (context.system.armor === undefined) {
+      context.system.armor = 0;
+    }
+    
+    if (!context.system.hp) {
+      context.system.hp = { value: 10, max: 10 };
+    }
+    
+    if (context.system.crew === undefined) {
+      context.system.crew = 1;
+    }
+    
+    if (context.system.price === undefined) {
+      context.system.price = 0;
+    }
+    
+    // 차량 타입 옵션 추가
     context.vehicleTypes = CONFIG.CWN.vehicleTypes;
+    
+    console.log("CWN | 차량 데이터 준비 완료:", context.system);
   }
 
   /* -------------------------------------------- */

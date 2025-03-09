@@ -576,14 +576,14 @@ export default {
 Hooks.on("renderDialog", (dialog, html, data) => {
   // 아이템 생성 대화상자인지 확인
   if (dialog.data.title === "Create New Item") {
-    console.log("CWN | Modifying item creation dialog");
-    console.log("CWN | Dialog data:", dialog.data);
-    console.log("CWN | Dialog html:", html);
+    console.log("CWN | 아이템 생성 대화상자 수정 시작");
+    console.log("CWN | 대화상자 데이터:", dialog.data);
+    console.log("CWN | HTML 요소:", html);
     
     // 기존 타입 필드 제거
     const existingTypeField = html.find("select[name='type']").first().closest(".form-group");
     if (existingTypeField.length) {
-      console.log("CWN | Removing existing type field");
+      console.log("CWN | 기존 타입 필드 제거");
       existingTypeField.remove();
     }
     
@@ -612,16 +612,16 @@ Hooks.on("renderDialog", (dialog, html, data) => {
     
     // 타입 선택 드롭다운을 이름 입력 필드 다음에 추가
     nameInput.parent().parent().after(typeSelect);
-    console.log("CWN | Added type select dropdown to dialog");
+    console.log("CWN | 타입 선택 드롭다운 추가 완료");
     
     // 폼 제출 이벤트 수정
     form.off("submit");
-    form.on("submit", event => {
+    form.on("submit", async event => {
       event.preventDefault();
       const form = event.currentTarget;
       const name = form.name.value;
       const type = form.type.value;
-      console.log("CWN | Form submitted with name:", name, "and type:", type);
+      console.log(`CWN | 폼 제출됨 - 이름: "${name}", 타입: "${type}"`);
       
       // 아이템 생성 데이터 준비
       const itemData = {
@@ -675,6 +675,7 @@ Hooks.on("renderDialog", (dialog, html, data) => {
         };
       } else if (type === "gear") {
         itemData.system = {
+          type: "general",
           quantity: 1,
           price: 0,
           weight: 0.1,
@@ -695,6 +696,9 @@ Hooks.on("renderDialog", (dialog, html, data) => {
           type: "medical",
           price: 0,
           quantity: 1,
+          effect: "",
+          sideEffect: "",
+          overdose: "",
           tags: []
         };
       } else if (type === "asset") {
@@ -703,13 +707,19 @@ Hooks.on("renderDialog", (dialog, html, data) => {
           type: "military",
           cost: 1,
           maintenance: 0,
-          hp: { value: 1, max: 1 }
+          force: 0,
+          cunning: 0,
+          wealth: 0,
+          hp: { value: 1, max: 1 },
+          tags: []
         };
       } else if (type === "power") {
         itemData.system = {
           level: 1,
           type: "psychic",
           cost: 0,
+          range: "self",
+          duration: "instant",
           tags: []
         };
       } else if (type === "vehicle") {
@@ -724,16 +734,26 @@ Hooks.on("renderDialog", (dialog, html, data) => {
         };
       }
       
-      // 아이템 생성
-      Item.create(itemData).then(item => {
-        console.log("CWN | Item created:", item);
+      console.log("CWN | 아이템 생성 데이터:", itemData);
+      
+      try {
+        // 아이템 생성
+        const item = await Item.create(itemData);
+        console.log("CWN | 아이템 생성 성공:", item);
+        
+        // 아이템 시트 열기
         if (item) {
+          console.log("CWN | 아이템 시트 열기 시도");
           item.sheet.render(true);
         }
-      });
+      } catch (error) {
+        console.error("CWN | 아이템 생성 중 오류 발생:", error);
+      }
       
       dialog.close();
     });
+    
+    console.log("CWN | 아이템 생성 대화상자 수정 완료");
   }
 });
 
