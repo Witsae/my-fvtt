@@ -229,6 +229,8 @@
       "SaveRoll": "{save} Save",
       "SkillRoll": "{skill} Check",
       "WeaponAttack": "{weapon} Attack"
-    }
+    },
+    "NoAttributes": "No attributes available for this item type.",
+    "NoItemType": "No item type specified."
   }
 } 

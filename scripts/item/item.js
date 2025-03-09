@@ -4,18 +4,20 @@
  */
 export class CWNItem extends Item {
   /**
-   * 아이템 생성 메서드
-   * @param {Object|Object[]} data 아이템 데이터 또는 데이터 배열
-   * @param {Object} [options={}] 생성 옵션
-   * @returns {Promise<CWNItem|CWNItem[]>} 생성된 아이템 또는 아이템 배열
-   * @static
+   * 아이템 생성 메서드 오버라이드
+   * @override
    */
   static async create(data, options = {}) {
     console.log("CWN | CWNItem.create 호출됨:", data, options);
     
-    // 부모 클래스의 create 메서드 호출 (Item.createDocuments)
+    // 부모 클래스의 create 메서드 호출
     console.log("CWN | 부모 클래스의 create 메서드 호출");
-    return await super.create(data, options);
+    const item = await super.create(data, options);
+    
+    // 생성된 아이템 로깅
+    console.log("CWN | 아이템 생성 완료:", item);
+    
+    return item;
   }
   
   /**

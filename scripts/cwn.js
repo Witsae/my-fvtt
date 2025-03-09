@@ -593,26 +593,27 @@ export default {
 // 아이템 생성 대화상자 수정
 Hooks.on("renderDialog", (dialog, html, data) => {
   // 아이템 생성 대화상자인지 확인
-  if (dialog.data.title === "Create New Item") {
+  if (dialog.title === "Create New Item") {
     console.log("CWN | 아이템 생성 대화상자 수정 시작");
-    console.log("CWN | 대화상자 데이터:", dialog.data);
+    console.log("CWN | 대화상자 데이터:", data);
     console.log("CWN | HTML 요소:", html);
     
     // 기존 타입 필드 제거
-    const existingTypeField = html.find("select[name='type']").first().closest(".form-group");
-    if (existingTypeField.length) {
+    const typeField = html.find('select[name="type"]');
+    if (typeField.length) {
       console.log("CWN | 기존 타입 필드 제거");
-      existingTypeField.remove();
+      typeField.closest('.form-group').remove();
     }
     
+    // 폼 요소 가져오기
+    const form = html.find('form');
+    
     // 타입 선택 드롭다운 추가
-    const form = html.find("form");
-    const nameInput = form.find("input[name='name']");
-    const typeSelect = $(`
+    const typeOptions = `
       <div class="form-group">
         <label>Type</label>
         <div class="form-fields">
-          <select name="type">
+          <select name="type" id="item-type">
             <option value="weapon">Weapon</option>
             <option value="armor">Armor</option>
             <option value="skill">Skill</option>
@@ -626,81 +627,66 @@ Hooks.on("renderDialog", (dialog, html, data) => {
           </select>
         </div>
       </div>
-    `);
+    `;
     
-    // 타입 선택 드롭다운을 이름 입력 필드 다음에 추가
-    nameInput.parent().parent().after(typeSelect);
+    // 타입 선택 드롭다운을 폼에 추가
+    form.find('.form-group').after(typeOptions);
     console.log("CWN | 타입 선택 드롭다운 추가 완료");
     
-    // 폼 제출 이벤트 수정
-    form.off("submit");
+    // 폼 제출 이벤트 처리
     form.on("submit", async event => {
       event.preventDefault();
-      const form = event.currentTarget;
-      const name = form.name.value;
-      const type = form.type.value;
-      console.log(`CWN | 폼 제출됨 - 이름: "${name}", 타입: "${type}"`);
       
-      // 아이템 생성 데이터 준비
+      // 폼 데이터 가져오기
+      const form = event.currentTarget;
+      const formData = new FormData(form);
+      
+      // 아이템 데이터 생성
       const itemData = {
-        name: name,
-        type: type,
-        system: {}
+        name: formData.get("name"),
+        type: formData.get("type")
       };
       
+      console.log("CWN | 아이템 생성 폼 제출:", itemData);
+      
       // 아이템 타입별 기본 데이터 설정
-      if (type === "weapon") {
+      if (itemData.type === "weapon") {
         itemData.system = {
           damage: "1d6",
           range: "melee",
           attackBonus: 0,
-          attribute: "str",
+          skillBonus: false,
           ammo: { value: 0, max: 0 },
-          tags: [],
-          price: 0,
-          weight: 1,
-          location: "readied",
-          equipped: false
+          tags: []
         };
-      } else if (type === "armor") {
+      } else if (itemData.type === "armor") {
         itemData.system = {
           ac: 10,
-          meleeAC: 10,
           type: "light",
-          traumaDiePenalty: 0,
-          tags: [],
-          price: 0,
-          weight: 1,
-          location: "readied"
+          tags: []
         };
-      } else if (type === "skill") {
+      } else if (itemData.type === "skill") {
         itemData.system = {
           level: 0,
           attribute: "int",
-          category: "standard",
-          specialty: "",
-          source: ""
+          category: "standard"
         };
-      } else if (type === "focus") {
+      } else if (itemData.type === "focus") {
         itemData.system = {
           level: 1,
           prerequisites: "",
-          levelEffects: {
-            level1: "",
-            level2: ""
-          },
-          source: ""
+          levelEffects: { level1: "", level2: "" }
         };
-      } else if (type === "gear") {
+      } else if (itemData.type === "gear") {
         itemData.system = {
-          type: "general",
           quantity: 1,
-          price: 0,
           weight: 0.1,
+          price: 0,
           location: "stowed",
+          type: "general",
           tags: []
         };
-      } else if (type === "cyberware") {
+      } else if (itemData.type === "cyberware") {
         itemData.system = {
           systemStrain: 1,
           location: "body",
@@ -708,7 +694,7 @@ Hooks.on("renderDialog", (dialog, html, data) => {
           price: 0,
           tags: []
         };
-      } else if (type === "drug") {
+      } else if (itemData.type === "drug") {
         itemData.system = {
           duration: "1 hour",
           type: "medical",
@@ -719,7 +705,7 @@ Hooks.on("renderDialog", (dialog, html, data) => {
           overdose: "",
           tags: []
         };
-      } else if (type === "asset") {
+      } else if (itemData.type === "asset") {
         itemData.system = {
           rating: 1,
           type: "military",
@@ -731,7 +717,7 @@ Hooks.on("renderDialog", (dialog, html, data) => {
           hp: { value: 1, max: 1 },
           tags: []
         };
-      } else if (type === "power") {
+      } else if (itemData.type === "power") {
         itemData.system = {
           level: 1,
           type: "psychic",
@@ -740,7 +726,7 @@ Hooks.on("renderDialog", (dialog, html, data) => {
           duration: "instant",
           tags: []
         };
-      } else if (type === "vehicle") {
+      } else if (itemData.type === "vehicle") {
         itemData.system = {
           type: "ground",
           speed: 0,
@@ -756,32 +742,15 @@ Hooks.on("renderDialog", (dialog, html, data) => {
       console.log("CWN | Item.create 메서드 호출 전");
       
       try {
-        // Foundry VTT v12에서 Item.create 메서드 사용
-        console.log("CWN | Item.create 메서드 호출 시도");
-        
-        // 아이템 생성 시도
-        const item = await Item.create(itemData);
+        // 아이템 생성
+        const item = await Item.create(itemData, { renderSheet: true });
         console.log("CWN | 아이템 생성 성공:", item);
-        
-        // 아이템 시트 열기
-        if (item) {
-          console.log("CWN | 아이템 시트 열기 시도");
-          item.sheet.render(true);
-        } else {
-          console.error("CWN | 아이템이 생성되었지만 null 또는 undefined입니다.");
-          ui.notifications.error("아이템이 생성되었지만 시트를 열 수 없습니다.");
-        }
       } catch (error) {
-        console.error("CWN | 아이템 생성 중 오류 발생:", error);
-        
-        // 오류 세부 정보 로깅
-        console.error("CWN | 오류 이름:", error.name);
-        console.error("CWN | 오류 메시지:", error.message);
-        console.error("CWN | 오류 스택:", error.stack);
-        
-        ui.notifications.error(`아이템 생성 중 오류 발생: ${error.message}`);
+        console.error("CWN | 아이템 생성 실패:", error);
+        ui.notifications.error(`아이템 생성 실패: ${error.message}`);
       }
       
+      // 대화상자 닫기
       dialog.close();
     });
     

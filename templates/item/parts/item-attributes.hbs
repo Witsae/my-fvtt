@@ -2,25 +2,25 @@
   <!-- 아이템 타입별 속성 템플릿 포함 -->
   {{#if type}}
     {{#if (eq type "weapon")}}
-      {{> "systems/cwn-system/templates/item/parts/item-weapon-attributes.hbs"}}
+      {{> "templates/item/parts/item-weapon-attributes.hbs"}}
     {{else if (eq type "armor")}}
-      {{> "systems/cwn-system/templates/item/parts/item-armor-attributes.hbs"}}
+      {{> "templates/item/parts/item-armor-attributes.hbs"}}
     {{else if (eq type "skill")}}
-      {{> "systems/cwn-system/templates/item/parts/item-skill-attributes.hbs"}}
+      {{> "templates/item/parts/item-skill-attributes.hbs"}}
     {{else if (eq type "focus")}}
-      {{> "systems/cwn-system/templates/item/parts/item-focus-attributes.hbs"}}
+      {{> "templates/item/parts/item-focus-attributes.hbs"}}
     {{else if (eq type "gear")}}
-      {{> "systems/cwn-system/templates/item/parts/item-gear-attributes.hbs"}}
+      {{> "templates/item/parts/item-gear-attributes.hbs"}}
     {{else if (eq type "cyberware")}}
-      {{> "systems/cwn-system/templates/item/parts/item-cyberware-attributes.hbs"}}
+      {{> "templates/item/parts/item-cyberware-attributes.hbs"}}
     {{else if (eq type "drug")}}
-      {{> "systems/cwn-system/templates/item/parts/item-drug-attributes.hbs"}}
+      {{> "templates/item/parts/item-drug-attributes.hbs"}}
     {{else if (eq type "asset")}}
-      {{> "systems/cwn-system/templates/item/parts/item-asset-attributes.hbs"}}
+      {{> "templates/item/parts/item-asset-attributes.hbs"}}
     {{else if (eq type "power")}}
-      {{> "systems/cwn-system/templates/item/parts/item-power-attributes.hbs"}}
+      {{> "templates/item/parts/item-power-attributes.hbs"}}
     {{else if (eq type "vehicle")}}
-      {{> "systems/cwn-system/templates/item/parts/item-vehicle-attributes.hbs"}}
+      {{> "templates/item/parts/item-vehicle-attributes.hbs"}}
     {{else}}
       <p>{{localize "CWN.NoAttributes"}}</p>
     {{/if}}

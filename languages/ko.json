@@ -218,6 +218,9 @@
       "SaveRoll": "{save} 내성",
       "SkillRoll": "{skill} 기술",
       "WeaponAttack": "{weapon} 공격"
-    }
+    },
+    
+    "NoAttributes": "이 아이템 타입에 사용 가능한 속성이 없습니다.",
+    "NoItemType": "아이템 타입이 지정되지 않았습니다."
   }
 } 
