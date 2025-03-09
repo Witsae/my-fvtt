@@ -502,78 +502,37 @@ Hooks.on("renderDialog", (dialog, html, data) => {
 
 // 아이템 시트 렌더링 훅 추가
 Hooks.on("renderItemSheet", (app, html, data) => {
-  console.log("CWN | renderItemSheet hook called");
-  console.log("CWN | Item sheet app:", app);
-  console.log("CWN | Item sheet html:", html);
-  console.log("CWN | Item sheet data:", data);
+  console.log("CWN | renderItemSheet hook called for:", app.item?.name, app.item?.type);
   
-  // 디버그 로그 추가
-  console.log("CWN | Item sheet data details:");
-  console.log("CWN | - Item name:", data.document?.name);
-  console.log("CWN | - Item type:", data.document?.type);
-  console.log("CWN | - Item system data:", data.document?.system);
-  console.log("CWN | - Context system data:", data.system);
-  console.log("CWN | - Template path:", app.template);
-  
-  // 템플릿 경로 확인
-  const templatePath = app.template;
-  console.log("CWN | Using template path:", templatePath);
-  
-  // 아이템 타입별 속성 템플릿 경로 확인
-  if (data.document?.type) {
-    const attributesPath = `systems/cwn-system/templates/item/parts/item-${data.document.type}-attributes.hbs`;
-    console.log("CWN | Expected attributes template path:", attributesPath);
-  }
-  
-  // 아이템 시트가 비어있는 경우 수동으로 내용 추가
-  if (html.find('.sheet-body').length === 0 || html.find('.sheet-body').is(':empty')) {
-    console.log("CWN | Sheet body is empty, manually adding content");
+  try {
+    // 탭 초기화 로직 개선
+    const tabs = html.find('.tabs');
+    const tabsContent = html.find('.tab');
     
-    // 기본 탭 구조 추가
-    const tabsHtml = `
-      <nav class="sheet-tabs tabs" data-group="primary">
-        <a class="item active" data-tab="description">설명</a>
-        <a class="item" data-tab="attributes">속성</a>
-      </nav>
-      <section class="sheet-body">
-        <div class="tab description active" data-group="primary" data-tab="description">
-          <div class="editor-content">
-            <textarea name="system.description">${data.document?.system?.description || ''}</textarea>
-          </div>
-        </div>
-        <div class="tab attributes" data-group="primary" data-tab="attributes">
-          <div class="form-group">
-            <label>아이템 타입</label>
-            <div class="form-fields">
-              <span>${data.document?.type || '알 수 없음'}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-    `;
-    
-    html.find('form').append(tabsHtml);
-    
-    // 탭 초기화 - 안전하게 처리
-    try {
-      // 탭 핸들러가 이미 존재하는지 확인
-      if (app._tabs && Array.isArray(app._tabs) && app._tabs.length > 0) {
-        console.log("CWN | Tabs already exist, activating description tab");
-        app._tabs[0].activate("description");
-      } else {
-        console.log("CWN | Creating new tab handlers");
-        // 탭 핸들러가 없으면 수동으로 탭 기능 활성화
-        html.find('.tabs a.item').click(function() {
-          const tab = $(this).data("tab");
-          html.find('.tabs a.item').removeClass("active");
-          html.find(`.tabs a.item[data-tab="${tab}"]`).addClass("active");
-          html.find('.tab').removeClass("active");
-          html.find(`.tab[data-tab="${tab}"]`).addClass("active");
-        });
-      }
-    } catch (error) {
-      console.error("CWN | Error initializing tabs:", error);
+    // 이미 탭 핸들러가 있는지 확인
+    if (tabs.length > 0 && !tabs.hasClass('initialized')) {
+      console.log("CWN | Initializing tabs for item sheet");
+      
+      // 첫 번째 탭에 active 클래스 추가
+      tabs.find('.item').first().addClass('active');
+      tabsContent.first().addClass('active');
+      
+      // 탭 클릭 이벤트 핸들러 추가
+      tabs.on('click', '.item', function() {
+        const tab = $(this).data('tab');
+        tabs.find('.item').removeClass('active');
+        tabsContent.removeClass('active');
+        $(this).addClass('active');
+        html.find(`.tab[data-tab="${tab}"]`).addClass('active');
+      });
+      
+      tabs.addClass('initialized');
+      console.log("CWN | Tabs initialized successfully");
+    } else {
+      console.log("CWN | Tabs already initialized or not found");
     }
+  } catch (error) {
+    console.error("CWN | Error initializing item sheet tabs:", error);
   }
 });
 

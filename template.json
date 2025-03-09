@@ -97,7 +97,7 @@
     }
   },
   "Item": {
-    "types": ["skill", "focus", "weapon", "armor", "gear", "cyberware", "asset"],
+    "types": ["skill", "focus", "weapon", "armor", "gear", "cyberware", "asset", "drug", "power", "vehicle"],
     "templates": {
       "base": {
         "description": "",
@@ -161,6 +161,36 @@
       },
       "attack": 0,
       "counterattack": 0,
+      "tags": []
+    },
+    "drug": {
+      "templates": ["base", "physical"],
+      "duration": "",
+      "effect": "",
+      "type": "medical",
+      "tags": []
+    },
+    "power": {
+      "templates": ["base"],
+      "level": 1,
+      "type": "psychic",
+      "cost": 0,
+      "range": "",
+      "duration": "",
+      "tags": []
+    },
+    "vehicle": {
+      "templates": ["base", "physical"],
+      "speed": 0,
+      "handling": 0,
+      "armor": 0,
+      "hp": {
+        "value": 0,
+        "max": 0
+      },
+      "crew": 1,
+      "passengers": 0,
+      "type": "ground",
       "tags": []
     }
   }

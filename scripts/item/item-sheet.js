@@ -30,10 +30,6 @@ export class CWNItemSheet extends ItemSheet {
   get template() {
     console.log("CWN | ItemSheet template getter called for:", this.item?.name, this.item?.type);
     
-    // 아이템 타입에 따른 템플릿 경로 설정
-    const type = this.item?.type || "gear";
-    console.log("CWN | Item type for template:", type);
-    
     // 기본 템플릿 경로 - Foundry 기본 템플릿 사용
     const path = "templates/sheets/item-sheet.html";
     console.log("CWN | Using template path:", path);
