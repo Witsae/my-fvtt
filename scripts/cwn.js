@@ -80,6 +80,14 @@ Hooks.once("init", async function() {
   
   // Foundry v12 호환성을 위한 매크로 등록
   registerMacros();
+
+  // 게임 전역 객체에 CWN 클래스 등록
+  game.cwn = {
+    CWN,
+    CWNActor,
+    CWNItem,
+    rollItemMacro
+  };
 });
 
 /* -------------------------------------------- */
@@ -417,8 +425,11 @@ Hooks.once("ready", async function() {
     createMacroShortcuts();
   }
   
+  // 스타일 초기화
+  CWN._initializeStyles();
+  
   // 아이템 분류 시스템 초기화
-  this._initializeItemCategories();
+  _initializeItemCategories();
 });
 
 /**
@@ -1053,5 +1064,68 @@ function _registerItemCategoryLocalization() {
   // 개발 모드에서만 로그 출력
   if (game.settings.get("core", "debugMode")) {
     console.log("CWN | 아이템 분류 로컬라이제이션 키:", localizationData);
+  }
+}
+
+/**
+ * Cities Without Number 시스템 클래스
+ */
+class CWN {
+  /**
+   * 시스템 스타일 초기화
+   * @private
+   */
+  static _initializeStyles() {
+    console.log("CWN | 시스템 스타일 초기화");
+    
+    // 전투 관련 스타일 추가
+    const combatStyles = `
+      .dice-total.critical {
+        color: #18520b;
+        font-weight: bold;
+        text-shadow: 0 0 5px #7aff7a;
+      }
+      
+      .dice-total.fumble {
+        color: #aa0200;
+        font-weight: bold;
+        text-shadow: 0 0 5px #ff7a7a;
+      }
+      
+      .tags {
+        margin: 5px 0;
+        font-style: italic;
+        color: #666;
+      }
+      
+      .damage-type {
+        margin: 5px 0;
+        font-style: italic;
+        color: #666;
+      }
+      
+      /* 장착된 아이템 스타일 */
+      .item-equipped {
+        border-left: 3px solid #18520b;
+      }
+      
+      /* 무기 공격 버튼 */
+      .item-control.item-attack {
+        color: #aa0200;
+      }
+      
+      /* 무기 피해 버튼 */
+      .item-control.item-damage {
+        color: #18520b;
+      }
+    `;
+    
+    // 스타일 요소 생성 및 추가
+    const styleElement = document.createElement('style');
+    styleElement.id = 'cwn-combat-styles';
+    styleElement.textContent = combatStyles;
+    document.head.appendChild(styleElement);
+    
+    console.log("CWN | 시스템 스타일 초기화 완료");
   }
 } 

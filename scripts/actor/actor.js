@@ -12,11 +12,18 @@ export class CWNActor extends Actor {
     const systemData = actorData.system;
     const flags = actorData.flags;
 
-    // Make separate methods for each Actor type (character, npc, etc.) to keep
-    // things organized.
+    // 액터 타입별 데이터 준비
     this._prepareCharacterData(actorData);
     this._prepareNpcData(actorData);
     this._prepareFactionData(actorData);
+    
+    // 장착된 아이템 효과 계산 (비동기 함수이므로 결과를 기다리지 않음)
+    // 실제 효과는 calculateEquippedItemEffects 메서드에서 비동기적으로 적용됨
+    if (this.type === 'character' || this.type === 'npc') {
+      this.calculateEquippedItemEffects().catch(err => {
+        console.error(`CWN | 장착된 아이템 효과 계산 중 오류 발생:`, err);
+      });
+    }
   }
 
   /**
@@ -289,5 +296,167 @@ export class CWNActor extends Actor {
    */
   getSkill(skillName) {
     return this.items.find(i => i.type === "skill" && i.name.toLowerCase() === skillName.toLowerCase()) || null;
+  }
+
+  /**
+   * 장착된 아이템의 효과를 계산하여 액터에 적용
+   * @returns {Promise<void>}
+   */
+  async calculateEquippedItemEffects() {
+    console.log(`CWN | 장착된 아이템 효과 계산 시작: ${this.name}`);
+    
+    // 액터 타입이 캐릭터나 NPC가 아니면 무시
+    if (this.type !== 'character' && this.type !== 'npc') {
+      console.log(`CWN | 캐릭터/NPC가 아니므로 장착 효과 계산 무시: ${this.type}`);
+      return;
+    }
+    
+    // 장착된 아이템 가져오기
+    const equippedItems = this.items.filter(i => i.system.equipped === true);
+    console.log(`CWN | 장착된 아이템 수: ${equippedItems.length}`);
+    
+    // 방어구 효과 계산
+    await this._calculateArmorEffects(equippedItems);
+    
+    // 무기 효과 계산
+    await this._calculateWeaponEffects(equippedItems);
+    
+    // 사이버웨어 효과 계산
+    await this._calculateCyberwareEffects(equippedItems);
+    
+    // 기타 장비 효과 계산
+    await this._calculateGearEffects(equippedItems);
+    
+    console.log(`CWN | 장착된 아이템 효과 계산 완료: ${this.name}`);
+  }
+  
+  /**
+   * 방어구 효과 계산
+   * @param {Array} equippedItems 장착된 아이템 배열
+   * @private
+   */
+  async _calculateArmorEffects(equippedItems) {
+    // 장착된 방어구 필터링
+    const armors = equippedItems.filter(i => i.type === 'armor');
+    console.log(`CWN | 장착된 방어구 수: ${armors.length}`);
+    
+    if (armors.length === 0) {
+      // 방어구가 없으면 기본 AC로 설정
+      const dexMod = this.system.attributes.dex.mod;
+      const baseAC = 10 + dexMod;
+      
+      console.log(`CWN | 방어구 없음, 기본 AC 설정: ${baseAC} (10 + ${dexMod})`);
+      
+      await this.update({
+        'system.ac.value': baseAC
+      });
+      
+      return;
+    }
+    
+    // 가장 높은 AC 값을 가진 방어구 찾기
+    let bestArmor = armors[0];
+    for (let i = 1; i < armors.length; i++) {
+      if (armors[i].system.ac > bestArmor.system.ac) {
+        bestArmor = armors[i];
+      }
+    }
+    
+    // 최종 AC 계산
+    const dexMod = this.system.attributes.dex.mod;
+    const armorAC = bestArmor.system.ac;
+    const allowDex = bestArmor.system.allowDex !== false;
+    const maxDex = bestArmor.system.maxDex !== undefined ? bestArmor.system.maxDex : Infinity;
+    
+    let finalAC = armorAC;
+    if (allowDex) {
+      finalAC += Math.min(dexMod, maxDex);
+    }
+    
+    console.log(`CWN | 최종 AC 계산: ${finalAC} (방어구: ${armorAC}, 민첩: ${allowDex ? Math.min(dexMod, maxDex) : 0})`);
+    
+    // AC 업데이트
+    await this.update({
+      'system.ac.value': finalAC,
+      'system.ac.fromArmor': bestArmor.name
+    });
+  }
+  
+  /**
+   * 무기 효과 계산
+   * @param {Array} equippedItems 장착된 아이템 배열
+   * @private
+   */
+  async _calculateWeaponEffects(equippedItems) {
+    // 장착된 무기 필터링
+    const weapons = equippedItems.filter(i => i.type === 'weapon');
+    console.log(`CWN | 장착된 무기 수: ${weapons.length}`);
+    
+    if (weapons.length === 0) {
+      return;
+    }
+    
+    // 무기 태그 효과 적용 (향후 확장)
+    // 현재는 로깅만 수행
+    weapons.forEach(weapon => {
+      if (Array.isArray(weapon.system.tags)) {
+        weapon.system.tags.forEach(tag => {
+          console.log(`CWN | 무기 태그 효과 검사: ${weapon.name}, 태그: ${tag}`);
+        });
+      }
+    });
+  }
+  
+  /**
+   * 사이버웨어 효과 계산
+   * @param {Array} equippedItems 장착된 아이템 배열
+   * @private
+   */
+  async _calculateCyberwareEffects(equippedItems) {
+    // 장착된 사이버웨어 필터링
+    const cyberware = equippedItems.filter(i => i.type === 'cyberware');
+    console.log(`CWN | 장착된 사이버웨어 수: ${cyberware.length}`);
+    
+    if (cyberware.length === 0) {
+      return;
+    }
+    
+    // 총 시스템 스트레인 계산
+    let totalStrain = 0;
+    cyberware.forEach(item => {
+      const strain = item.system.systemStrain || 0;
+      totalStrain += strain;
+      console.log(`CWN | 사이버웨어 스트레인 추가: ${item.name}, 스트레인: ${strain}`);
+    });
+    
+    console.log(`CWN | 총 사이버웨어 스트레인: ${totalStrain}`);
+    
+    // 시스템 스트레인 업데이트
+    await this.update({
+      'system.systemStrain.fromCyberware': totalStrain
+    });
+    
+    // 사이버웨어 능력치 보너스 적용 (향후 확장)
+  }
+  
+  /**
+   * 기타 장비 효과 계산
+   * @param {Array} equippedItems 장착된 아이템 배열
+   * @private
+   */
+  async _calculateGearEffects(equippedItems) {
+    // 장착된 기타 장비 필터링
+    const gear = equippedItems.filter(i => i.type === 'gear');
+    console.log(`CWN | 장착된 기타 장비 수: ${gear.length}`);
+    
+    if (gear.length === 0) {
+      return;
+    }
+    
+    // 장비 효과 적용 (향후 확장)
+    // 현재는 로깅만 수행
+    gear.forEach(item => {
+      console.log(`CWN | 장비 효과 검사: ${item.name}`);
+    });
   }
 } 

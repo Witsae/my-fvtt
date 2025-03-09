@@ -212,413 +212,24 @@ export class CWNItem extends Item {
   }
 
   /**
-   * 아이템 굴림 처리
-   * @param {Object} options 옵션
+   * 일반 아이템 굴림
    */
-  async roll(options = {}) {
-    // 아이템 타입별 굴림 처리
+  async roll() {
+    console.log("CWN | 아이템 굴림:", this.name);
+    
+    // 아이템 타입에 따라 다른 굴림 메서드 호출
     if (this.type === 'weapon') {
-      return this._rollWeapon(options);
-    } else if (this.type === 'skill') {
-      return this._rollSkill(options);
-    } else if (this.type === 'focus') {
-      return this._rollFocus(options);
-    } else if (this.type === 'asset') {
-      return this._rollAsset(options);
-    } else {
-      // 기본 아이템 정보 표시
-      return this._displayItemInfo(options);
-    }
-  }
-  
-  /**
-   * 무기 공격 굴림
-   * @param {Object} options 옵션
-   * @private
-   */
-  async _rollWeapon(options = {}) {
-    // 액터 확인
-    const actor = this.actor;
-    if (!actor) {
-      ui.notifications.warn(game.i18n.localize("CWN.Errors.NoActor"));
-      return null;
+      return this.rollAttack();
     }
     
-    // 탄약 확인 (원거리 무기인 경우)
-    const isRanged = this.system.range && this.system.range !== "melee";
-    if (isRanged && this.system.ammo && this.system.ammo.max > 0) {
-      if (this.system.ammo.value <= 0) {
-        ui.notifications.warn(game.i18n.format("CWN.Errors.NoAmmo", {name: this.name}));
-        return null;
-      }
-    }
-    
-    // 공격 보너스 계산
-    const attackBonus = this.system.attackBonus || 0;
-    const attributeMod = actor.system.attributes[this.system.attribute || "str"].mod;
-    const totalBonus = attackBonus + attributeMod;
-    
-    // 공격 굴림 수식
-    const formula = `1d20 + ${totalBonus}`;
-    
-    // 무기 타입 결정
-    const weaponType = isRanged ? 
-      game.i18n.localize(CONFIG.CWN.weaponRanges[this.system.range]) : 
-      game.i18n.localize("CWN.WeaponRangeMelee");
-    
-    // 공격 라벨
-    const label = game.i18n.format("CWN.Chat.WeaponAttack", {
-      name: this.name,
-      type: weaponType
-    });
-    
-    // 공격 굴림 대화상자
-    const rollDialog = await new Promise(resolve => {
-      new Dialog({
-        title: game.i18n.format("CWN.Dialogs.WeaponAttack", {name: this.name}),
-        content: `
-          <form>
-            <div class="form-group">
-              <label>${game.i18n.localize("CWN.AttackBonus")}:</label>
-              <input type="number" name="bonus" value="0">
-            </div>
-            <div class="form-group">
-              <label>${game.i18n.localize("CWN.Burst")}:</label>
-              <input type="checkbox" name="burst" ${this.system.tags.includes("burst") ? "" : "disabled"}>
-            </div>
-          </form>
-        `,
-        buttons: {
-          roll: {
-            icon: '<i class="fas fa-dice-d20"></i>',
-            label: game.i18n.localize("CWN.Dialogs.Roll"),
-            callback: html => resolve(html.find('[name=bonus]').val())
-          },
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
-            label: game.i18n.localize("CWN.Dialogs.Cancel"),
-            callback: () => resolve(null)
-          }
-        },
-        default: "roll"
-      }).render(true);
-    });
-    
-    if (rollDialog === null) return null;
-    
-    // 추가 보너스 적용
-    const extraBonus = parseInt(rollDialog) || 0;
-    const finalFormula = `1d20 + ${totalBonus + extraBonus}`;
-    
-    // 주사위 굴림
-    const roll = await new Roll(finalFormula).evaluate({async: true});
-    
-    // 탄약 감소 (원거리 무기인 경우)
-    if (isRanged && this.system.ammo && this.system.ammo.max > 0) {
-      await this.update({"system.ammo.value": Math.max(this.system.ammo.value - 1, 0)});
-    }
-    
-    // 채팅 메시지 생성
+    // 아이템 정보를 채팅에 표시
     const chatData = {
-      user: game.user.id,
-      speaker: ChatMessage.getSpeaker({actor: actor}),
-      flavor: label,
-      rollMode: options.rollMode || game.settings.get("core", "rollMode"),
-      sound: CONFIG.sounds.dice
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor: `${this.name}`,
+      content: await TextEditor.enrichHTML(this.system.description, {async: true})
     };
     
-    // 피해 버튼 추가
-    const damageFormula = this.system.damage;
-    if (damageFormula) {
-      chatData.content = `
-        <div class="card-buttons">
-          <button data-action="damage" data-formula="${damageFormula}">${game.i18n.localize("CWN.Damage")}</button>
-        </div>
-      `;
-    }
-    
-    // 채팅 메시지 생성
-    if (roll) {
-      chatData.roll = roll;
-      return ChatMessage.create(chatData);
-    }
-    
-    return null;
-  }
-  
-  /**
-   * 기술 굴림
-   * @param {Object} options 옵션
-   * @private
-   */
-  async _rollSkill(options = {}) {
-    // 액터 확인
-    const actor = this.actor;
-    if (!actor) {
-      ui.notifications.warn(game.i18n.localize("CWN.Errors.NoActor"));
-      return null;
-    }
-    
-    // 캐릭터 확인
-    if (actor.type !== "character" && actor.type !== "npc") {
-      ui.notifications.warn(game.i18n.localize("CWN.Errors.NonCharacter"));
-      return null;
-    }
-    
-    // 기술 레벨 및 속성 수정치 가져오기
-    const skillLevel = this.system.level || 0;
-    const attribute = this.system.attribute || "int";
-    const attributeMod = actor.system.attributes[attribute].mod;
-    
-    // 기술 굴림 수식 결정
-    let formula = "2d6";
-    if (skillLevel >= 3) formula = "3d6kh2"; // 3d6 중 높은 2개
-    if (skillLevel >= 5) formula = "4d6kh2"; // 4d6 중 높은 2개
-    
-    // 기술 레벨 및 속성 수정치 추가
-    formula += ` + ${skillLevel} + ${attributeMod}`;
-    
-    // 기술 라벨
-    const label = game.i18n.format("CWN.SkillCheck", {skill: this.name});
-    
-    // 기술 굴림 대화상자
-    const rollDialog = await new Promise(resolve => {
-      new Dialog({
-        title: game.i18n.format("CWN.Dialogs.SkillRoll", {name: this.name}),
-        content: `
-          <form>
-            <div class="form-group">
-              <label>${game.i18n.localize("CWN.SkillBonus")}:</label>
-              <input type="number" name="bonus" value="0">
-            </div>
-          </form>
-        `,
-        buttons: {
-          roll: {
-            icon: '<i class="fas fa-dice-d20"></i>',
-            label: game.i18n.localize("CWN.Dialogs.Roll"),
-            callback: html => resolve(html.find('[name=bonus]').val())
-          },
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
-            label: game.i18n.localize("CWN.Dialogs.Cancel"),
-            callback: () => resolve(null)
-          }
-        },
-        default: "roll"
-      }).render(true);
-    });
-    
-    if (rollDialog === null) return null;
-    
-    // 추가 보너스 적용
-    const extraBonus = parseInt(rollDialog) || 0;
-    const finalFormula = `${formula} + ${extraBonus}`;
-    
-    // 주사위 굴림
-    const roll = await new Roll(finalFormula).evaluate({async: true});
-    
-    // 채팅 메시지 생성
-    const chatData = {
-      user: game.user.id,
-      speaker: ChatMessage.getSpeaker({actor: actor}),
-      flavor: label,
-      rollMode: options.rollMode || game.settings.get("core", "rollMode"),
-      sound: CONFIG.sounds.dice
-    };
-    
-    // 채팅 메시지 생성
-    if (roll) {
-      chatData.roll = roll;
-      return ChatMessage.create(chatData);
-    }
-    
-    return null;
-  }
-  
-  /**
-   * 특성 정보 표시
-   * @param {Object} options 옵션
-   * @private
-   */
-  async _rollFocus(options = {}) {
-    // 액터 확인
-    const actor = this.actor;
-    if (!actor) {
-      ui.notifications.warn(game.i18n.localize("CWN.Errors.NoActor"));
-      return null;
-    }
-    
-    // 특성 정보 생성
-    const description = this.system.description || game.i18n.localize("CWN.Chat.NoDescription");
-    const level1Effect = this.system.levelEffects?.level1 || "";
-    const level2Effect = this.system.levelEffects?.level2 || "";
-    
-    // 채팅 메시지 내용
-    const content = `
-      <div class="cwn chat-card">
-        <h2>${this.name}</h2>
-        <div class="card-content">
-          <p>${description}</p>
-          ${level1Effect ? `<p><strong>${game.i18n.localize("CWN.Chat.Level1")}:</strong> ${level1Effect}</p>` : ""}
-          ${level2Effect ? `<p><strong>${game.i18n.localize("CWN.Chat.Level2")}:</strong> ${level2Effect}</p>` : ""}
-        </div>
-      </div>
-    `;
-    
-    // 채팅 메시지 생성
-    const chatData = {
-      user: game.user.id,
-      speaker: ChatMessage.getSpeaker({actor: actor}),
-      content: content,
-      rollMode: options.rollMode || game.settings.get("core", "rollMode")
-    };
-    
-    return ChatMessage.create(chatData);
-  }
-  
-  /**
-   * 자산 액션 굴림
-   * @param {Object} options 옵션
-   * @private
-   */
-  async _rollAsset(options = {}) {
-    // 액터 확인
-    const actor = this.actor;
-    if (!actor) {
-      ui.notifications.warn(game.i18n.localize("CWN.Errors.NoActor"));
-      return null;
-    }
-    
-    // 세력 확인
-    if (actor.type !== "faction") {
-      ui.notifications.warn(game.i18n.localize("CWN.Errors.AssetFaction"));
-      return null;
-    }
-    
-    // 자산 정보 생성
-    const description = this.system.description || "";
-    const rating = this.system.rating || 1;
-    const type = this.system.type || "military";
-    
-    // 자산 액션 대화상자
-    const actionType = await new Promise(resolve => {
-      new Dialog({
-        title: game.i18n.format("CWN.Dialogs.AssetAction", {name: this.name}),
-        content: `
-          <form>
-            <div class="form-group">
-              <label>${game.i18n.localize("CWN.Dialogs.Action")}:</label>
-              <select name="action">
-                <option value="attack">${game.i18n.localize("CWN.Dialogs.Attack")}</option>
-                <option value="defense">${game.i18n.localize("CWN.Dialogs.Defense")}</option>
-                <option value="info">${game.i18n.localize("CWN.Dialogs.Info")}</option>
-              </select>
-            </div>
-          </form>
-        `,
-        buttons: {
-          roll: {
-            icon: '<i class="fas fa-dice-d20"></i>',
-            label: game.i18n.localize("CWN.Dialogs.Roll"),
-            callback: html => resolve(html.find('[name=action]').val())
-          },
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
-            label: game.i18n.localize("CWN.Dialogs.Cancel"),
-            callback: () => resolve(null)
-          }
-        },
-        default: "roll"
-      }).render(true);
-    });
-    
-    if (actionType === null) return null;
-    
-    // 액션 타입에 따른 처리
-    if (actionType === "info") {
-      // 자산 정보 표시
-      return this._displayItemInfo(options);
-    } else if (actionType === "attack" || actionType === "defense") {
-      // 공격 또는 방어 굴림
-      const formula = `1d6 + ${rating}`;
-      const roll = await new Roll(formula).evaluate({async: true});
-      
-      // 채팅 메시지 생성
-      const chatData = {
-        user: game.user.id,
-        speaker: ChatMessage.getSpeaker({actor: actor}),
-        flavor: `${this.name} - ${actionType === "attack" ? game.i18n.localize("CWN.Dialogs.Attack") : game.i18n.localize("CWN.Dialogs.Defense")}`,
-        rollMode: options.rollMode || game.settings.get("core", "rollMode"),
-        sound: CONFIG.sounds.dice
-      };
-      
-      // 채팅 메시지 생성
-      if (roll) {
-        chatData.roll = roll;
-        return ChatMessage.create(chatData);
-      }
-    }
-    
-    return null;
-  }
-  
-  /**
-   * 아이템 정보 표시
-   * @param {Object} options 옵션
-   * @private
-   */
-  async _displayItemInfo(options = {}) {
-    // 액터 확인
-    const actor = this.actor;
-    
-    // 아이템 정보 생성
-    const description = this.system.description || "";
-    
-    // 아이템 타입별 추가 정보
-    let additionalInfo = "";
-    
-    if (this.type === "weapon") {
-      additionalInfo = `
-        <p><strong>${game.i18n.localize("CWN.Damage")}:</strong> ${this.system.damage}</p>
-        <p><strong>${game.i18n.localize("CWN.Range")}:</strong> ${game.i18n.localize(CONFIG.CWN.weaponRanges[this.system.range] || "CWN.WeaponRangeMelee")}</p>
-      `;
-    } else if (this.type === "armor") {
-      additionalInfo = `
-        <p><strong>${game.i18n.localize("CWN.AC")}:</strong> ${this.system.ac}</p>
-        <p><strong>${game.i18n.localize("CWN.Chat.MeleeAC")}:</strong> ${this.system.meleeAC}</p>
-      `;
-    } else if (this.type === "cyberware") {
-      additionalInfo = `
-        <p><strong>${game.i18n.localize("CWN.Chat.SystemStrain")}:</strong> ${this.system.systemStrain}</p>
-      `;
-    }
-    
-    // 태그 정보 추가
-    if (this.system.tags && this.system.tags.length > 0) {
-      additionalInfo += `<p><strong>${game.i18n.localize("CWN.Tags")}:</strong> ${this.system.tags.join(", ")}</p>`;
-    }
-    
-    // 채팅 메시지 내용
-    const content = `
-      <div class="cwn chat-card">
-        <h2>${this.name}</h2>
-        <div class="card-content">
-          ${additionalInfo}
-          <p>${description}</p>
-        </div>
-      </div>
-    `;
-    
-    // 채팅 메시지 생성
-    const chatData = {
-      user: game.user.id,
-      speaker: actor ? ChatMessage.getSpeaker({actor: actor}) : ChatMessage.getSpeaker(),
-      content: content,
-      rollMode: options.rollMode || game.settings.get("core", "rollMode")
-    };
-    
-    return ChatMessage.create(chatData);
+    ChatMessage.create(chatData);
   }
 
   /**
@@ -713,103 +324,208 @@ export class CWNItem extends Item {
   }
   
   /**
-   * 무기 공격 굴림
+   * 무기 공격 굴림 수행
+   * @param {Object} options 옵션
+   * @returns {Promise<Roll>} 굴림 결과
    */
-  async rollAttack() {
-    console.log("CWN | 무기 공격 굴림:", this.name);
-    
-    if (this.type !== "weapon") {
-      ui.notifications.warn("무기 아이템만 공격 굴림을 할 수 있습니다.");
-      return;
+  async rollAttack(options = {}) {
+    if (this.type !== 'weapon') {
+      console.error("CWN | 무기가 아닌 아이템으로 공격 굴림을 시도했습니다:", this.name, this.type);
+      return null;
     }
     
-    // 공격 굴림 로직 구현
-    const rollFormula = "1d20";
-    const roll = new Roll(rollFormula);
-    await roll.evaluate();
+    console.log(`CWN | 무기 공격 굴림 시작: ${this.name}`);
     
-    // 채팅 메시지 생성
-    const messageData = {
+    // 액터가 없으면 굴림 불가
+    if (!this.actor) {
+      ui.notifications.warn(`${this.name}의 소유자가 없어 공격 굴림을 할 수 없습니다.`);
+      return null;
+    }
+    
+    // 장착 상태 확인
+    if (!this.system.equipped) {
+      ui.notifications.warn(`${this.name}이(가) 장착되어 있지 않습니다.`);
+      console.log(`CWN | 무기가 장착되어 있지 않음: ${this.name}`);
+      
+      // 옵션에 따라 자동 장착
+      if (options.autoEquip) {
+        await this.toggleEquipped(true);
+        console.log(`CWN | 무기 자동 장착됨: ${this.name}`);
+      } else {
+        return null;
+      }
+    }
+    
+    // 액터 데이터 가져오기
+    const actorData = this.actor.getRollData();
+    
+    // 무기 데이터 가져오기
+    const weaponData = this.system;
+    
+    // 공격 보너스 계산
+    let attackBonus = 0;
+    
+    // 무기 유형에 따른 능력치 보너스 적용
+    if (weaponData.attackAttribute) {
+      const attrMod = actorData.attributes[weaponData.attackAttribute].mod;
+      attackBonus += attrMod;
+      console.log(`CWN | 능력치 보너스 적용: ${weaponData.attackAttribute} (${attrMod})`);
+    } else {
+      // 기본값: 근접 무기는 STR, 원거리 무기는 DEX 사용
+      if (weaponData.range === 'melee') {
+        attackBonus += actorData.attributes.str.mod;
+        console.log(`CWN | 근접 무기 STR 보너스 적용: ${actorData.attributes.str.mod}`);
+      } else {
+        attackBonus += actorData.attributes.dex.mod;
+        console.log(`CWN | 원거리 무기 DEX 보너스 적용: ${actorData.attributes.dex.mod}`);
+      }
+    }
+    
+    // 무기 보너스 적용
+    if (weaponData.attackBonus) {
+      attackBonus += parseInt(weaponData.attackBonus);
+      console.log(`CWN | 무기 자체 보너스 적용: ${weaponData.attackBonus}`);
+    }
+    
+    // 캐릭터 레벨 보너스 적용 (선택적)
+    if (weaponData.useLevelBonus && actorData.level) {
+      attackBonus += Math.floor(actorData.level / 2);
+      console.log(`CWN | 레벨 보너스 적용: +${Math.floor(actorData.level / 2)}`);
+    }
+    
+    // 최종 공격 보너스
+    console.log(`CWN | 최종 공격 보너스: ${attackBonus}`);
+    
+    // 공격 굴림 수식 생성
+    const formula = `1d20 + ${attackBonus}`;
+    
+    // 굴림 수행
+    const roll = new Roll(formula, actorData);
+    const result = await roll.evaluate({async: true});
+    
+    // 결과 메시지 생성
+    let flavor = `<h2>${this.name} 공격 굴림</h2>`;
+    
+    // 크리티컬 및 실패 확인
+    const d20Result = result.dice[0].results[0].result;
+    if (d20Result === 20) {
+      flavor += `<div class="dice-formula">${formula}</div>`;
+      flavor += `<div class="dice-total critical">${result.total} (크리티컬!)</div>`;
+    } else if (d20Result === 1) {
+      flavor += `<div class="dice-formula">${formula}</div>`;
+      flavor += `<div class="dice-total fumble">${result.total} (실패!)</div>`;
+    } else {
+      flavor += `<div class="dice-formula">${formula}</div>`;
+      flavor += `<div class="dice-total">${result.total}</div>`;
+    }
+    
+    // 채팅 메시지 전송
+    await result.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `${this.name} 공격 굴림`,
-      content: `<div class="dice-roll">
-        <div class="dice-result">
-          <div class="dice-formula">${rollFormula}</div>
-          <div class="dice-tooltip">
-            <section class="tooltip-part">
-              <div class="dice">
-                <header class="part-header flexrow">
-                  <span class="part-formula">${rollFormula}</span>
-                  <span class="part-total">${roll.total}</span>
-                </header>
-              </div>
-            </section>
-          </div>
-          <h4 class="dice-total">${roll.total}</h4>
-        </div>
-      </div>`
-    };
+      flavor: flavor,
+      rollMode: game.settings.get('core', 'rollMode')
+    });
     
-    ChatMessage.create(messageData);
+    console.log(`CWN | 무기 공격 굴림 완료: ${this.name}, 결과: ${result.total}`);
+    
+    return result;
   }
   
   /**
-   * 무기 피해 굴림
+   * 무기 피해 굴림 수행
+   * @param {Object} options 옵션
+   * @returns {Promise<Roll>} 굴림 결과
    */
-  async rollDamage() {
-    console.log("CWN | 무기 피해 굴림:", this.name);
-    
-    if (this.type !== "weapon") {
-      ui.notifications.warn("무기 아이템만 피해 굴림을 할 수 있습니다.");
-      return;
+  async rollDamage(options = {}) {
+    if (this.type !== 'weapon') {
+      console.error("CWN | 무기가 아닌 아이템으로 피해 굴림을 시도했습니다:", this.name, this.type);
+      return null;
     }
     
-    // 피해 굴림 로직 구현
-    const damageFormula = this.system.damage || "1d6";
-    const roll = new Roll(damageFormula);
-    await roll.evaluate();
+    console.log(`CWN | 무기 피해 굴림 시작: ${this.name}`);
     
-    // 채팅 메시지 생성
-    const messageData = {
+    // 액터가 없으면 굴림 불가
+    if (!this.actor) {
+      ui.notifications.warn(`${this.name}의 소유자가 없어 피해 굴림을 할 수 없습니다.`);
+      return null;
+    }
+    
+    // 장착 상태 확인
+    if (!this.system.equipped && !options.ignoreEquipped) {
+      ui.notifications.warn(`${this.name}이(가) 장착되어 있지 않습니다.`);
+      console.log(`CWN | 무기가 장착되어 있지 않음: ${this.name}`);
+      return null;
+    }
+    
+    // 액터 데이터 가져오기
+    const actorData = this.actor.getRollData();
+    
+    // 무기 데이터 가져오기
+    const weaponData = this.system;
+    
+    // 피해 보너스 계산
+    let damageBonus = 0;
+    
+    // 무기 유형에 따른 능력치 보너스 적용
+    if (weaponData.damageAttribute) {
+      const attrMod = actorData.attributes[weaponData.damageAttribute].mod;
+      damageBonus += attrMod;
+      console.log(`CWN | 피해 능력치 보너스 적용: ${weaponData.damageAttribute} (${attrMod})`);
+    } else if (weaponData.range === 'melee') {
+      // 기본값: 근접 무기만 STR 보너스 적용
+      damageBonus += actorData.attributes.str.mod;
+      console.log(`CWN | 근접 무기 STR 피해 보너스 적용: ${actorData.attributes.str.mod}`);
+    }
+    
+    // 무기 보너스 적용
+    if (weaponData.damageBonus) {
+      damageBonus += parseInt(weaponData.damageBonus);
+      console.log(`CWN | 무기 자체 피해 보너스 적용: ${weaponData.damageBonus}`);
+    }
+    
+    // 피해 주사위 가져오기
+    let damageDice = weaponData.damage || "1d6";
+    
+    // 피해 수식 생성
+    let formula = damageDice;
+    if (damageBonus !== 0) {
+      formula += damageBonus >= 0 ? ` + ${damageBonus}` : ` - ${Math.abs(damageBonus)}`;
+    }
+    
+    console.log(`CWN | 피해 수식: ${formula}`);
+    
+    // 굴림 수행
+    const roll = new Roll(formula, actorData);
+    const result = await roll.evaluate({async: true});
+    
+    // 결과 메시지 생성
+    let flavor = `<h2>${this.name} 피해 굴림</h2>`;
+    
+    // 무기 태그 정보 추가
+    if (Array.isArray(weaponData.tags) && weaponData.tags.length > 0) {
+      flavor += `<div class="tags">태그: ${weaponData.tags.join(', ')}</div>`;
+    }
+    
+    // 피해 유형 정보 추가
+    if (weaponData.damageType) {
+      flavor += `<div class="damage-type">피해 유형: ${weaponData.damageType}</div>`;
+    }
+    
+    flavor += `<div class="dice-formula">${formula}</div>`;
+    flavor += `<div class="dice-total">${result.total}</div>`;
+    
+    // 채팅 메시지 전송
+    await result.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `${this.name} 피해 굴림`,
-      content: `<div class="dice-roll">
-        <div class="dice-result">
-          <div class="dice-formula">${damageFormula}</div>
-          <div class="dice-tooltip">
-            <section class="tooltip-part">
-              <div class="dice">
-                <header class="part-header flexrow">
-                  <span class="part-formula">${damageFormula}</span>
-                  <span class="part-total">${roll.total}</span>
-                </header>
-              </div>
-            </section>
-          </div>
-          <h4 class="dice-total">${roll.total}</h4>
-        </div>
-      </div>`
-    };
+      flavor: flavor,
+      rollMode: game.settings.get('core', 'rollMode')
+    });
     
-    ChatMessage.create(messageData);
+    console.log(`CWN | 무기 피해 굴림 완료: ${this.name}, 결과: ${result.total}`);
+    
+    return result;
   }
   
-  /**
-   * 일반 아이템 굴림
-   */
-  async roll() {
-    console.log("CWN | 아이템 굴림:", this.name);
-    
-    // 아이템 정보를 채팅에 표시
-    const chatData = {
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `${this.name}`,
-      content: await TextEditor.enrichHTML(this.system.description, {async: true})
-    };
-    
-    ChatMessage.create(chatData);
-  }
-
   /**
    * 아이템 복제 메서드
    * @returns {Promise<CWNItem>} 복제된 아이템
@@ -1082,5 +798,201 @@ export class CWNItem extends Item {
     
     console.log("CWN | 아이템 카테고리별 그룹화 완료:", grouped);
     return grouped;
+  }
+
+  /**
+   * 아이템 장착 상태 토글
+   * @param {boolean} equipped 장착 상태 (true: 장착, false: 해제)
+   * @returns {Promise<Item>} 업데이트된 아이템
+   */
+  async toggleEquipped(equipped = undefined) {
+    console.log(`CWN | 아이템 장착 상태 토글 시작: ${this.name}`);
+    
+    // 현재 장착 상태 확인
+    const currentEquipped = this.system.equipped || false;
+    
+    // 새 장착 상태 결정 (파라미터가 없으면 현재 상태 반전)
+    const newEquipped = equipped !== undefined ? equipped : !currentEquipped;
+    
+    console.log(`CWN | 아이템 장착 상태 변경: ${this.name} (${currentEquipped} -> ${newEquipped})`);
+    
+    // 아이템 업데이트
+    const updated = await this.update({'system.equipped': newEquipped});
+    
+    // 소유자가 있는 경우 효과 적용
+    if (this.actor) {
+      // 아이템 자체 효과 적용
+      await this._applyEquipmentEffects(newEquipped);
+      
+      // 액터의 모든 장착 아이템 효과 재계산
+      await this.actor.calculateEquippedItemEffects();
+    }
+    
+    return updated;
+  }
+  
+  /**
+   * 장착 효과 적용
+   * @param {boolean} isEquipped 장착 여부
+   * @private
+   */
+  async _applyEquipmentEffects(isEquipped) {
+    console.log(`CWN | 장착 효과 적용: ${this.name} (장착: ${isEquipped})`);
+    
+    // 아이템 타입별 효과 적용
+    switch (this.type) {
+      case 'armor':
+        await this._applyArmorEffects(isEquipped);
+        break;
+      case 'weapon':
+        await this._applyWeaponEffects(isEquipped);
+        break;
+      case 'cyberware':
+        await this._applyCyberwareEffects(isEquipped);
+        break;
+      default:
+        // 기타 아이템 타입은 특별한 효과 없음
+        console.log(`CWN | ${this.type} 타입은 장착 효과가 없습니다.`);
+        break;
+    }
+    
+    // 액티브 이펙트 적용 (향후 확장)
+    this._toggleActiveEffects(isEquipped);
+  }
+  
+  /**
+   * 방어구 효과 적용
+   * @param {boolean} isEquipped 장착 여부
+   * @private
+   */
+  async _applyArmorEffects(isEquipped) {
+    if (!this.actor) return;
+    
+    const armorData = this.system;
+    console.log(`CWN | 방어구 효과 적용: ${this.name}, AC: ${armorData.ac}`);
+    
+    // 액터의 현재 AC 계산
+    const actorData = this.actor.system;
+    let baseAC = 10; // 기본 AC
+    
+    // 민첩 보너스 적용
+    const dexMod = actorData.attributes.dex.mod;
+    
+    // 장착된 모든 방어구 가져오기
+    const equippedArmors = this.actor.items.filter(i => 
+      i.type === 'armor' && 
+      i.system.equipped && 
+      i._id !== this._id // 현재 아이템 제외
+    );
+    
+    // 가장 높은 AC 값을 가진 방어구 찾기
+    let highestAC = 0;
+    equippedArmors.forEach(armor => {
+      if (armor.system.ac > highestAC) {
+        highestAC = armor.system.ac;
+      }
+    });
+    
+    // 현재 아이템이 장착되고 AC가 더 높으면 사용
+    if (isEquipped && armorData.ac > highestAC) {
+      highestAC = armorData.ac;
+    }
+    
+    // 최종 AC 계산
+    let finalAC = baseAC + dexMod;
+    if (highestAC > 0) {
+      finalAC = highestAC + (armorData.allowDex ? Math.min(dexMod, armorData.maxDex || 0) : 0);
+    }
+    
+    console.log(`CWN | 최종 AC 계산: ${finalAC} (기본: ${baseAC}, 방어구: ${highestAC}, 민첩: ${dexMod})`);
+    
+    // 액터 데이터 업데이트
+    await this.actor.update({
+      'system.ac.value': finalAC
+    });
+  }
+  
+  /**
+   * 무기 효과 적용
+   * @param {boolean} isEquipped 장착 여부
+   * @private
+   */
+  async _applyWeaponEffects(isEquipped) {
+    if (!this.actor) return;
+    
+    const weaponData = this.system;
+    console.log(`CWN | 무기 효과 적용: ${this.name}, 피해: ${weaponData.damage}`);
+    
+    // 무기 장착 시 효과 (예: 전투 준비 상태 등)
+    // 현재는 특별한 효과 없이 로깅만 수행
+    
+    // 무기 태그에 따른 특수 효과 적용 (향후 확장)
+    if (Array.isArray(weaponData.tags)) {
+      weaponData.tags.forEach(tag => {
+        console.log(`CWN | 무기 태그 효과 검사: ${tag}`);
+        // 태그별 효과 적용 로직 (향후 구현)
+      });
+    }
+  }
+  
+  /**
+   * 사이버웨어 효과 적용
+   * @param {boolean} isEquipped 장착 여부
+   * @private
+   */
+  async _applyCyberwareEffects(isEquipped) {
+    if (!this.actor) return;
+    
+    const cyberwareData = this.system;
+    console.log(`CWN | 사이버웨어 효과 적용: ${this.name}, 시스템 스트레인: ${cyberwareData.systemStrain}`);
+    
+    // 현재 시스템 스트레인 값 가져오기
+    const currentStrain = this.actor.system.systemStrain.value;
+    
+    // 장착/해제에 따른 시스템 스트레인 조정
+    let newStrain = currentStrain;
+    if (isEquipped) {
+      // 장착 시 스트레인 증가
+      newStrain += (cyberwareData.systemStrain || 0);
+    } else {
+      // 해제 시 스트레인 감소
+      newStrain -= (cyberwareData.systemStrain || 0);
+    }
+    
+    // 음수 방지
+    newStrain = Math.max(0, newStrain);
+    
+    console.log(`CWN | 시스템 스트레인 조정: ${currentStrain} -> ${newStrain}`);
+    
+    // 액터 데이터 업데이트
+    await this.actor.update({
+      'system.systemStrain.value': newStrain
+    });
+    
+    // 사이버웨어 능력치 보너스 적용 (향후 확장)
+    if (cyberwareData.attributeBonus) {
+      // 능력치 보너스 적용 로직 (향후 구현)
+    }
+  }
+  
+  /**
+   * 액티브 이펙트 토글
+   * @param {boolean} isActive 활성화 여부
+   * @private
+   */
+  _toggleActiveEffects(isActive) {
+    // 아이템에 정의된 액티브 이펙트 가져오기
+    const effects = this.effects;
+    if (!effects || effects.size === 0) return;
+    
+    console.log(`CWN | 액티브 이펙트 토글: ${this.name}, 효과 수: ${effects.size}, 활성화: ${isActive}`);
+    
+    // 각 이펙트 활성화/비활성화
+    effects.forEach(effect => {
+      if (effect.transfer) {
+        console.log(`CWN | 이펙트 상태 변경: ${effect.label} (${effect.disabled} -> ${!isActive})`);
+        effect.update({disabled: !isActive});
+      }
+    });
   }
 } 

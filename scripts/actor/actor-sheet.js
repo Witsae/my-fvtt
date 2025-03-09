@@ -279,6 +279,30 @@ export class CWNActorSheet extends ActorSheet {
       }
     });
     
+    // 무기 공격 굴림 버튼
+    html.find('.item-control.item-attack').click(ev => {
+      ev.preventDefault();
+      const li = $(ev.currentTarget).closest(".item");
+      const itemId = li.attr("data-item-id");
+      const item = this.actor.items.get(itemId);
+      
+      if (item && item.type === 'weapon') {
+        item.rollAttack();
+      }
+    });
+    
+    // 무기 피해 굴림 버튼
+    html.find('.item-control.item-damage').click(ev => {
+      ev.preventDefault();
+      const li = $(ev.currentTarget).closest(".item");
+      const itemId = li.attr("data-item-id");
+      const item = this.actor.items.get(itemId);
+      
+      if (item && item.type === 'weapon') {
+        item.rollDamage();
+      }
+    });
+    
     // 새로운 아이템 분류 시스템 이벤트 리스너
     // 아이템 필터링 및 정렬 기능
     html.find('[data-action="search-items"]').on('input', this._onSearchItems.bind(this));
@@ -779,12 +803,10 @@ export class CWNActorSheet extends ActorSheet {
     
     if (!item) return;
     
-    // 아이템 장착 상태 토글
-    const equipped = !item.system.equipped;
-    console.log(`CWN | 아이템 장착 상태 변경: ${item.name} (${equipped ? '장착' : '해제'})`);
+    console.log(`CWN | 아이템 장착 상태 토글 UI 이벤트: ${item.name}`);
     
-    // 아이템 업데이트
-    item.update({'system.equipped': equipped});
+    // 새로운 toggleEquipped 메서드 사용
+    item.toggleEquipped();
   }
   
   /**

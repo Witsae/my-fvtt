@@ -262,6 +262,10 @@
             </div>
             <div class="item-controls">
               <a class="item-control item-edit" title="{{localize 'CWN.EditItem'}}"><i class="fas fa-edit"></i></a>
+              {{#if (eq item.type "weapon")}}
+              <a class="item-control item-attack" title="{{localize 'CWN.Attack'}}"><i class="fas fa-dice-d20"></i></a>
+              <a class="item-control item-damage" title="{{localize 'CWN.Damage'}}"><i class="fas fa-skull"></i></a>
+              {{/if}}
               <a class="item-control item-unequip" title="{{localize 'CWN.Unequip'}}"><i class="fas fa-toggle-off"></i></a>
             </div>
           </li>
@@ -332,6 +336,10 @@
                 </div>
                 <div class="item-controls">
                   <a class="item-control item-edit" title="{{localize 'CWN.EditItem'}}"><i class="fas fa-edit"></i></a>
+                  {{#if (eq item.type "weapon")}}
+                  <a class="item-control item-attack" title="{{localize 'CWN.Attack'}}"><i class="fas fa-dice-d20"></i></a>
+                  <a class="item-control item-damage" title="{{localize 'CWN.Damage'}}"><i class="fas fa-skull"></i></a>
+                  {{/if}}
                   <a class="item-control item-equip" title="{{localize 'CWN.Equip'}}"><i class="fas fa-toggle-on"></i></a>
                   <a class="item-control item-delete" title="{{localize 'CWN.DeleteItem'}}"><i class="fas fa-trash"></i></a>
                 </div>
