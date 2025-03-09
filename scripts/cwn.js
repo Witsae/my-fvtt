@@ -9,6 +9,7 @@ import { ValidatedDialog } from "./utils/ValidatedDialog.js";
 import { chatListeners, calculateStats, limitConcurrency, getDefaultImage } from "./utils/utils.js";
 import { CWNCombatant, CombatUtils } from "./utils/combat.js";
 import { ItemClassMap } from "./items/index.js";
+import { onManageActiveEffect, prepareActiveEffectCategories } from "./utils/effects.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */

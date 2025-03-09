@@ -544,7 +544,22 @@ export class CWNItemSheet extends ItemSheet {
       // 아이템 타입별 특수 리스너
       if (this.item.type === 'weapon') {
         html.find('.ammo-control').click(this._onAmmoControl.bind(this));
+        
+        // 무기 타입 토글 (근접/원거리)
+        html.find('a.melee-toggle').click(() => {
+          console.log("CWN | 근접 무기 토글 클릭");
+          this.item.update({ "system.melee": !this.item.system.melee });
+        });
+        
+        html.find('a.missile-toggle').click(() => {
+          console.log("CWN | 원거리 무기 토글 클릭");
+          this.item.update({ "system.missile": !this.item.system.missile });
+        });
       }
+      
+      // 입력 필드 포커스 시 전체 선택
+      const inputs = html.find("input");
+      inputs.focus(ev => ev.currentTarget.select());
     }
     
     // 탭 초기화 - 이미 탭 핸들러가 있는지 확인
@@ -559,8 +574,38 @@ export class CWNItemSheet extends ItemSheet {
       tabs.addClass('initialized');
     }
 
-    // Rollable elements
+    // 굴림 가능한 요소
     html.find('.rollable').click(this._onRoll.bind(this));
+    
+    // 효과 관리
+    html.find(".effect-control").click(ev => {
+      console.log("CWN | 효과 컨트롤 클릭");
+      if (this.item.isOwned) return ui.notifications.warn("아이템 소유자만 효과를 관리할 수 있습니다.");
+      const button = ev.currentTarget;
+      const li = button.closest("li");
+      const effect = li ? this.item.effects.get(li.dataset.effectId) : null;
+      
+      switch (button.dataset.action) {
+        case "create":
+          console.log("CWN | 새 효과 생성");
+          return this.item.createEmbeddedDocuments("ActiveEffect", [{
+            label: "새 효과",
+            icon: "icons/svg/aura.svg",
+            origin: this.item.uuid,
+            "duration.rounds": 1,
+            disabled: true
+          }]);
+        case "edit":
+          console.log("CWN | 효과 편집:", effect);
+          return effect.sheet.render(true);
+        case "delete":
+          console.log("CWN | 효과 삭제:", effect);
+          return effect.delete();
+        case "toggle":
+          console.log("CWN | 효과 토글:", effect);
+          return effect.update({disabled: !effect.disabled});
+      }
+    });
   }
 
   /**
@@ -674,58 +719,62 @@ export class CWNItemSheet extends ItemSheet {
   }
 
   /**
-   * 태그 삭제 처리
-   * @param {Event} event 클릭 이벤트
+   * 태그 삭제 핸들러
+   * @param {Event} event 이벤트 객체
    * @private
    */
   async _onTagDelete(event) {
     event.preventDefault();
-    const tagIndex = event.currentTarget.dataset.tagIndex;
-    const tags = Array.from(this.item.system.tags || []);
-    
-    if (tagIndex !== undefined && tags.length > parseInt(tagIndex)) {
-      tags.splice(parseInt(tagIndex), 1);
-      await this.item.update({"system.tags": tags});
-    }
+    const element = event.currentTarget;
+    const tag = element.parentElement.dataset.tag;
+    console.log(`CWN | 태그 삭제 요청: "${tag}"`);
+    await this.item.popTag(tag);
   }
 
   /**
-   * 태그 추가 처리
-   * @param {Event} event 클릭 이벤트
+   * 태그 추가 핸들러
+   * @param {Event} event 이벤트 객체
    * @private
    */
   async _onTagAdd(event) {
     event.preventDefault();
     const input = event.currentTarget.previousElementSibling;
-    const tagName = input.value.trim();
+    const tag = input.value.trim();
+    console.log(`CWN | 태그 추가 요청: "${tag}"`);
     
-    if (tagName) {
-      const tags = Array.from(this.item.system.tags || []);
-      if (!tags.includes(tagName)) {
-        tags.push(tagName);
-        await this.item.update({"system.tags": tags});
-        input.value = "";
-      }
+    if (tag) {
+      await this.item.addTag(tag);
+      input.value = "";
     }
   }
 
   /**
-   * 탄약 증가/감소 처리
-   * @param {Event} event 클릭 이벤트
+   * 탄약 관리 핸들러
+   * @param {Event} event 이벤트 객체
    * @private
    */
   async _onAmmoControl(event) {
     event.preventDefault();
-    const button = event.currentTarget;
-    const action = button.dataset.action;
-    const ammo = this.item.system.ammo || {};
+    const element = event.currentTarget;
+    const action = element.dataset.action;
+    console.log(`CWN | 탄약 관리 요청: "${action}"`);
     
+    // 현재 탄약 정보 가져오기
+    const ammo = foundry.utils.deepClone(this.item.system.ammo || { value: 0, max: 0 });
+    
+    // 액션에 따라 처리
     if (action === "increase") {
-      await this.item.update({"system.ammo.value": Math.min((ammo.value || 0) + 1, ammo.max || 0)});
+      ammo.value = Math.min(ammo.value + 1, ammo.max);
     } else if (action === "decrease") {
-      await this.item.update({"system.ammo.value": Math.max((ammo.value || 0) - 1, 0)});
-    } else if (action === "reload") {
-      await this.item.update({"system.ammo.value": ammo.max || 0});
+      ammo.value = Math.max(ammo.value - 1, 0);
+    } else if (action === "increaseMax") {
+      ammo.max += 1;
+    } else if (action === "decreaseMax") {
+      ammo.max = Math.max(ammo.max - 1, 0);
+      ammo.value = Math.min(ammo.value, ammo.max);
     }
+    
+    // 업데이트
+    await this.item.update({ "system.ammo": ammo });
   }
 } 

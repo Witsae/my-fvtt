@@ -27,4 +27,54 @@
   {{else}}
     <p class="warning">{{localize "CWN.NoItemType"}}</p>
   {{/if}}
+</div>
+
+{{!-- 기본 아이템 속성 --}}
+<div class="form-group">
+  <label>{{localize "CWN.ItemSource"}}</label>
+  <div class="form-fields">
+    <input type="text" name="system.source" value="{{system.source}}">
+  </div>
+</div>
+
+{{#if (eq type "weapon" "armor" "gear" "cyberware" "drug")}}
+<div class="form-group">
+  <label>{{localize "CWN.ItemQuantity"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.quantity" value="{{system.quantity}}" min="0" step="1">
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.ItemWeight"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.weight" value="{{system.weight}}" min="0" step="0.1">
+  </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.ItemPrice"}}</label>
+  <div class="form-fields">
+    <input type="number" name="system.price" value="{{system.price}}" min="0" step="1">
+  </div>
+</div>
+{{/if}}
+
+{{!-- 태그 관리 --}}
+<div class="form-group stacked">
+  <label>{{localize "CWN.ItemTags"}}</label>
+  <div class="form-fields">
+    <div class="tags">
+      {{#each system.tags as |tag|}}
+      <div class="tag" data-tag="{{tag}}">
+        {{tag}}
+        <a class="tag-delete"><i class="fas fa-times"></i></a>
+      </div>
+      {{/each}}
+    </div>
+    <div class="tag-input">
+      <input type="text" placeholder="{{localize 'CWN.AddTag'}}">
+      <a class="tag-add"><i class="fas fa-plus"></i></a>
+    </div>
+  </div>
 </div> 

@@ -656,4 +656,133 @@ export class CWNItem extends Item {
     
     return this._sheet;
   }
+
+  /**
+   * 태그 추가 메서드
+   * @param {string} tag 추가할 태그
+   */
+  async addTag(tag) {
+    console.log(`CWN | 태그 추가: "${tag}"`);
+    if (!tag) return;
+    
+    const tags = this.system.tags || [];
+    if (tags.includes(tag)) return;
+    
+    tags.push(tag);
+    return this.update({ "system.tags": tags });
+  }
+  
+  /**
+   * 태그 제거 메서드
+   * @param {string} tag 제거할 태그
+   */
+  async popTag(tag) {
+    console.log(`CWN | 태그 제거: "${tag}"`);
+    if (!tag) return;
+    
+    const tags = this.system.tags || [];
+    const index = tags.indexOf(tag);
+    if (index === -1) return;
+    
+    tags.splice(index, 1);
+    return this.update({ "system.tags": tags });
+  }
+  
+  /**
+   * 무기 공격 굴림
+   */
+  async rollAttack() {
+    console.log("CWN | 무기 공격 굴림:", this.name);
+    
+    if (this.type !== "weapon") {
+      ui.notifications.warn("무기 아이템만 공격 굴림을 할 수 있습니다.");
+      return;
+    }
+    
+    // 공격 굴림 로직 구현
+    const rollFormula = "1d20";
+    const roll = new Roll(rollFormula);
+    await roll.evaluate();
+    
+    // 채팅 메시지 생성
+    const messageData = {
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor: `${this.name} 공격 굴림`,
+      content: `<div class="dice-roll">
+        <div class="dice-result">
+          <div class="dice-formula">${rollFormula}</div>
+          <div class="dice-tooltip">
+            <section class="tooltip-part">
+              <div class="dice">
+                <header class="part-header flexrow">
+                  <span class="part-formula">${rollFormula}</span>
+                  <span class="part-total">${roll.total}</span>
+                </header>
+              </div>
+            </section>
+          </div>
+          <h4 class="dice-total">${roll.total}</h4>
+        </div>
+      </div>`
+    };
+    
+    ChatMessage.create(messageData);
+  }
+  
+  /**
+   * 무기 피해 굴림
+   */
+  async rollDamage() {
+    console.log("CWN | 무기 피해 굴림:", this.name);
+    
+    if (this.type !== "weapon") {
+      ui.notifications.warn("무기 아이템만 피해 굴림을 할 수 있습니다.");
+      return;
+    }
+    
+    // 피해 굴림 로직 구현
+    const damageFormula = this.system.damage || "1d6";
+    const roll = new Roll(damageFormula);
+    await roll.evaluate();
+    
+    // 채팅 메시지 생성
+    const messageData = {
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor: `${this.name} 피해 굴림`,
+      content: `<div class="dice-roll">
+        <div class="dice-result">
+          <div class="dice-formula">${damageFormula}</div>
+          <div class="dice-tooltip">
+            <section class="tooltip-part">
+              <div class="dice">
+                <header class="part-header flexrow">
+                  <span class="part-formula">${damageFormula}</span>
+                  <span class="part-total">${roll.total}</span>
+                </header>
+              </div>
+            </section>
+          </div>
+          <h4 class="dice-total">${roll.total}</h4>
+        </div>
+      </div>`
+    };
+    
+    ChatMessage.create(messageData);
+  }
+  
+  /**
+   * 일반 아이템 굴림
+   */
+  async roll() {
+    console.log("CWN | 아이템 굴림:", this.name);
+    
+    // 아이템 정보를 채팅에 표시
+    const chatData = {
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor: `${this.name}`,
+      content: await TextEditor.enrichHTML(this.system.description, {async: true})
+    };
+    
+    ChatMessage.create(chatData);
+  }
 } 
