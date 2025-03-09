@@ -40,6 +40,24 @@ Hooks.once("init", async function() {
     types: ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"]
   });
   
+  // 아이템 시트 클래스 설정
+  CONFIG.Item.sheetClasses.cwn = CONFIG.Item.sheetClasses.cwn || {};
+  CONFIG.Item.sheetClasses.cwn.base = {
+    id: "cwn",
+    label: "CWN.SheetClassItem",
+    cls: CWNItemSheet
+  };
+  
+  // 아이템 타입별 시트 클래스 설정
+  const itemTypes = ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"];
+  itemTypes.forEach(type => {
+    CONFIG.Item.sheetClasses.cwn[type] = {
+      id: `cwn.${type}`,
+      label: `CWN.SheetClassItem.${type}`,
+      cls: CWNItemSheet
+    };
+  });
+  
   // 아이템 시트 클래스 확인
   console.log("CWN | Item sheet classes after registration:", CONFIG.Item.sheetClasses);
 
@@ -774,8 +792,48 @@ Hooks.on("renderDialog", (dialog, html, data) => {
 // 아이템 시트 렌더링 훅 추가
 Hooks.on("renderItemSheet", (app, html, data) => {
   console.log("CWN | renderItemSheet hook called for:", app.item?.name, app.item?.type);
+  console.log("CWN | Item sheet app:", app);
+  console.log("CWN | Item sheet html:", html);
+  console.log("CWN | Item sheet data:", data);
   
   try {
+    // 시트 내용이 비어있는지 확인
+    if (html.find('.sheet-body').length === 0) {
+      console.warn("CWN | 아이템 시트 내용이 비어있습니다. 템플릿이 제대로 로드되지 않았을 수 있습니다.");
+      
+      // 기본 시트 구조 추가
+      const sheetContent = html.find('form');
+      if (sheetContent.length > 0 && sheetContent.children().length <= 1) {
+        console.log("CWN | 기본 시트 구조 추가 시도");
+        
+        // 기본 시트 구조 생성
+        const sheetStructure = $(`
+          <nav class="sheet-tabs tabs" data-group="primary">
+            <a class="item active" data-tab="description">설명</a>
+            <a class="item" data-tab="attributes">속성</a>
+            <a class="item" data-tab="effects">효과</a>
+          </nav>
+          <section class="sheet-body">
+            <div class="tab description active" data-group="primary" data-tab="description">
+              <div class="editor-content">
+                <textarea name="system.description">${data.system?.description || ""}</textarea>
+              </div>
+            </div>
+            <div class="tab attributes" data-group="primary" data-tab="attributes">
+              <p>아이템 타입: ${data.type || "알 수 없음"}</p>
+              <p>아이템 속성을 표시하는 부분입니다.</p>
+            </div>
+            <div class="tab effects" data-group="primary" data-tab="effects">
+              <p>아이템 효과를 표시하는 부분입니다.</p>
+            </div>
+          </section>
+        `);
+        
+        sheetContent.append(sheetStructure);
+        console.log("CWN | 기본 시트 구조 추가 완료");
+      }
+    }
+    
     // 탭 초기화 로직 개선
     const tabs = html.find('.tabs');
     const tabsContent = html.find('.tab');
