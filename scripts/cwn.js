@@ -823,16 +823,21 @@ Hooks.on("renderItemSheet", (app, html, data) => {
         const descriptionEditor = html.find('textarea[name="system.description"]');
         if (descriptionEditor.length > 0) {
           console.log("CWN | 설명 에디터 초기화");
-          descriptionEditor.each((i, el) => {
-            const editor = new TextEditor(el, {
-              content: itemData.system?.description || "",
-              target: el.name,
+          try {
+            // Foundry v12에서는 TextEditor.create 메서드를 사용
+            const editorOptions = {
+              target: "system.description",
               button: true,
               owner: app.isEditable,
               editable: app.isEditable
-            });
-            editor.render(true);
-          });
+            };
+            
+            // 에디터 초기화
+            TextEditor.enrichHTML(descriptionEditor.val(), editorOptions);
+            console.log("CWN | 에디터 초기화 완료");
+          } catch (error) {
+            console.error("CWN | 에디터 초기화 중 오류 발생:", error);
+          }
         }
       }
     }
