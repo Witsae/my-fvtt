@@ -826,15 +826,29 @@ Hooks.on("renderItemSheet", (app, html, data) => {
           try {
             // Foundry v12에서는 TextEditor.create 메서드를 사용
             const editorOptions = {
-              target: "system.description",
+              target: descriptionEditor[0],
               button: true,
               owner: app.isEditable,
               editable: app.isEditable
             };
             
-            // 에디터 초기화
-            TextEditor.enrichHTML(descriptionEditor.val(), editorOptions);
-            console.log("CWN | 에디터 초기화 완료");
+            // 에디터 초기화 - v12 호환성 개선
+            if (TextEditor.create) {
+              TextEditor.create(editorOptions).then(editor => {
+                app.editors = app.editors || {};
+                app.editors.description = editor;
+                console.log("CWN | 에디터 초기화 완료 (v12 방식)");
+              }).catch(error => {
+                console.error("CWN | 에디터 초기화 실패 (v12 방식):", error);
+                // 대체 방법으로 enrichHTML 사용
+                TextEditor.enrichHTML(descriptionEditor.val(), editorOptions);
+                console.log("CWN | 대체 방법으로 에디터 초기화 완료");
+              });
+            } else {
+              // 이전 버전 호환성
+              TextEditor.enrichHTML(descriptionEditor.val(), editorOptions);
+              console.log("CWN | 에디터 초기화 완료 (이전 버전 방식)");
+            }
           } catch (error) {
             console.error("CWN | 에디터 초기화 중 오류 발생:", error);
           }

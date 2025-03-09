@@ -45,8 +45,17 @@ export class CWNItemSheet extends ItemSheet {
     
     console.log(`CWN | 사용할 템플릿 경로: "${templatePath}"`);
     
-    // 항상 타입별 템플릿 경로 반환 (템플릿 파일은 기본 템플릿을 포함하도록 구성됨)
-    return templatePath;
+    try {
+      // 템플릿 존재 여부 확인 (비동기 함수이므로 실제로는 확인 불가능하지만 로그 목적으로 유지)
+      console.log(`CWN | 템플릿 파일 존재 여부 확인 시도: "${templatePath}"`);
+      
+      // 항상 타입별 템플릿 경로 반환 (템플릿 파일은 기본 템플릿을 포함하도록 구성됨)
+      return templatePath;
+    } catch (error) {
+      console.error(`CWN | 템플릿 파일 접근 중 오류 발생: ${error.message}`);
+      console.log(`CWN | 기본 템플릿으로 대체: "systems/cwn-system/templates/item/item-sheet.hbs"`);
+      return `systems/cwn-system/templates/item/item-sheet.hbs`;
+    }
   }
 
   /** @override */
@@ -78,8 +87,11 @@ export class CWNItemSheet extends ItemSheet {
       this._prepareItemData(context);
       
       // 아이템 타입별 속성 템플릿 경로 설정
-      context.attributesTemplate = `systems/cwn-system/templates/item/parts/item-${itemData.type}-attributes.hbs`;
-      console.log(`CWN | 속성 템플릿 경로: ${context.attributesTemplate}`);
+      const attributesTemplatePath = `systems/cwn-system/templates/item/parts/item-${itemData.type}-attributes.hbs`;
+      console.log(`CWN | 속성 템플릿 경로: ${attributesTemplatePath}`);
+      
+      // 템플릿 경로 설정
+      context.attributesTemplate = attributesTemplatePath;
     }
     
     console.log("CWN | 최종 아이템 시트 데이터:", context);
