@@ -28,33 +28,40 @@ export class CWNItemSheet extends ItemSheet {
 
   /** @override */
   get template() {
-    console.log(`CWN | 아이템 시트 템플릿 요청 - 아이템: "${this.item?.name}", 타입: "${this.item?.type}"`);
+    const itemType = this.item.type;
+    const path = `systems/cwn-system/templates/item/item-${itemType}-sheet.hbs`;
+    console.log(`CWN | 아이템 시트 템플릿 요청: ${path}`);
     
-    // 아이템 타입이 없는 경우 기본 템플릿 반환
-    if (!this.item?.type) {
-      console.warn("CWN | 아이템에 타입이 없어 기본 템플릿 사용");
+    // 템플릿 존재 여부 확인
+    fetch(path)
+      .then(response => {
+        console.log(`CWN | 아이템 템플릿 존재 여부: ${response.ok ? '존재함' : '존재하지 않음'}`);
+        if (!response.ok) {
+          console.error(`CWN | 아이템 템플릿을 찾을 수 없음: ${path}, 기본 템플릿 사용`);
+          // 기본 템플릿 경로 확인
+          const defaultPath = `systems/cwn-system/templates/item/item-sheet.hbs`;
+          return fetch(defaultPath).then(defaultResponse => {
+            console.log(`CWN | 기본 아이템 템플릿 존재 여부: ${defaultResponse.ok ? '존재함' : '존재하지 않음'}`);
+          });
+        }
+      })
+      .catch(error => {
+        console.error(`CWN | 아이템 템플릿 확인 중 오류 발생:`, error);
+      });
+    
+    // 템플릿이 없는 경우 기본 템플릿 사용
+    try {
+      const templateExists = !!fetch(path).then(r => r.ok);
+      if (!templateExists) {
+        console.warn(`CWN | 아이템 타입 '${itemType}'에 대한 템플릿이 없어 기본 템플릿 사용`);
+        return `systems/cwn-system/templates/item/item-sheet.hbs`;
+      }
+    } catch (error) {
+      console.error(`CWN | 템플릿 확인 중 오류:`, error);
       return `systems/cwn-system/templates/item/item-sheet.hbs`;
     }
     
-    // 시스템 ID 가져오기
-    const systemId = game.system.id;
-    console.log(`CWN | 현재 시스템 ID: "${systemId}"`);
-    
-    // 아이템 타입별 템플릿 경로
-    const templatePath = `systems/${systemId}/templates/item/item-${this.item.type}-sheet.hbs`;
-    
-    console.log(`CWN | 사용할 템플릿 경로: "${templatePath}"`);
-    
-    // 템플릿 파일 존재 여부 확인 (비동기 함수이므로 실제로는 확인 불가능하지만 로그 목적으로 유지)
-    fetch(templatePath)
-      .then(response => {
-        console.log(`CWN | 템플릿 파일 존재 여부: ${response.ok ? "존재함" : "존재하지 않음"}`);
-      })
-      .catch(error => {
-        console.error(`CWN | 템플릿 파일 확인 중 오류:`, error);
-      });
-    
-    return templatePath;
+    return path;
   }
 
   /** @override */

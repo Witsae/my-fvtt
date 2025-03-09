@@ -16,7 +16,42 @@ import { onManageActiveEffect, prepareActiveEffectCategories } from "./utils/eff
 /* -------------------------------------------- */
 
 Hooks.once("init", async function() {
-  console.log("CWN | 시스템 초기화 시작");
+  console.log(`CWN | 시스템 초기화 시작`);
+  
+  // 디버깅: 액터 시트 등록 확인
+  console.log("CWN | 액터 시트 등록 확인:", {
+    baseClass: ActorSheet,
+    currentConfig: CONFIG.Actor.sheetClasses
+  });
+  
+  // 디버깅: 아이템 시트 등록 확인
+  console.log("CWN | 아이템 시트 등록 확인:", {
+    baseClass: ItemSheet,
+    currentConfig: CONFIG.Item.sheetClasses
+  });
+  
+  // 시스템 ID 확인
+  console.log("CWN | 시스템 ID:", game.system.id);
+  
+  // 기존 시트 등록 해제 및 재등록
+  Actors.unregisterSheet("core", ActorSheet);
+  Items.unregisterSheet("core", ItemSheet);
+  
+  Actors.registerSheet("cwn-system", CWNActorSheet, { makeDefault: true });
+  Items.registerSheet("cwn-system", CWNItemSheet, { makeDefault: true });
+  
+  console.log("CWN | 시트 재등록 완료");
+  
+  // 시스템 스타일 초기화
+  CWN._initializeStyles();
+  
+  // CWN 클래스 및 관련 컴포넌트를 game 객체에 등록
+  game.cwn = {
+    CWN,
+    CWNActor,
+    CWNItem,
+    rollItemMacro
+  };
   
   // 액터 시트 등록 확인
   console.log("CWN | 액터 시트 등록:", {
@@ -96,14 +131,6 @@ Hooks.once("init", async function() {
   registerMacros();
   
   console.log("CWN | 시트 등록 완료");
-  
-  // 게임 전역 객체에 CWN 클래스 등록
-  game.cwn = {
-    CWN,
-    CWNActor,
-    CWNItem,
-    rollItemMacro
-  };
 });
 
 /* -------------------------------------------- */
@@ -1097,64 +1124,58 @@ function _registerItemCategoryLocalization() {
 }
 
 /**
- * Cities Without Number 시스템 클래스
+ * 시스템 스타일 초기화 메서드를 CWN 클래스에 추가
  */
-class CWN {
-  /**
-   * 시스템 스타일 초기화
-   * @private
-   */
-  static _initializeStyles() {
-    console.log("CWN | 시스템 스타일 초기화");
+CWN._initializeStyles = function() {
+  console.log("CWN | 시스템 스타일 초기화");
+  
+  // 전투 관련 스타일 추가
+  const combatStyles = `
+    .dice-total.critical {
+      color: #18520b;
+      font-weight: bold;
+      text-shadow: 0 0 5px #7aff7a;
+    }
     
-    // 전투 관련 스타일 추가
-    const combatStyles = `
-      .dice-total.critical {
-        color: #18520b;
-        font-weight: bold;
-        text-shadow: 0 0 5px #7aff7a;
-      }
-      
-      .dice-total.fumble {
-        color: #aa0200;
-        font-weight: bold;
-        text-shadow: 0 0 5px #ff7a7a;
-      }
-      
-      .tags {
-        margin: 5px 0;
-        font-style: italic;
-        color: #666;
-      }
-      
-      .damage-type {
-        margin: 5px 0;
-        font-style: italic;
-        color: #666;
-      }
-      
-      /* 장착된 아이템 스타일 */
-      .item-equipped {
-        border-left: 3px solid #18520b;
-      }
-      
-      /* 무기 공격 버튼 */
-      .item-control.item-attack {
-        color: #aa0200;
-      }
-      
-      /* 무기 피해 버튼 */
-      .item-control.item-damage {
-        color: #18520b;
-      }
-    `;
+    .dice-total.fumble {
+      color: #aa0200;
+      font-weight: bold;
+      text-shadow: 0 0 5px #ff7a7a;
+    }
     
-    // 스타일 요소 생성 및 추가
-    const styleElement = document.createElement('style');
-    styleElement.id = 'cwn-combat-styles';
-    styleElement.textContent = combatStyles;
-    document.head.appendChild(styleElement);
+    .tags {
+      margin: 5px 0;
+      font-style: italic;
+      color: #666;
+    }
     
-    console.log("CWN | 시스템 스타일 초기화 완료");
-  }
-} 
+    .damage-type {
+      margin: 5px 0;
+      font-style: italic;
+      color: #666;
+    }
+    
+    /* 장착된 아이템 스타일 */
+    .item-equipped {
+      border-left: 3px solid #18520b;
+    }
+    
+    /* 무기 공격 버튼 */
+    .item-control.item-attack {
+      color: #aa0200;
+    }
+    
+    /* 무기 피해 버튼 */
+    .item-control.item-damage {
+      color: #18520b;
+    }
+  `;
+  
+  // 스타일 요소 생성 및 추가
+  const styleElement = document.createElement('style');
+  styleElement.id = 'cwn-combat-styles';
+  styleElement.textContent = combatStyles;
+  document.head.appendChild(styleElement);
+  
+  console.log("CWN | 시스템 스타일 초기화 완료");
+}; 
