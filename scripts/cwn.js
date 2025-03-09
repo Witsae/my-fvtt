@@ -806,23 +806,40 @@ Hooks.on("renderItemSheet", (app, html, data) => {
       if (sheetContent.length > 0 && sheetContent.children().length <= 1) {
         console.log("CWN | 기본 시트 구조 추가 시도");
         
+        // 아이템 데이터 가져오기
+        const item = app.item;
+        const itemData = item.toObject(false);
+        
         // 기본 시트 구조 생성
         const sheetStructure = $(`
+          <header class="sheet-header">
+            <img class="profile-img" src="${itemData.img}" data-edit="img" title="${itemData.name}" />
+            <div class="header-details">
+              <h1 class="charname">
+                <input name="name" type="text" value="${itemData.name}" placeholder="이름" />
+              </h1>
+            </div>
+          </header>
+          
           <nav class="sheet-tabs tabs" data-group="primary">
             <a class="item active" data-tab="description">설명</a>
             <a class="item" data-tab="attributes">속성</a>
             <a class="item" data-tab="effects">효과</a>
           </nav>
+          
           <section class="sheet-body">
             <div class="tab description active" data-group="primary" data-tab="description">
               <div class="editor-content">
-                <textarea name="system.description">${data.system?.description || ""}</textarea>
+                <textarea name="system.description">${itemData.system?.description || ""}</textarea>
               </div>
             </div>
+            
             <div class="tab attributes" data-group="primary" data-tab="attributes">
-              <p>아이템 타입: ${data.type || "알 수 없음"}</p>
-              <p>아이템 속성을 표시하는 부분입니다.</p>
+              <div class="item-attributes">
+                ${getAttributesHTML(itemData)}
+              </div>
             </div>
+            
             <div class="tab effects" data-group="primary" data-tab="effects">
               <p>아이템 효과를 표시하는 부분입니다.</p>
             </div>
@@ -831,6 +848,22 @@ Hooks.on("renderItemSheet", (app, html, data) => {
         
         sheetContent.append(sheetStructure);
         console.log("CWN | 기본 시트 구조 추가 완료");
+        
+        // 에디터 초기화
+        const descriptionEditor = html.find('textarea[name="system.description"]');
+        if (descriptionEditor.length > 0) {
+          console.log("CWN | 설명 에디터 초기화");
+          descriptionEditor.each((i, el) => {
+            const editor = new TextEditor(el, {
+              content: itemData.system?.description || "",
+              target: el.name,
+              button: true,
+              owner: app.isEditable,
+              editable: app.isEditable
+            });
+            editor.render(true);
+          });
+        }
       }
     }
     
@@ -864,6 +897,81 @@ Hooks.on("renderItemSheet", (app, html, data) => {
     console.error("CWN | Error initializing item sheet tabs:", error);
   }
 });
+
+/**
+ * 아이템 타입별 속성 HTML 생성
+ * @param {Object} itemData 아이템 데이터
+ * @returns {string} 속성 HTML
+ */
+function getAttributesHTML(itemData) {
+  const type = itemData.type;
+  const system = itemData.system;
+  
+  console.log(`CWN | 아이템 속성 HTML 생성 - 타입: "${type}"`, system);
+  
+  let html = `<p>아이템 타입: ${type}</p>`;
+  
+  // 무기 속성
+  if (type === 'weapon') {
+    html += `
+      <div class="form-group">
+        <label>피해량</label>
+        <div class="form-fields">
+          <input type="text" name="system.damage" value="${system.damage || '1d6'}" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>사거리</label>
+        <div class="form-fields">
+          <input type="text" name="system.range" value="${system.range || 'melee'}" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>공격 보너스</label>
+        <div class="form-fields">
+          <input type="number" name="system.attackBonus" value="${system.attackBonus || 0}" />
+        </div>
+      </div>
+    `;
+  }
+  // 방어구 속성
+  else if (type === 'armor') {
+    html += `
+      <div class="form-group">
+        <label>AC</label>
+        <div class="form-fields">
+          <input type="number" name="system.ac" value="${system.ac || 10}" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>근접 AC</label>
+        <div class="form-fields">
+          <input type="number" name="system.meleeAC" value="${system.meleeAC || 10}" />
+        </div>
+      </div>
+    `;
+  }
+  // 기술 속성
+  else if (type === 'skill') {
+    html += `
+      <div class="form-group">
+        <label>레벨</label>
+        <div class="form-fields">
+          <input type="number" name="system.level" value="${system.level || 0}" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>능력치</label>
+        <div class="form-fields">
+          <input type="text" name="system.attribute" value="${system.attribute || 'int'}" />
+        </div>
+      </div>
+    `;
+  }
+  // 기타 아이템 타입에 대한 속성 추가 가능
+  
+  return html;
+}
 
 // 아이템 시트 준비 디버깅
 Hooks.on("preRenderItemSheet", (app, data) => {

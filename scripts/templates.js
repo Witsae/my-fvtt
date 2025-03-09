@@ -22,18 +22,8 @@ export async function preloadHandlebarsTemplates() {
     "systems/cwn-system/templates/item/parts/item-attributes.hbs",
     "systems/cwn-system/templates/item/parts/item-effects.hbs",
     
-    // Item type-specific templates
+    // 기본 아이템 시트 템플릿
     "systems/cwn-system/templates/item/item-sheet.hbs",
-    "systems/cwn-system/templates/item/item-weapon-sheet.hbs",
-    "systems/cwn-system/templates/item/item-armor-sheet.hbs",
-    "systems/cwn-system/templates/item/item-skill-sheet.hbs",
-    "systems/cwn-system/templates/item/item-focus-sheet.hbs",
-    "systems/cwn-system/templates/item/item-gear-sheet.hbs",
-    "systems/cwn-system/templates/item/item-cyberware-sheet.hbs",
-    "systems/cwn-system/templates/item/item-drug-sheet.hbs",
-    "systems/cwn-system/templates/item/item-asset-sheet.hbs",
-    "systems/cwn-system/templates/item/item-power-sheet.hbs",
-    "systems/cwn-system/templates/item/item-vehicle-sheet.hbs",
     
     // Item type-specific attribute templates
     "systems/cwn-system/templates/item/parts/item-weapon-attributes.hbs",
