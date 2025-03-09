@@ -425,67 +425,35 @@ function registerMacros() {
 
 Hooks.once("ready", async function() {
   console.log("CWN | Cities Without Number System Ready");
-  console.log("CWN | Item sheet classes at ready:", CONFIG.Item.sheetClasses);
+  console.log("CWN | Item sheet classes at ready:", game.system.documentTypes.Item.reduce((acc, type) => {
+    acc[type] = game.system.template.Item[type] || {};
+    return acc;
+  }, {base: game.system.model.Item}));
   
-  // Verify settings are registered
+  // 시스템 설정 확인
   try {
     const enableSanity = game.settings.get("cwn-system", "enableSanity");
-    console.log("CWN | enableSanity setting:", enableSanity);
+    console.log(`CWN | enableSanity setting: ${enableSanity}`);
   } catch (error) {
-    console.error("CWN | Error accessing settings:", error);
+    console.warn("CWN | Error accessing settings:", error);
   }
   
-  // Add global chat command for rolling skills
+  // CWN 클래스 및 관련 컴포넌트를 game 객체에 등록
   game.cwn = {
-    rollSkill: (skillName, actorId) => {
-      const actor = game.actors.get(actorId);
-      if (!actor) {
-        ui.notifications.error("Actor not found");
-        return;
-      }
-      return actor.rollSkill(skillName);
-    },
-    rollSave: (saveId, actorId) => {
-      const actor = game.actors.get(actorId);
-      if (!actor) {
-        ui.notifications.error("Actor not found");
-        return;
-      }
-      return actor.rollSave(saveId);
-    },
-    rollAttribute: (attributeName, actorId) => {
-      return game.macros.rollAttribute(attributeName, actorId);
-    },
-    rollWeaponAttack: (weaponName, actorId) => {
-      return game.macros.rollWeaponAttack(weaponName, actorId);
-    },
-    ValidatedDialog,
-    ItemClassMap
+    CWN,
+    CWNActor,
+    CWNItem,
+    rollItemMacro
   };
   
-  // 매크로 바로가기 등록
-  if (game.user.isGM) {
-    createMacroShortcuts();
-  }
-  
-  // 스타일 초기화
+  // 시스템 스타일 초기화
   CWN._initializeStyles();
   
   // 아이템 분류 시스템 초기화
   _initializeItemCategories();
   
-  // 시스템 정보 확인
   console.log("CWN | 시스템 준비 완료");
-  console.log("CWN | 시스템 정보:", {
-    id: game.system.id,
-    data: game.system,
-    moduleData: game.modules
-  });
-  
-  // 시스템 ID가 'cwn-system'이 아닌 경우 경고
-  if (game.system.id !== 'cwn-system') {
-    console.warn(`CWN | 시스템 ID가 예상과 다릅니다: ${game.system.id} (예상: cwn-system)`);
-  }
+  console.log("CWN | 시스템 정보:", game.system);
 });
 
 /**
@@ -1056,15 +1024,15 @@ Hooks.on("updateItem", (item, changes, options, userId) => {
 function _initializeItemCategories() {
   console.log("CWN | 아이템 분류 시스템 초기화");
   
-  // 아이템 카테고리 정의 확인
-  if (!CWNItem.categories) {
-    console.error("CWN | 아이템 카테고리 정의를 찾을 수 없습니다.");
-    return;
-  }
-  
-  // 아이템 태그 정의 확인
-  if (!CWNItem.tagCategories) {
-    console.error("CWN | 아이템 태그 정의를 찾을 수 없습니다.");
+  // CWNItem 클래스에 카테고리 정의 추가
+  if (CWNItem) {
+    CWNItem.categories = ITEM_CATEGORIES;
+    CWNItem.tagCategories = ITEM_TAG_CATEGORIES;
+    
+    console.log("CWN | 아이템 카테고리 정의 완료:", CWNItem.categories);
+    console.log("CWN | 아이템 태그 카테고리 정의 완료:", CWNItem.tagCategories);
+  } else {
+    console.error("CWN | CWNItem 클래스를 찾을 수 없습니다.");
     return;
   }
   
@@ -1186,7 +1154,7 @@ CWN._initializeStyles = function() {
 };
 
 // 아이템 카테고리 정의
-CWNItem.categories = {
+const ITEM_CATEGORIES = {
   weapon: {
     label: "CWN.ItemCategory.Weapons",
     types: ["weapon"],
@@ -1230,7 +1198,7 @@ CWNItem.categories = {
 };
 
 // 아이템 태그 카테고리 정의
-CWNItem.tagCategories = {
+const ITEM_TAG_CATEGORIES = {
   weaponType: {
     label: "CWN.TagCategory.WeaponType",
     tags: ["melee", "ranged", "thrown", "explosive"]

@@ -12,24 +12,23 @@ export async function preloadHandlebarsTemplates() {
   // 템플릿 경로 정의
   const templatePaths = [
     // 액터 템플릿
-    `systems/cwn-system/templates/actor/actor-character-sheet.hbs`,
-    `systems/cwn-system/templates/actor/actor-npc-sheet.hbs`,
-    `systems/cwn-system/templates/actor/actor-vehicle-sheet.hbs`,
+    `systems/${systemId}/templates/actor/actor-character-sheet.hbs`,
+    `systems/${systemId}/templates/actor/actor-npc-sheet.hbs`,
     
     // 아이템 템플릿
-    `systems/cwn-system/templates/item/item-sheet.hbs`,
-    `systems/cwn-system/templates/item/item-armor-sheet.hbs`,
-    `systems/cwn-system/templates/item/item-weapon-sheet.hbs`,
-    `systems/cwn-system/templates/item/item-equipment-sheet.hbs`,
-    `systems/cwn-system/templates/item/item-cyberware-sheet.hbs`,
-    `systems/cwn-system/templates/item/item-focus-sheet.hbs`,
+    `systems/${systemId}/templates/item/item-sheet.hbs`,
+    `systems/${systemId}/templates/item/item-armor-sheet.hbs`,
+    `systems/${systemId}/templates/item/item-weapon-sheet.hbs`,
+    `systems/${systemId}/templates/item/item-gear-sheet.hbs`,
+    `systems/${systemId}/templates/item/item-cyberware-sheet.hbs`,
+    `systems/${systemId}/templates/item/item-focus-sheet.hbs`,
     
     // 부분 템플릿
-    `systems/cwn-system/templates/actor/parts/actor-features.hbs`,
-    `systems/cwn-system/templates/actor/parts/actor-items.hbs`,
-    `systems/cwn-system/templates/actor/parts/actor-spells.hbs`,
-    `systems/cwn-system/templates/actor/parts/actor-effects.hbs`,
-    `systems/cwn-system/templates/item/parts/item-attributes.hbs`
+    `systems/${systemId}/templates/actor/parts/actor-features.hbs`,
+    `systems/${systemId}/templates/actor/parts/actor-items.hbs`,
+    `systems/${systemId}/templates/actor/parts/actor-spells.hbs`,
+    `systems/${systemId}/templates/actor/parts/actor-effects.hbs`,
+    `systems/${systemId}/templates/item/parts/item-attributes.hbs`
   ];
   
   // 각 템플릿 경로 확인

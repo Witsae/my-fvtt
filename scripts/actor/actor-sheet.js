@@ -167,7 +167,8 @@ export class CWNActorSheet extends ActorSheet {
     console.log("CWN | 아이템 카테고리별 그룹화 시작");
     
     // 카테고리 정의 확인
-    if (!CWNItem.categories) {
+    const itemCategories = game.cwn?.CWNItem?.categories;
+    if (!itemCategories) {
       console.error("CWN | 아이템 카테고리 정의를 찾을 수 없습니다.");
       return {};
     }
@@ -176,7 +177,7 @@ export class CWNActorSheet extends ActorSheet {
     const result = {};
     
     // 각 카테고리 초기화
-    Object.entries(CWNItem.categories).forEach(([key, category]) => {
+    Object.entries(itemCategories).forEach(([key, category]) => {
       result[key] = {
         label: category.label,
         icon: category.icon,
@@ -189,7 +190,7 @@ export class CWNActorSheet extends ActorSheet {
       let assigned = false;
       
       // 아이템 타입에 맞는 카테고리 찾기
-      Object.entries(CWNItem.categories).forEach(([key, category]) => {
+      Object.entries(itemCategories).forEach(([key, category]) => {
         if (category.types.includes(item.type)) {
           result[key].items.push(item);
           assigned = true;
@@ -197,7 +198,7 @@ export class CWNActorSheet extends ActorSheet {
       });
       
       // 할당되지 않은 아이템은 기타 카테고리에 추가
-      if (!assigned) {
+      if (!assigned && result.other) {
         result.other.items.push(item);
       }
     });
@@ -282,177 +283,59 @@ export class CWNActorSheet extends ActorSheet {
 
   /* -------------------------------------------- */
 
-  /** @override */
+  /**
+   * 이벤트 리스너 활성화
+   * @param {jQuery} html 
+   */
   activateListeners(html) {
     super.activateListeners(html);
+    
+    console.log("CWN | 액터 시트 이벤트 리스너 활성화");
 
-    // 기존 아이템 상호작용 이벤트 리스너
-    // Render the item sheet for viewing/editing prior to the editable check.
-    html.find('.item-edit').click(ev => {
-      ev.preventDefault();
-      const li = $(ev.currentTarget).closest(".item");
-      const itemId = li.attr("data-item-id");
-      const item = this.actor.items.get(itemId);
-      if (item) {
-        this._openItemSheet(item);
-      }
-    });
-
-    // Item name click to open sheet
-    html.find('.item-name').click(ev => {
-      ev.preventDefault();
-      if ($(ev.target).hasClass('rollable')) return;
-      
-      const li = $(ev.currentTarget).closest(".item");
-      const itemId = li.attr("data-item-id");
-      const item = this.actor.items.get(itemId);
-      
-      if (item) {
-        this._openItemSheet(item);
-      } else {
-        console.error("Item not found with ID:", itemId);
-      }
-    });
-
-    // Direct item click handler
-    html.find('li.item').click(ev => {
-      // Skip if clicking on controls
-      if ($(ev.target).closest('.item-controls').length) return;
-      if ($(ev.target).hasClass('rollable')) return;
-      if ($(ev.target).hasClass('item-name')) return; // Already handled above
-      
-      // Get the item
-      const li = $(ev.currentTarget);
-      const itemId = li.attr("data-item-id");
-      const item = this.actor.items.get(itemId);
-      
-      if (item) {
-        this._openItemSheet(item);
-      } else {
-        console.error("Item not found with ID:", itemId);
-      }
-    });
+    // 모든 버튼에 대한 클릭 이벤트 처리
+    html.find('button').click(this._onButtonClick.bind(this));
     
-    // 무기 공격 굴림 버튼
-    html.find('.item-control.item-attack').click(ev => {
-      ev.preventDefault();
-      const li = $(ev.currentTarget).closest(".item");
-      const itemId = li.attr("data-item-id");
-      const item = this.actor.items.get(itemId);
-      
-      if (item && item.type === 'weapon') {
-        item.rollAttack();
-      }
-    });
-    
-    // 무기 피해 굴림 버튼
-    html.find('.item-control.item-damage').click(ev => {
-      ev.preventDefault();
-      const li = $(ev.currentTarget).closest(".item");
-      const itemId = li.attr("data-item-id");
-      const item = this.actor.items.get(itemId);
-      
-      if (item && item.type === 'weapon') {
-        item.rollDamage();
-      }
-    });
-    
-    // 새로운 아이템 분류 시스템 이벤트 리스너
-    // 아이템 필터링 및 정렬 기능
-    html.find('[data-action="search-items"]').on('input', this._onSearchItems.bind(this));
-    html.find('[data-action="filter-items"]').on('click', this._onFilterItems.bind(this));
-    html.find('[data-action="sort-items"]').on('click', this._onSortItems.bind(this));
-    html.find('[data-action="toggle-category"]').on('click', this._onToggleCategory.bind(this));
-    html.find('.item-control.item-equip').on('click', this._onToggleItemEquipped.bind(this));
-    html.find('.item-control.item-unequip').on('click', this._onToggleItemEquipped.bind(this));
-    
-    // 아이템 생성 드롭다운 메뉴
-    html.find('.item-create-button').on('click', event => {
-      event.preventDefault();
-      const dropdown = event.currentTarget.nextElementSibling;
-      dropdown.classList.toggle('show');
-    });
-    
-    // 필터 드롭다운 메뉴
-    html.find('.filter-dropdown-button').on('click', event => {
-      event.preventDefault();
-      const dropdown = event.currentTarget.nextElementSibling;
-      dropdown.classList.toggle('show');
-    });
-    
-    // 정렬 드롭다운 메뉴
-    html.find('.sort-dropdown-button').on('click', event => {
-      event.preventDefault();
-      const dropdown = event.currentTarget.nextElementSibling;
-      dropdown.classList.toggle('show');
-    });
-    
-    // 드롭다운 외부 클릭 시 닫기
-    document.addEventListener('click', event => {
-      if (!event.target.matches('.item-create-button') && 
-          !event.target.matches('.filter-dropdown-button') && 
-          !event.target.matches('.sort-dropdown-button')) {
-        const dropdowns = html.find('.item-create-dropdown-content, .filter-dropdown-content, .sort-dropdown-content');
-        dropdowns.each((i, el) => {
-          if (el.classList.contains('show')) {
-            el.classList.remove('show');
-          }
-        });
-      }
-    });
-
-    // -------------------------------------------------------------
-    // Everything below here is only needed if the sheet is editable
-    if (!this.isEditable) return;
-
-    // Add Inventory Item
-    html.find('.item-create').click(this._onItemCreate.bind(this));
-    
-    // Delete Inventory Item
-    html.find('.item-delete').click(ev => {
-      const li = $(ev.currentTarget).closest(".item");
-      const itemId = li.attr("data-item-id");
-      const item = this.actor.items.get(itemId);
-      if (item) {
-        this._deleteItemDialog(item);
-      }
-    });
-    
-    // Active Effect management
-    html.find(".effect-control").click(ev => {
-      const button = ev.currentTarget;
-      const effectId = button.closest(".effect").dataset.effectId;
-      const effect = this.actor.effects.get(effectId);
-      
-      switch (button.dataset.action) {
-        case "toggle":
-          effect.update({disabled: !effect.disabled});
-          break;
-        case "edit":
-          effect.sheet.render(true);
-          break;
-        case "delete":
-          effect.delete();
-          break;
-      }
-    });
-
-    // Rollable abilities.
-    html.find('.rollable').click(this._onRoll.bind(this));
-
-    // Drag events for macros.
+    // 아이템 관련 이벤트
     if (this.actor.isOwner) {
-      let handler = ev => this._onDragStart(ev);
-      html.find('li.item').each((i, li) => {
-        // Ignore for the header row.
-        if (li.classList.contains("item-header")) return;
-        // Add draggable attribute and dragstart listener.
-        li.setAttribute("draggable", "true");
-        li.addEventListener("dragstart", handler, false);
-      });
+      // 아이템 생성
+      html.find('.item-create').click(this._onItemCreate.bind(this));
+      
+      // 아이템 편집
+      html.find('.item-edit').click(this._onItemEdit.bind(this));
+      
+      // 아이템 삭제
+      html.find('.item-delete').click(this._onItemDelete.bind(this));
+      
+      // 아이템 장착 토글
+      html.find('.item-equip').click(this._onToggleItemEquipped.bind(this));
+      
+      // 아이템 복제
+      if (this._onItemDuplicate) {
+        html.find('.item-duplicate').click(this._onItemDuplicate.bind(this));
+      }
+      
+      // 아이템 검색
+      html.find('.item-search').keyup(this._onSearchItems.bind(this));
+      
+      // 아이템 필터
+      html.find('.item-filter').click(this._onFilterItems.bind(this));
+      
+      // 아이템 정렬
+      html.find('.item-sort').click(this._onSortItems.bind(this));
+      
+      // 카테고리 토글
+      html.find('.category-header').click(this._onToggleCategory.bind(this));
     }
+    
+    // 주사위 굴림 이벤트
+    html.find('.rollable').click(this._onRoll.bind(this));
+    
+    // 액티브 이펙트 관리
+    html.find('.effect-control').click(ev => onManageActiveEffect(ev, this.actor));
+    
+    console.log("CWN | 액터 시트 이벤트 리스너 활성화 완료");
   }
-  
+
   /**
    * Shows a dialog to confirm item deletion
    * @param {Item} item The item to delete
@@ -895,5 +778,91 @@ export class CWNActorSheet extends ActorSheet {
         $(categoryEl).show();
       }
     });
+  }
+
+  /**
+   * 버튼 클릭 이벤트 처리
+   * @param {Event} event 
+   * @private
+   */
+  _onButtonClick(event) {
+    event.preventDefault();
+    const button = event.currentTarget;
+    const action = button.dataset.action;
+    
+    console.log(`CWN | 버튼 클릭: ${action}`);
+    
+    // 버튼 액션에 따른 처리
+    switch (action) {
+      case 'roll-ability':
+        this._onRollAbility(event);
+        break;
+      case 'roll-save':
+        this._onRollSave(event);
+        break;
+      case 'roll-skill':
+        this._onRollSkill(event);
+        break;
+      // 추가 액션 처리
+      default:
+        console.log(`CWN | 처리되지 않은 버튼 액션: ${action}`);
+    }
+  }
+  
+  /**
+   * 아이템 생성 이벤트 처리
+   * @param {Event} event 
+   * @private
+   */
+  _onItemCreate(event) {
+    event.preventDefault();
+    const header = event.currentTarget;
+    const type = header.dataset.type;
+    
+    console.log(`CWN | 아이템 생성 요청: ${type}`);
+    
+    const itemData = {
+      name: game.i18n.format("CWN.NewItem", {type: game.i18n.localize(`CWN.ItemType.${type}`)}),
+      type: type,
+      system: {}
+    };
+    
+    return this.actor.createEmbeddedDocuments("Item", [itemData]);
+  }
+  
+  /**
+   * 아이템 편집 이벤트 처리
+   * @param {Event} event 
+   * @private
+   */
+  _onItemEdit(event) {
+    event.preventDefault();
+    const li = event.currentTarget.closest(".item");
+    const itemId = li.dataset.itemId;
+    const item = this.actor.items.get(itemId);
+    
+    console.log(`CWN | 아이템 편집 요청: ${item?.name || itemId}`);
+    
+    if (item) {
+      item.sheet.render(true);
+    }
+  }
+  
+  /**
+   * 아이템 삭제 이벤트 처리
+   * @param {Event} event 
+   * @private
+   */
+  _onItemDelete(event) {
+    event.preventDefault();
+    const li = event.currentTarget.closest(".item");
+    const itemId = li.dataset.itemId;
+    const item = this.actor.items.get(itemId);
+    
+    console.log(`CWN | 아이템 삭제 요청: ${item?.name || itemId}`);
+    
+    if (item) {
+      this._deleteItemDialog(item);
+    }
   }
 } 
