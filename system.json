@@ -33,6 +33,7 @@
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "sanity",
   "url": "https://github.com/Witsae/my-fvtt",
-  "manifest": "https://github.com/Witsae/my-fvtt/releases/download/v1.3.25/system.json",
-  "download": "https://github.com/Witsae/my-fvtt/releases/download/v1.3.25/cwn-system.zip"
+  "manifest": "https://raw.githubusercontent.com/Witsae/my-fvtt/main/system.json",
+  "download": "https://github.com/Witsae/my-fvtt/archive/refs/tags/v1.3.25.zip",
+  "license": "LICENSE"
 } 
