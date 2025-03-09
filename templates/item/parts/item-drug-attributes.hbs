@@ -1,8 +1,22 @@
 <div class="form-group">
   <label>{{localize "CWN.Duration"}}</label>
-  <div class="form-fields">
-    <input type="text" name="system.duration" value="{{system.duration}}" />
-  </div>
+  <input type="text" name="system.duration" value="{{system.duration}}" data-dtype="String"/>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.DrugType"}}</label>
+  <select name="system.type">
+    {{#select system.type}}
+    {{#each drugTypes as |label key|}}
+    <option value="{{key}}">{{localize label}}</option>
+    {{/each}}
+    {{/select}}
+  </select>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Quantity"}}</label>
+  <input type="number" name="system.quantity" value="{{system.quantity}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">
@@ -28,20 +42,21 @@
 
 <div class="form-group">
   <label>{{localize "CWN.Price"}}</label>
-  <div class="form-fields">
-    <input type="text" name="system.price" value="{{system.price}}" />
-  </div>
+  <input type="number" name="system.price" value="{{system.price}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Tags"}}</label>
-  <div class="form-fields tag-list">
-    {{#each system.tags as |tag index|}}
-    <div class="tag-entry">
-      <input type="text" name="system.tags.{{index}}" value="{{tag}}" />
-      <a class="tag-delete" data-index="{{index}}"><i class="fas fa-trash"></i></a>
+  <div class="tags-container">
+    {{#each system.tags as |tag tagIndex|}}
+    <div class="tag">
+      <span class="tag-text">{{tag}}</span>
+      <a class="tag-delete" data-tag-index="{{tagIndex}}"><i class="fas fa-times"></i></a>
     </div>
     {{/each}}
-    <a class="tag-add"><i class="fas fa-plus"></i> {{localize "Add Tag"}}</a>
+    <div class="tag-input-container">
+      <input type="text" class="tag-input" placeholder="{{localize 'CWN.AddTag'}}"/>
+      <button type="button" class="tag-add"><i class="fas fa-plus"></i></button>
+    </div>
   </div>
 </div> 

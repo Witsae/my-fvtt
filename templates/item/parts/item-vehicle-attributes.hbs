@@ -1,56 +1,55 @@
 <div class="form-group">
-  <label>{{localize "CWN.Type"}}</label>
-  <div class="form-fields">
-    <input type="text" name="system.type" value="{{system.type}}" />
-  </div>
+  <label>{{localize "CWN.VehicleType"}}</label>
+  <select name="system.type">
+    {{#select system.type}}
+    {{#each vehicleTypes as |label key|}}
+    <option value="{{key}}">{{localize label}}</option>
+    {{/each}}
+    {{/select}}
+  </select>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Armor"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.armor" value="{{system.armor}}" min="0" />
-  </div>
+  <input type="number" name="system.armor" value="{{system.armor}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.HP"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.hp.value" value="{{system.hp.value}}" min="0" />
-    /
-    <input type="number" name="system.hp.max" value="{{system.hp.max}}" min="0" />
+  <div class="resource">
+    <input type="number" name="system.hp.value" value="{{system.hp.value}}" data-dtype="Number"/>
+    <span>/</span>
+    <input type="number" name="system.hp.max" value="{{system.hp.max}}" data-dtype="Number"/>
   </div>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Speed"}}</label>
-  <div class="form-fields">
-    <input type="text" name="system.speed" value="{{system.speed}}" />
-  </div>
+  <input type="number" name="system.speed" value="{{system.speed}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Crew"}}</label>
-  <div class="form-fields">
-    <input type="text" name="system.crew" value="{{system.crew}}" />
-  </div>
+  <input type="number" name="system.crew" value="{{system.crew}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Price"}}</label>
-  <div class="form-fields">
-    <input type="text" name="system.price" value="{{system.price}}" />
-  </div>
+  <input type="number" name="system.price" value="{{system.price}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.Tags"}}</label>
-  <div class="form-fields tag-list">
-    {{#each system.tags as |tag index|}}
-    <div class="tag-entry">
-      <input type="text" name="system.tags.{{index}}" value="{{tag}}" />
-      <a class="tag-delete" data-index="{{index}}"><i class="fas fa-trash"></i></a>
+  <div class="tags-container">
+    {{#each system.tags as |tag tagIndex|}}
+    <div class="tag">
+      <span class="tag-text">{{tag}}</span>
+      <a class="tag-delete" data-tag-index="{{tagIndex}}"><i class="fas fa-times"></i></a>
     </div>
     {{/each}}
-    <a class="tag-add"><i class="fas fa-plus"></i> {{localize "Add Tag"}}</a>
+    <div class="tag-input-container">
+      <input type="text" class="tag-input" placeholder="{{localize 'CWN.AddTag'}}"/>
+      <button type="button" class="tag-add"><i class="fas fa-plus"></i></button>
+    </div>
   </div>
 </div> 

@@ -14,17 +14,15 @@
 
 <div class="form-group">
   <label>{{localize "CWN.Rating"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.rating" value="{{system.rating}}" min="0" />
-  </div>
+  <input type="number" name="system.rating" value="{{system.rating}}" data-dtype="Number" min="1" max="6"/>
 </div>
 
 <div class="form-group">
   <label>{{localize "CWN.HP"}}</label>
-  <div class="form-fields">
-    <input type="number" name="system.hp.value" value="{{system.hp.value}}" min="0" />
-    /
-    <input type="number" name="system.hp.max" value="{{system.hp.max}}" min="0" />
+  <div class="resource">
+    <input type="number" name="system.hp.value" value="{{system.hp.value}}" data-dtype="Number"/>
+    <span>/</span>
+    <input type="number" name="system.hp.max" value="{{system.hp.max}}" data-dtype="Number"/>
   </div>
 </div>
 
@@ -51,9 +49,7 @@
 
 <div class="form-group">
   <label>{{localize "CWN.Cost"}}</label>
-  <div class="form-fields">
-    <input type="text" name="system.cost" value="{{system.cost}}" />
-  </div>
+  <input type="number" name="system.cost" value="{{system.cost}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">
@@ -61,6 +57,11 @@
   <div class="form-fields">
     <input type="text" name="system.upkeep" value="{{system.upkeep}}" />
   </div>
+</div>
+
+<div class="form-group">
+  <label>{{localize "CWN.Maintenance"}}</label>
+  <input type="number" name="system.maintenance" value="{{system.maintenance}}" data-dtype="Number"/>
 </div>
 
 <div class="form-group">

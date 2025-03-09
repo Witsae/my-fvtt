@@ -595,11 +595,11 @@ Hooks.on("renderDialog", (dialog, html, data) => {
         <label>Type</label>
         <div class="form-fields">
           <select name="type">
-            <option value="gear">Gear</option>
             <option value="weapon">Weapon</option>
             <option value="armor">Armor</option>
             <option value="skill">Skill</option>
             <option value="focus">Focus</option>
+            <option value="gear">Gear</option>
             <option value="cyberware">Cyberware</option>
             <option value="drug">Drug</option>
             <option value="asset">Asset</option>
@@ -622,7 +622,116 @@ Hooks.on("renderDialog", (dialog, html, data) => {
       const name = form.name.value;
       const type = form.type.value;
       console.log("CWN | Form submitted with name:", name, "and type:", type);
-      dialog.data.resolve({ name, type });
+      
+      // 아이템 생성 데이터 준비
+      const itemData = {
+        name: name,
+        type: type,
+        system: {}
+      };
+      
+      // 아이템 타입별 기본 데이터 설정
+      if (type === "weapon") {
+        itemData.system = {
+          damage: "1d6",
+          range: "melee",
+          attackBonus: 0,
+          attribute: "str",
+          ammo: { value: 0, max: 0 },
+          tags: [],
+          price: 0,
+          weight: 1,
+          location: "readied",
+          equipped: false
+        };
+      } else if (type === "armor") {
+        itemData.system = {
+          ac: 10,
+          meleeAC: 10,
+          type: "light",
+          traumaDiePenalty: 0,
+          tags: [],
+          price: 0,
+          weight: 1,
+          location: "readied"
+        };
+      } else if (type === "skill") {
+        itemData.system = {
+          level: 0,
+          attribute: "int",
+          category: "standard",
+          specialty: "",
+          source: ""
+        };
+      } else if (type === "focus") {
+        itemData.system = {
+          level: 1,
+          prerequisites: "",
+          levelEffects: {
+            level1: "",
+            level2: ""
+          },
+          source: ""
+        };
+      } else if (type === "gear") {
+        itemData.system = {
+          quantity: 1,
+          price: 0,
+          weight: 0.1,
+          location: "stowed",
+          tags: []
+        };
+      } else if (type === "cyberware") {
+        itemData.system = {
+          systemStrain: 1,
+          location: "body",
+          type: "implant",
+          price: 0,
+          tags: []
+        };
+      } else if (type === "drug") {
+        itemData.system = {
+          duration: "1 hour",
+          type: "medical",
+          price: 0,
+          quantity: 1,
+          tags: []
+        };
+      } else if (type === "asset") {
+        itemData.system = {
+          rating: 1,
+          type: "military",
+          cost: 1,
+          maintenance: 0,
+          hp: { value: 1, max: 1 }
+        };
+      } else if (type === "power") {
+        itemData.system = {
+          level: 1,
+          type: "psychic",
+          cost: 0,
+          tags: []
+        };
+      } else if (type === "vehicle") {
+        itemData.system = {
+          type: "ground",
+          speed: 0,
+          armor: 0,
+          hp: { value: 10, max: 10 },
+          crew: 1,
+          price: 0,
+          tags: []
+        };
+      }
+      
+      // 아이템 생성
+      Item.create(itemData).then(item => {
+        console.log("CWN | Item created:", item);
+        if (item) {
+          item.sheet.render(true);
+        }
+      });
+      
       dialog.close();
     });
   }
