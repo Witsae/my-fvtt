@@ -425,10 +425,24 @@ function registerMacros() {
 
 Hooks.once("ready", async function() {
   console.log("CWN | Cities Without Number System Ready");
-  console.log("CWN | Item sheet classes at ready:", game.system.documentTypes.Item.reduce((acc, type) => {
-    acc[type] = game.system.template.Item[type] || {};
-    return acc;
-  }, {base: game.system.model.Item}));
+  
+  // 안전하게 Item 타입 정보 로깅
+  try {
+    if (game.system && game.system.documentTypes && game.system.documentTypes.Item) {
+      console.log("CWN | Item sheet classes at ready:", game.system.documentTypes.Item.reduce((acc, type) => {
+        acc[type] = game.system.template.Item[type] || {};
+        return acc;
+      }, {base: game.system.model.Item}));
+    } else {
+      console.log("CWN | Item 타입 정보를 가져올 수 없습니다:", {
+        hasSystem: !!game.system,
+        hasDocumentTypes: !!(game.system && game.system.documentTypes),
+        documentTypes: game.system?.documentTypes
+      });
+    }
+  } catch (error) {
+    console.error("CWN | Item 타입 정보 로깅 중 오류 발생:", error);
+  }
   
   // 시스템 설정 확인
   try {

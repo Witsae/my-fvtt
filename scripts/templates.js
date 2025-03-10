@@ -26,7 +26,6 @@ export async function preloadHandlebarsTemplates() {
     // 부분 템플릿
     `systems/${systemId}/templates/actor/parts/actor-features.hbs`,
     `systems/${systemId}/templates/actor/parts/actor-items.hbs`,
-    `systems/${systemId}/templates/actor/parts/actor-spells.hbs`,
     `systems/${systemId}/templates/actor/parts/actor-effects.hbs`,
     `systems/${systemId}/templates/item/parts/item-attributes.hbs`
   ];
