@@ -167,7 +167,7 @@ export class CWNActorSheet extends ActorSheet {
     console.log("CWN | 아이템 카테고리별 그룹화 시작");
     
     // 카테고리 정의 확인
-    const itemCategories = game.cwn?.CWNItem?.categories;
+    const itemCategories = game.cwn?.itemCategories;
     if (!itemCategories) {
       console.error("CWN | 아이템 카테고리 정의를 찾을 수 없습니다.");
       return {};
@@ -215,7 +215,7 @@ export class CWNActorSheet extends ActorSheet {
    */
   _groupItemsByTags(items) {
     const taggedItems = {};
-    const tagCategories = game.cwn.CWNItem.tagCategories;
+    const tagCategories = game.cwn.itemTagCategories;
     
     // 태그 카테고리 초기화
     Object.keys(tagCategories).forEach(category => {

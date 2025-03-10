@@ -11,6 +11,70 @@ import { CWNCombatant, CombatUtils } from "./utils/combat.js";
 import { ItemClassMap } from "./items/index.js";
 import { onManageActiveEffect, prepareActiveEffectCategories } from "./utils/effects.js";
 
+// 아이템 카테고리 정의
+const ITEM_CATEGORIES = {
+  weapon: {
+    label: "CWN.ItemCategory.Weapons",
+    types: ["weapon"],
+    icon: "fas fa-sword"
+  },
+  armor: {
+    label: "CWN.ItemCategory.Armor",
+    types: ["armor"],
+    icon: "fas fa-shield"
+  },
+  equipment: {
+    label: "CWN.ItemCategory.Equipment",
+    types: ["gear"],
+    icon: "fas fa-backpack"
+  },
+  cyberware: {
+    label: "CWN.ItemCategory.Cyberware",
+    types: ["cyberware"],
+    icon: "fas fa-microchip"
+  },
+  skills: {
+    label: "CWN.ItemCategory.Skills",
+    types: ["skill"],
+    icon: "fas fa-book"
+  },
+  foci: {
+    label: "CWN.ItemCategory.Foci",
+    types: ["focus"],
+    icon: "fas fa-eye"
+  },
+  powers: {
+    label: "CWN.ItemCategory.Powers",
+    types: ["power"],
+    icon: "fas fa-bolt"
+  },
+  other: {
+    label: "CWN.ItemCategory.Other",
+    types: ["drug", "asset", "vehicle"],
+    icon: "fas fa-box"
+  }
+};
+
+// 아이템 태그 카테고리 정의
+const ITEM_TAG_CATEGORIES = {
+  weaponType: {
+    label: "CWN.TagCategory.WeaponType",
+    tags: ["melee", "ranged", "thrown", "explosive"]
+  },
+  weaponProperty: {
+    label: "CWN.TagCategory.WeaponProperty",
+    tags: ["accurate", "area", "blast", "burst", "concealed", "daze", "fixed", "heavy", "reload", "silent", "smart", "shock", "twoHanded"]
+  },
+  armorType: {
+    label: "CWN.TagCategory.ArmorType",
+    tags: ["light", "medium", "heavy", "powered", "shield"]
+  },
+  equipmentType: {
+    label: "CWN.TagCategory.EquipmentType",
+    tags: ["general", "tool", "medical", "electronic", "survival", "clothing"]
+  }
+};
+
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
 /* -------------------------------------------- */
@@ -450,6 +514,39 @@ Hooks.once("ready", async function() {
     console.log(`CWN | enableSanity setting: ${enableSanity}`);
   } catch (error) {
     console.warn("CWN | Error accessing settings:", error);
+  }
+  
+  // CWNItem 클래스에 카테고리 정보 추가 (getter 메서드 사용)
+  try {
+    if (game.cwn && game.cwn.itemCategories && game.cwn.itemTagCategories) {
+      // CWNItem 클래스에 정적 메서드 추가
+      CWNItem.getCategories = function() {
+        return game.cwn.itemCategories;
+      };
+      
+      CWNItem.getTagCategories = function() {
+        return game.cwn.itemTagCategories;
+      };
+      
+      // 호환성을 위한 별칭 (기존 코드가 categories와 tagCategories를 직접 참조하는 경우)
+      Object.defineProperty(CWNItem, 'categories', {
+        get: function() { return game.cwn.itemCategories; }
+      });
+      
+      Object.defineProperty(CWNItem, 'tagCategories', {
+        get: function() { return game.cwn.itemTagCategories; }
+      });
+      
+      console.log("CWN | CWNItem 클래스에 카테고리 getter 메서드 추가 완료");
+    } else {
+      console.error("CWN | 카테고리 정보를 CWNItem 클래스에 추가할 수 없습니다:", {
+        hasCwn: !!game.cwn,
+        hasItemCategories: !!(game.cwn && game.cwn.itemCategories),
+        hasItemTagCategories: !!(game.cwn && game.cwn.itemTagCategories)
+      });
+    }
+  } catch (error) {
+    console.error("CWN | CWNItem 클래스에 카테고리 정보 추가 중 오류 발생:", error);
   }
   
   // CWN 클래스 및 관련 컴포넌트를 game 객체에 등록
@@ -1038,22 +1135,20 @@ Hooks.on("updateItem", (item, changes, options, userId) => {
 function _initializeItemCategories() {
   console.log("CWN | 아이템 분류 시스템 초기화");
   
-  // CWNItem 클래스에 카테고리 정의 추가
-  if (CWNItem) {
-    CWNItem.categories = ITEM_CATEGORIES;
-    CWNItem.tagCategories = ITEM_TAG_CATEGORIES;
-    
-    console.log("CWN | 아이템 카테고리 정의 완료:", CWNItem.categories);
-    console.log("CWN | 아이템 태그 카테고리 정의 완료:", CWNItem.tagCategories);
-  } else {
-    console.error("CWN | CWNItem 클래스를 찾을 수 없습니다.");
-    return;
+  // 전역 game 객체에 카테고리 정의 추가
+  if (!game.cwn) {
+    game.cwn = {};
   }
   
-  // 로컬라이제이션 키 등록
-  _registerItemCategoryLocalization();
+  // 카테고리 정의 추가
+  game.cwn.itemCategories = ITEM_CATEGORIES;
+  game.cwn.itemTagCategories = ITEM_TAG_CATEGORIES;
   
-  console.log("CWN | 아이템 분류 시스템 초기화 완료");
+  console.log("CWN | 아이템 카테고리 정의 완료:", game.cwn.itemCategories);
+  console.log("CWN | 아이템 태그 카테고리 정의 완료:", game.cwn.itemTagCategories);
+  
+  // 지역화 등록
+  _registerItemCategoryLocalization();
 }
 
 /**
@@ -1063,13 +1158,13 @@ function _initializeItemCategories() {
 function _registerItemCategoryLocalization() {
   // 카테고리 라벨 등록
   const categoryLabels = {};
-  Object.entries(CWNItem.categories).forEach(([key, category]) => {
+  Object.entries(game.cwn.itemCategories).forEach(([key, category]) => {
     categoryLabels[category.label] = category.label.replace("CWN.ItemCategory.", "");
   });
   
   // 태그 라벨 등록
   const tagLabels = {};
-  Object.entries(CWNItem.tagCategories).forEach(([catKey, category]) => {
+  Object.entries(game.cwn.itemTagCategories).forEach(([catKey, category]) => {
     tagLabels[category.label] = category.label.replace("CWN.TagCategory.", "");
     
     category.tags.forEach(tag => {
@@ -1165,74 +1260,6 @@ CWN._initializeStyles = function() {
   document.head.appendChild(styleElement);
   
   console.log("CWN | 시스템 스타일 초기화 완료");
-};
-
-// 아이템 카테고리 정의
-const ITEM_CATEGORIES = {
-  weapon: {
-    label: "CWN.ItemCategory.Weapons",
-    types: ["weapon"],
-    icon: "fas fa-sword"
-  },
-  armor: {
-    label: "CWN.ItemCategory.Armor",
-    types: ["armor"],
-    icon: "fas fa-shield"
-  },
-  equipment: {
-    label: "CWN.ItemCategory.Equipment",
-    types: ["gear"],
-    icon: "fas fa-backpack"
-  },
-  cyberware: {
-    label: "CWN.ItemCategory.Cyberware",
-    types: ["cyberware"],
-    icon: "fas fa-microchip"
-  },
-  skills: {
-    label: "CWN.ItemCategory.Skills",
-    types: ["skill"],
-    icon: "fas fa-book"
-  },
-  foci: {
-    label: "CWN.ItemCategory.Foci",
-    types: ["focus"],
-    icon: "fas fa-eye"
-  },
-  powers: {
-    label: "CWN.ItemCategory.Powers",
-    types: ["power"],
-    icon: "fas fa-bolt"
-  },
-  other: {
-    label: "CWN.ItemCategory.Other",
-    types: ["drug", "asset", "vehicle"],
-    icon: "fas fa-box"
-  }
-};
-
-// 아이템 태그 카테고리 정의
-const ITEM_TAG_CATEGORIES = {
-  weaponType: {
-    label: "CWN.TagCategory.WeaponType",
-    tags: ["melee", "ranged", "thrown", "explosive"]
-  },
-  weaponProperty: {
-    label: "CWN.TagCategory.WeaponProperty",
-    tags: ["accurate", "area", "blast", "burst", "concealed", "daze", "fixed", "heavy", "reload", "silent", "smart", "shock", "twoHanded"]
-  },
-  armorType: {
-    label: "CWN.TagCategory.ArmorType",
-    tags: ["light", "medium", "heavy", "powered", "shield"]
-  },
-  equipmentType: {
-    label: "CWN.TagCategory.EquipmentType",
-    tags: ["general", "tool", "medical", "electronic", "survival", "clothing"]
-  },
-  cyberwareType: {
-    label: "CWN.TagCategory.CyberwareType",
-    tags: ["implant", "enhancement", "replacement"]
-  }
 };
 
 /**
