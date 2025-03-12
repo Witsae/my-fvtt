@@ -3,6 +3,9 @@
  * v12 호환성: 메인 모듈 초기화
  */
 
+// 모듈 ID 설정
+const MODULE_ID = 'cwn-system';
+
 // v12 호환성 패치 적용
 applyV12Compatibility();
 
@@ -81,9 +84,6 @@ function applyV12Compatibility() {
     ui.notifications.error(`v12 호환성 패치 적용 중 오류가 발생했습니다: ${error.message}`);
   }
 }
-
-// 모듈 ID 설정
-const MODULE_ID = 'cwn-system';
 
 // 모듈 초기화
 Hooks.once('init', () => {

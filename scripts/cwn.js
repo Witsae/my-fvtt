@@ -447,17 +447,34 @@ Hooks.once("ready", async function() {
   
   // 안전하게 Item 타입 정보 로깅
   try {
-    if (game.system && game.system.documentTypes && game.system.documentTypes.Item) {
-      console.log("CWN | Item sheet classes at ready:", game.system.documentTypes.Item.reduce((acc, type) => {
-        acc[type] = game.system.template.Item[type] || {};
+    // 시스템 정보 확인
+    if (!game.system) {
+      console.log("CWN | game.system이 정의되지 않았습니다.");
+      return;
+    }
+    
+    // 문서 타입 확인 (v12 호환성: documentTypes 구조 변경)
+    const documentTypes = game.system.documentTypes || {};
+    
+    // Item 타입 정보 로깅
+    if (documentTypes.Item && Array.isArray(documentTypes.Item)) {
+      console.log("CWN | Item sheet classes at ready:", documentTypes.Item.reduce((acc, type) => {
+        acc[type] = game.system.template?.Item?.[type] || {};
         return acc;
-      }, {base: game.system.model.Item}));
+      }, {base: game.system.model?.Item || {}}));
     } else {
-      console.log("CWN | Item 타입 정보를 가져올 수 없습니다:", {
-        hasSystem: !!game.system,
-        hasDocumentTypes: !!(game.system && game.system.documentTypes),
-        documentTypes: game.system?.documentTypes
-      });
+      // v12 호환성: 대체 방법으로 CONFIG.Item.types 사용
+      const itemTypes = CONFIG.Item?.types || [];
+      if (itemTypes.length > 0) {
+        console.log("CWN | Item 타입 정보 (CONFIG.Item.types 사용):", itemTypes);
+      } else {
+        console.log("CWN | Item 타입 정보를 가져올 수 없습니다:", {
+          hasSystem: true,
+          hasDocumentTypes: !!documentTypes,
+          documentTypesKeys: Object.keys(documentTypes),
+          configItemTypes: CONFIG.Item?.types
+        });
+      }
     }
   } catch (error) {
     console.error("CWN | Item 타입 정보 로깅 중 오류 발생:", error);
@@ -515,7 +532,9 @@ Hooks.once("ready", async function() {
   }
   
   // CWN 클래스 및 관련 컴포넌트를 game 객체에 등록
+  // 기존 game.cwn 객체가 있으면 확장하고, 없으면 새로 생성합니다.
   game.cwn = {
+    ...(game.cwn || {}),  // 기존 속성 유지
     CWN,
     CWNActor,
     CWNItem,
@@ -525,8 +544,8 @@ Hooks.once("ready", async function() {
   // 시스템 스타일 초기화
   CWN._initializeStyles();
   
-  // 아이템 분류 시스템 초기화
-  _initializeItemCategories();
+  // 아이템 분류 시스템 초기화는 init 훅에서 이미 수행되었으므로 여기서는 제거합니다.
+  // _initializeItemCategories();
   
   console.log("CWN | 시스템 준비 완료");
   console.log("CWN | 시스템 정보:", game.system);
@@ -857,12 +876,33 @@ Hooks.on("renderDialog", (dialog, html, data) => {
       console.log("CWN | Item.create 메서드 호출 전");
       
       try {
+        // 데이터 유효성 검사
+        if (!itemData.name || itemData.name.trim() === "") {
+          throw new Error("아이템 이름은 필수입니다.");
+        }
+        
+        if (!itemData.type) {
+          throw new Error("아이템 타입은 필수입니다.");
+        }
+        
         // 아이템 생성
         const item = await Item.create(itemData, { renderSheet: true });
         console.log("CWN | 아이템 생성 성공:", item);
+        ui.notifications.info(`아이템 "${itemData.name}"이(가) 성공적으로 생성되었습니다.`);
       } catch (error) {
         console.error("CWN | 아이템 생성 실패:", error);
-        ui.notifications.error(`아이템 생성 실패: ${error.message}`);
+        let errorMessage = `아이템 생성 실패: ${error.message}`;
+        
+        // 오류 유형에 따른 구체적인 메시지
+        if (error.message.includes("permission")) {
+          errorMessage = "아이템 생성 권한이 없습니다. 게임 마스터에게 문의하세요.";
+        } else if (error.message.includes("duplicate")) {
+          errorMessage = `동일한 이름의 아이템 "${itemData.name}"이(가) 이미 존재합니다.`;
+        } else if (error.message.includes("schema")) {
+          errorMessage = `아이템 데이터 구조가 올바르지 않습니다: ${error.message}`;
+        }
+        
+        ui.notifications.error(errorMessage);
       }
       
       // 대화상자 닫기
@@ -891,82 +931,117 @@ Hooks.on("renderItemSheet", (app, html, data) => {
       if (sheetContent.length > 0 && sheetContent.children().length <= 1) {
         console.log("CWN | 기본 시트 구조 추가 시도");
         
-        // 아이템 데이터 가져오기
-        const item = app.item;
-        const itemData = item.toObject(false);
-        
-        // 기본 시트 구조 생성
-        const sheetStructure = $(`
-          <header class="sheet-header">
-            <img class="profile-img" src="${itemData.img}" data-edit="img" title="${itemData.name}" />
-            <div class="header-details">
-              <h1 class="charname">
-                <input name="name" type="text" value="${itemData.name}" placeholder="이름" />
-              </h1>
-            </div>
-          </header>
-          
-          <nav class="sheet-tabs tabs" data-group="primary">
-            <a class="item active" data-tab="description">설명</a>
-            <a class="item" data-tab="attributes">속성</a>
-            <a class="item" data-tab="effects">효과</a>
-          </nav>
-          
-          <section class="sheet-body">
-            <div class="tab description active" data-group="primary" data-tab="description">
-              <div class="editor-content">
-                <textarea name="system.description">${itemData.system?.description || ""}</textarea>
-              </div>
-            </div>
-            
-            <div class="tab attributes" data-group="primary" data-tab="attributes">
-              <div class="item-attributes">
-                ${getAttributesHTML(itemData)}
-              </div>
-            </div>
-            
-            <div class="tab effects" data-group="primary" data-tab="effects">
-              <p>아이템 효과를 표시하는 부분입니다.</p>
-            </div>
-          </section>
-        `);
-        
-        sheetContent.append(sheetStructure);
-        console.log("CWN | 기본 시트 구조 추가 완료");
-        
-        // 에디터 초기화
-        const descriptionEditor = html.find('textarea[name="system.description"]');
-        if (descriptionEditor.length > 0) {
-          console.log("CWN | 설명 에디터 초기화");
-          try {
-            // Foundry v12에서는 TextEditor.create 메서드를 사용
-            const editorOptions = {
-              target: descriptionEditor[0],
-              button: true,
-              owner: app.isEditable,
-              editable: app.isEditable
-            };
-            
-            // 에디터 초기화 - v12 호환성 개선
-            if (TextEditor.create) {
-              TextEditor.create(editorOptions).then(editor => {
-                app.editors = app.editors || {};
-                app.editors.description = editor;
-                console.log("CWN | 에디터 초기화 완료 (v12 방식)");
-              }).catch(error => {
-                console.error("CWN | 에디터 초기화 실패 (v12 방식):", error);
-                // 대체 방법으로 enrichHTML 사용
-                TextEditor.enrichHTML(descriptionEditor.val(), editorOptions);
-                console.log("CWN | 대체 방법으로 에디터 초기화 완료");
-              });
-            } else {
-              // 이전 버전 호환성
-              TextEditor.enrichHTML(descriptionEditor.val(), editorOptions);
-              console.log("CWN | 에디터 초기화 완료 (이전 버전 방식)");
-            }
-          } catch (error) {
-            console.error("CWN | 에디터 초기화 중 오류 발생:", error);
+        try {
+          // 아이템 데이터 가져오기
+          const item = app.item;
+          if (!item) {
+            throw new Error("아이템 데이터를 찾을 수 없습니다.");
           }
+          
+          const itemData = item.toObject(false);
+          
+          // 기본 시트 구조 생성
+          const sheetStructure = $(`
+            <header class="sheet-header">
+              <img class="profile-img" src="${itemData.img}" data-edit="img" title="${itemData.name}" />
+              <div class="header-details">
+                <h1 class="charname">
+                  <input name="name" type="text" value="${itemData.name}" placeholder="이름" />
+                </h1>
+              </div>
+            </header>
+            
+            <nav class="sheet-tabs tabs" data-group="primary">
+              <a class="item active" data-tab="description">설명</a>
+              <a class="item" data-tab="attributes">속성</a>
+              <a class="item" data-tab="effects">효과</a>
+            </nav>
+            
+            <section class="sheet-body">
+              <div class="tab description active" data-group="primary" data-tab="description">
+                <div class="editor-content">
+                  <textarea name="system.description">${itemData.system?.description || ""}</textarea>
+                </div>
+              </div>
+              
+              <div class="tab attributes" data-group="primary" data-tab="attributes">
+                <div class="item-attributes">
+                  ${getAttributesHTML(itemData)}
+                </div>
+              </div>
+              
+              <div class="tab effects" data-group="primary" data-tab="effects">
+                <p>아이템 효과를 표시하는 부분입니다.</p>
+              </div>
+            </section>
+          `);
+          
+          sheetContent.append(sheetStructure);
+          console.log("CWN | 기본 시트 구조 추가 완료");
+          
+          // 에디터 초기화
+          const descriptionEditor = html.find('textarea[name="system.description"]');
+          if (descriptionEditor.length > 0) {
+            console.log("CWN | 설명 에디터 초기화");
+            try {
+              // Foundry v12에서는 TextEditor.create 메서드를 사용
+              const editorOptions = {
+                target: descriptionEditor[0],
+                button: true,
+                owner: app.isEditable,
+                editable: app.isEditable
+              };
+              
+              // 에디터 초기화 - v12 호환성 개선
+              if (TextEditor.create) {
+                TextEditor.create(editorOptions).then(editor => {
+                  app.editors = app.editors || {};
+                  app.editors.description = editor;
+                  console.log("CWN | 에디터 초기화 완료 (v12 방식)");
+                }).catch(error => {
+                  console.error("CWN | 에디터 초기화 실패 (v12 방식):", error);
+                  // 대체 방법으로 enrichHTML 사용
+                  TextEditor.enrichHTML(descriptionEditor.val(), editorOptions);
+                  console.log("CWN | 대체 방법으로 에디터 초기화 완료");
+                });
+              } else {
+                // 이전 버전 호환성
+                TextEditor.enrichHTML(descriptionEditor.val(), editorOptions);
+                console.log("CWN | 에디터 초기화 완료 (이전 버전 방식)");
+              }
+            } catch (editorError) {
+              console.error("CWN | 에디터 초기화 중 오류 발생:", editorError);
+              ui.notifications.warn(`에디터 초기화 중 오류가 발생했습니다: ${editorError.message}`);
+              
+              // 기본 텍스트 영역으로 대체
+              try {
+                descriptionEditor.css({
+                  width: "100%",
+                  height: "200px",
+                  border: "1px solid #ccc",
+                  padding: "5px"
+                });
+              } catch (cssError) {
+                console.error("CWN | 대체 스타일 적용 중 오류 발생:", cssError);
+              }
+            }
+          }
+        } catch (structureError) {
+          console.error("CWN | 기본 시트 구조 추가 중 오류 발생:", structureError);
+          ui.notifications.error(`아이템 시트 구조 생성 중 오류가 발생했습니다: ${structureError.message}`);
+          
+          // 최소한의 기본 구조 추가
+          sheetContent.append(`
+            <div class="error-message">
+              <h2>아이템 시트 로드 오류</h2>
+              <p>아이템 시트를 로드하는 중 오류가 발생했습니다. 다음 정보를 확인하세요:</p>
+              <ul>
+                <li>아이템 타입: ${app.item?.type || "알 수 없음"}</li>
+                <li>템플릿 경로: ${app.template || "알 수 없음"}</li>
+              </ul>
+              <p>문제가 지속되면 게임 마스터에게 문의하세요.</p>
+            </div>
+          `);
         }
       }
     }
@@ -1121,52 +1196,58 @@ function _initializeItemCategories() {
  * @private
  */
 function _registerItemCategoryLocalization() {
-  // 카테고리 라벨 등록
-  const categoryLabels = {};
-  Object.entries(game.cwn.itemCategories).forEach(([key, category]) => {
-    categoryLabels[category.label] = category.label.replace("CWN.ItemCategory.", "");
-  });
-  
-  // 태그 라벨 등록
-  const tagLabels = {};
-  Object.entries(game.cwn.itemTagCategories).forEach(([catKey, category]) => {
-    tagLabels[category.label] = category.label.replace("CWN.TagCategory.", "");
-    
-    category.tags.forEach(tag => {
-      const tagKey = `CWN.Tag.${tag.charAt(0).toUpperCase() + tag.slice(1)}`;
-      tagLabels[tagKey] = tag;
-    });
-  });
-  
-  // 기타 필요한 키 등록
-  const otherLabels = {
-    "CWN.SearchItems": "아이템 검색",
-    "CWN.All": "전체",
-    "CWN.Equipped": "장착됨",
-    "CWN.Categories": "카테고리",
-    "CWN.Tags": "태그",
-    "CWN.SortBy": "정렬",
-    "CWN.EquippedItems": "장착된 아이템",
-    "CWN.AllItems": "모든 아이템",
-    "CWN.Equip": "장착",
-    "CWN.Unequip": "해제"
-  };
-  
-  // 로컬라이제이션 데이터 병합
-  const localizationData = {
-    ...categoryLabels,
-    ...tagLabels,
-    ...otherLabels
-  };
-  
-  // 개발 모드에서만 로그 출력
   try {
-    const debugMode = game.settings.get("core", "debugMode");
+    // core.debugMode 대신 cwn-system.debugMode 사용
+    const debugMode = game.settings.get('cwn-system', 'debugMode') || false;
+    
+    if (debugMode) {
+      console.log("CWN | 아이템 카테고리 지역화 등록 시작");
+    }
+    
+    // 카테고리 라벨 등록
+    const categoryLabels = {};
+    Object.entries(game.cwn.itemCategories).forEach(([key, category]) => {
+      categoryLabels[category.label] = category.label.replace("CWN.ItemCategory.", "");
+    });
+    
+    // 태그 라벨 등록
+    const tagLabels = {};
+    Object.entries(game.cwn.itemTagCategories).forEach(([catKey, category]) => {
+      tagLabels[category.label] = category.label.replace("CWN.TagCategory.", "");
+      
+      category.tags.forEach(tag => {
+        const tagKey = `CWN.Tag.${tag.charAt(0).toUpperCase() + tag.slice(1)}`;
+        tagLabels[tagKey] = tag;
+      });
+    });
+    
+    // 기타 필요한 키 등록
+    const otherLabels = {
+      "CWN.SearchItems": "아이템 검색",
+      "CWN.All": "전체",
+      "CWN.Equipped": "장착됨",
+      "CWN.Categories": "카테고리",
+      "CWN.Tags": "태그",
+      "CWN.SortBy": "정렬",
+      "CWN.EquippedItems": "장착된 아이템",
+      "CWN.AllItems": "모든 아이템",
+      "CWN.Equip": "장착",
+      "CWN.Unequip": "해제"
+    };
+    
+    // 로컬라이제이션 데이터 병합
+    const localizationData = {
+      ...categoryLabels,
+      ...tagLabels,
+      ...otherLabels
+    };
+    
+    // 개발 모드에서만 로그 출력
     if (debugMode) {
       console.log("CWN | 아이템 분류 로컬라이제이션 키:", localizationData);
     }
   } catch (error) {
-    console.warn("CWN | 디버그 모드 설정을 확인할 수 없습니다:", error);
+    console.log(`CWN | 디버그 모드 설정을 확인할 수 없습니다: ${error}`);
   }
 }
 
@@ -1257,11 +1338,11 @@ function rollItemMacro(itemName) {
 Hooks.once("setup", function() {
   console.log("CWN | 시스템 설정 시작");
   
-  // 아이템 카테고리 초기화 (setup 단계에서도 실행)
+  // 아이템 분류 시스템 초기화
   _initializeItemCategories();
   
-  // 시스템 설정 등록
-  _registerSystemSettings();
+  // 시스템 설정 등록 (함수 이름 수정: _registerSystemSettings -> registerSystemSettings)
+  registerSystemSettings();
   
   console.log("CWN | 시스템 설정 완료");
 }); 
