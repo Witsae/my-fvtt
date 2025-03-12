@@ -587,3 +587,125 @@ function registerModuleSettings() {
 ## 결론
 
 이번 업데이트(v1.3.40)에서는 Foundry VTT v12와의 호환성 문제를 해결하였습니다. 주요 변경 사항으로는 디버그 모드 설정 참조 오류, 시스템 설정 등록 함수 참조 오류, Item 타입 정보 로깅 오류를 수정하였습니다. 이러한 변경을 통해 시스템이 Foundry VTT v12에서도 정상적으로 작동할 수 있게 되었습니다. 
+
+## 버전 1.3.41 업데이트 (2025-03-16)
+
+이번 업데이트에서는 Foundry VTT v12에서 발생하는 추가적인 문제들을 해결했습니다.
+
+### 1. 액터 시트 attributes 오류 수정
+
+**문제 상황:**
+- 액터 시트를 열 때 `Cannot read properties of undefined (reading 'attributes')` 오류 발생
+- 오류 위치: `actor-sheet.js:92:47`의 `_prepareCharacterData` 함수
+
+**원인:**
+- `context.system.attributes`가 없거나 초기화되지 않은 상태에서 접근 시도
+- v12에서 데이터 구조 변경으로 인해 일부 속성이 초기화되지 않는 문제 발생
+
+**해결 방법:**
+- `_prepareCharacterData` 함수에 방어적 코딩 추가
+- `context.system`과 `context.system.attributes`가 없을 경우 초기화하는 코드 추가
+
+**코드 변경:**
+```javascript
+// 기존 코드
+_prepareCharacterData(context) {
+  // Handle ability scores.
+  for (let [k, v] of Object.entries(context.system.attributes)) {
+    v.label = game.i18n.localize(CONFIG.CWN.attributes[k]) ?? k;
+  }
+}
+
+// 변경된 코드
+_prepareCharacterData(context) {
+  // v12 호환성: system 속성 확인 및 초기화
+  if (!context.system) {
+    console.warn("CWN | 액터 시트 데이터에 system 속성이 없습니다:", context);
+    context.system = {};
+  }
+  
+  // v12 호환성: attributes 속성 확인
+  if (!context.system.attributes) {
+    console.warn("CWN | 액터 시트 데이터에 attributes 속성이 없습니다:", context.system);
+    context.system.attributes = {};
+  }
+  
+  // Handle ability scores.
+  for (let [k, v] of Object.entries(context.system.attributes)) {
+    v.label = game.i18n.localize(CONFIG.CWN.attributes[k]) ?? k;
+  }
+}
+```
+
+### 2. 아이템 시트 템플릿 로딩 문제 해결
+
+**문제 상황:**
+- 아이템 시트에서 이미지와 이름이 중복되어 표시되는 문제 발생
+- 아이템 시트가 제대로 렌더링되지 않음
+
+**원인:**
+- `template` getter 함수에서 비동기 `fetch`를 사용하여 템플릿 존재 여부를 확인하는 방식이 문제
+- 비동기 작업이 완료되기 전에 템플릿 경로가 반환되어 중복 렌더링 발생
+- v12에서 템플릿 로딩 방식과 충돌
+
+**해결 방법:**
+- `template` getter 함수를 단순화하여 비동기 `fetch` 제거
+- 템플릿 경로만 반환하도록 수정하여 Foundry의 기본 템플릿 처리 메커니즘 활용
+
+**코드 변경:**
+```javascript
+// 기존 코드
+get template() {
+  const itemType = this.item.type;
+  const path = `systems/cwn-system/templates/item/item-${itemType}-sheet.hbs`;
+  console.log(`CWN | 아이템 시트 템플릿 요청: ${path}`);
+  
+  // 템플릿 존재 여부 확인
+  fetch(path)
+    .then(response => {
+      console.log(`CWN | 아이템 템플릿 존재 여부: ${response.ok ? '존재함' : '존재하지 않음'}`);
+      if (!response.ok) {
+        console.error(`CWN | 아이템 템플릿을 찾을 수 없음: ${path}, 기본 템플릿 사용`);
+        // 기본 템플릿 경로 확인
+        const defaultPath = `systems/cwn-system/templates/item/item-sheet.hbs`;
+        return fetch(defaultPath).then(defaultResponse => {
+          console.log(`CWN | 기본 아이템 템플릿 존재 여부: ${defaultResponse.ok ? '존재함' : '존재하지 않음'}`);
+        });
+      }
+    })
+    .catch(error => {
+      console.error(`CWN | 아이템 템플릿 확인 중 오류 발생:`, error);
+    });
+  
+  // 템플릿이 없는 경우 기본 템플릿 사용
+  try {
+    const templateExists = !!fetch(path).then(r => r.ok);
+    if (!templateExists) {
+      console.warn(`CWN | 아이템 타입 '${itemType}'에 대한 템플릿이 없어 기본 템플릿 사용`);
+      return `systems/cwn-system/templates/item/item-sheet.hbs`;
+    }
+  } catch (error) {
+    console.error(`CWN | 템플릿 확인 중 오류:`, error);
+    return `systems/cwn-system/templates/item/item-sheet.hbs`;
+  }
+  
+  return path;
+}
+
+// 변경된 코드
+get template() {
+  const itemType = this.item.type;
+  // 아이템 타입별 템플릿 경로
+  const path = `systems/cwn-system/templates/item/item-${itemType}-sheet.hbs`;
+  console.log(`CWN | 아이템 시트 템플릿 요청: ${path}`);
+  
+  // v12 호환성: 템플릿 경로 단순화
+  // 비동기 fetch 대신 단순히 경로만 반환
+  // 템플릿이 없으면 Foundry가 자동으로 오류를 처리함
+  return path;
+}
+```
+
+## 결론
+
+이번 업데이트(v1.3.41)에서는 Foundry VTT v12와의 호환성을 더욱 강화하기 위해 액터 시트와 아이템 시트 관련 문제를 해결했습니다. 주요 변경 사항으로는 액터 시트의 attributes 속성 접근 오류 수정과 아이템 시트 템플릿 로딩 방식 개선이 있습니다. 이러한 변경을 통해 시스템이 Foundry VTT v12에서 더욱 안정적으로 작동할 수 있게 되었습니다. 
