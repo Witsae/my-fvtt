@@ -6,6 +6,7 @@ export class CWNItem extends Item {
   /**
    * 아이템 생성 메서드 오버라이드
    * @override
+   * v12 호환성: Item.create 메서드
    */
   static async create(data, options = {}) {
     console.log("CWN | CWNItem.create 호출됨:", data, options);
@@ -46,39 +47,51 @@ export class CWNItem extends Item {
   
   /**
    * Augment the basic Item data model with additional dynamic data.
+   * v12 호환성: 아이템 데이터 준비 메서드
+   * v10부터 item.data.data 대신 item.system을 사용합니다.
    */
   prepareData() {
-    // As with the actor class, items are documents that can have their data
-    // preparation methods overridden (such as prepareBaseData()).
     super.prepareData();
     
-    // 아이템 타입별 데이터 준비
+    // 아이템 데이터 참조
     const itemData = this;
-    const systemData = itemData.system;
+    const systemData = itemData.system; // v12 호환성: system 속성 사용
     const flags = itemData.flags;
     
-    // 아이템 타입별 준비 메서드 호출
-    this._prepareItemData(itemData);
+    // 아이템 타입별 데이터 준비
+    this._prepareItemData();
   }
-
+  
   /**
    * 아이템 타입별 데이터 준비
-   * @param {Object} itemData 아이템 데이터
-   * @private
+   * v12 호환성: 아이템 타입별 데이터 준비 메서드
    */
-  _prepareItemData(itemData) {
-    if (itemData.type === 'weapon') {
-      this._prepareWeaponData(itemData);
-    } else if (itemData.type === 'armor') {
-      this._prepareArmorData(itemData);
-    } else if (itemData.type === 'skill') {
-      this._prepareSkillData(itemData);
-    } else if (itemData.type === 'focus') {
-      this._prepareFocusData(itemData);
-    } else if (itemData.type === 'cyberware') {
-      this._prepareCyberwareData(itemData);
-    } else if (itemData.type === 'asset') {
-      this._prepareAssetData(itemData);
+  _prepareItemData() {
+    const systemData = this.system; // v12 호환성: system 속성 사용
+    
+    // 아이템 타입별 처리
+    switch (this.type) {
+      case 'weapon':
+        this._prepareWeaponData(systemData);
+        break;
+      case 'armor':
+        this._prepareArmorData(systemData);
+        break;
+      case 'skill':
+        this._prepareSkillData(systemData);
+        break;
+      case 'focus':
+        this._prepareFocusData(systemData);
+        break;
+      case 'cyberware':
+        this._prepareCyberwareData(systemData);
+        break;
+      case 'asset':
+        this._prepareAssetData(systemData);
+        break;
+      default:
+        console.log(`CWN | 알 수 없는 아이템 타입: ${this.type}`);
+        break;
     }
   }
   

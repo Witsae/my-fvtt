@@ -4,12 +4,16 @@
  */
 export class CWNActor extends Actor {
 
-  /** @override */
+  /** 
+   * @override 
+   * v12 호환성: Actor 데이터 준비 메서드
+   * v10부터 actor.data.data 대신 actor.system을 사용합니다.
+   */
   prepareData() {
     super.prepareData();
 
     const actorData = this;
-    const systemData = actorData.system;
+    const systemData = actorData.system; // v12 호환성: system 속성 사용
     const flags = actorData.flags;
 
     // 액터 타입별 데이터 준비
@@ -28,11 +32,12 @@ export class CWNActor extends Actor {
 
   /**
    * Prepare Character type specific data
+   * v12 호환성: 캐릭터 데이터 준비 메서드
    */
   _prepareCharacterData(actorData) {
     if (actorData.type !== 'character') return;
 
-    const systemData = actorData.system;
+    const systemData = actorData.system; // v12 호환성: system 속성 사용
 
     // Calculate attribute modifiers
     for (let [key, attribute] of Object.entries(systemData.attributes)) {
@@ -50,11 +55,8 @@ export class CWNActor extends Actor {
         systemData.sanity.max = 10 + systemData.attributes.wis.mod;
         if (systemData.sanity.max < 1) systemData.sanity.max = 1;
       }
-    } catch (error) {
-      console.warn("CWN | Error accessing enableSanity setting, defaulting to enabled:", error);
-      // Default behavior if setting is not available
-      systemData.sanity.max = 10 + systemData.attributes.wis.mod;
-      if (systemData.sanity.max < 1) systemData.sanity.max = 1;
+    } catch (e) {
+      console.warn("CWN | 정신력 설정을 가져오는 중 오류 발생:", e);
     }
 
     // Calculate max system strain

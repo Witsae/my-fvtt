@@ -1,5 +1,6 @@
 /**
  * 모듈 초기화 함수
+ * v12 호환성: Foundry VTT v12에 맞게 초기화 코드 구성
  */
 Hooks.once('init', async function() {
   console.log('My Foundry Module | 초기화 중');
@@ -17,6 +18,7 @@ Hooks.once('init', async function() {
 
 /**
  * 모듈이 준비되었을 때 실행되는 함수
+ * v12 호환성: 모듈 기능 구현
  */
 Hooks.once('ready', async function() {
   console.log('My Foundry Module | 준비 완료');
@@ -39,6 +41,28 @@ Hooks.once('setup', function() {
     console.log('My Foundry Module | Foundry VTT v12 호환 모드로 실행 중');
     
     // v12 특정 설정 및 조정
-    // 예: DocumentClass 변경사항, UUID 시스템 업데이트 등 처리
+    // 1. FogExploration.get 대신 FogExploration.load 사용
+    // 2. PlaceablesLayer#gridPrecision 대신 PlaceablesLayer#getSnappedPoint 사용
+    // 3. ObjectHUD 및 SynchronizedTransform 대신 새로운 PlaceableObjects 인터페이스 그룹 사용
+    // 4. 새로운 Color 클래스 사용
+    
+    // v12 호환성 패치 적용
+    applyV12Compatibility();
   }
-}); 
+});
+
+/**
+ * v12 호환성 패치를 적용하는 함수
+ * v12에서 변경된 API에 대한 호환성 처리를 수행합니다.
+ */
+function applyV12Compatibility() {
+  // FogExploration.get 대신 FogExploration.load 사용
+  if (typeof FogExploration !== 'undefined') {
+    if (!FogExploration.load && FogExploration.get) {
+      console.log('My Foundry Module | FogExploration.get을 FogExploration.load로 대체');
+      FogExploration.load = FogExploration.get;
+    }
+  }
+  
+  // 기타 v12 호환성 패치...
+} 

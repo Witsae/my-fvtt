@@ -5,6 +5,7 @@
 export class CWNCombatant extends Combatant {
   /**
    * 이니셔티브 공식을 계산합니다.
+   * v12 호환성: Combatant 클래스 확장
    * @override
    * @returns {string} 이니셔티브 공식
    * @protected
@@ -41,10 +42,12 @@ export class CWNCombatant extends Combatant {
 
 /**
  * 전투 관련 유틸리티 함수들
+ * v12 호환성: Combat 클래스 관련 유틸리티
  */
 export const CombatUtils = {
   /**
    * 전투 시작 시 이니셔티브를 자동으로 굴립니다.
+   * v12 호환성: Combat 인스턴스 처리
    * @param {Combat} combat 전투 인스턴스
    */
   async rollInitiative(combat) {

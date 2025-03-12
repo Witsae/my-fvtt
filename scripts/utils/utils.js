@@ -121,31 +121,50 @@ export function _addHealthButtons(html) {
 }
 
 /**
- * 선택된 토큰에 체력 변경을 표시합니다.
- * @param {Token} token 토큰
- * @param {string} fillColor 채우기 색상
- * @param {number} total 변경량
+ * 토큰 위에 값 변화를 표시합니다.
+ * v12 호환성: 새로운 Color 클래스 사용
+ * @param {Token} token 대상 토큰
+ * @param {string|Color} fillColor 채우기 색상
+ * @param {number} total 표시할 값
  */
 export async function showValueChange(token, fillColor, total) {
-  const text = Math.abs(total).toString();
-  const textStyle = {
-    fill: fillColor,
-    fontFamily: "Signika",
-    fontSize: 40,
+  // v12 호환성: Color 클래스 사용
+  const color = fillColor instanceof Color ? fillColor : new Color(fillColor);
+  
+  const scrollingText = {
+    anchor: CONST.TEXT_ANCHOR_POINTS.TOP,
+    fill: color.toString(), // Color 객체를 문자열로 변환
+    fontSize: 16,
+    stroke: 0x000000,
     strokeThickness: 4,
-    stroke: "#000000"
+    text: total.toString().startsWith("-") ? total.toString() : "+" + total.toString()
   };
   
-  const textObj = new PIXI.Text(text, textStyle);
-  textObj.anchor.set(0.5, 0.5);
-  textObj.position.set(token.w / 2, token.h / 2);
+  // v12 호환성: createScrollingText 메서드 위치 변경 처리
+  if (canvas.interface && typeof canvas.interface.createScrollingText === "function") {
+    // v12 방식: CanvasInterfaceGroup#createScrollingText 사용
+    canvas.interface.createScrollingText(token.center, scrollingText.text, scrollingText);
+  } else if (canvas.hud && typeof canvas.hud.createScrollingText === "function") {
+    // 이전 방식: ObjectHUD#createScrollingText 사용
+    canvas.hud.createScrollingText(token.center, scrollingText.text, scrollingText);
+  } else {
+    console.warn("CWN | createScrollingText 메서드를 찾을 수 없습니다.");
+  }
+}
+
+/**
+ * 토큰의 체력 변화를 표시합니다.
+ * v12 호환성: 새로운 Color 클래스 사용
+ * @param {Token} token 대상 토큰
+ * @param {number} value 변화량
+ */
+export async function showHealthChange(token, value) {
+  // v12 호환성: Color 클래스 사용
+  const fillColor = value > 0 
+    ? new Color("#18520b") // 녹색 (회복)
+    : new Color("#aa0200"); // 빨간색 (피해)
   
-  token.addChild(textObj);
-  
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  token.removeChild(textObj);
-  textObj.destroy();
+  await showValueChange(token, fillColor, value);
 }
 
 /**
@@ -169,7 +188,7 @@ export async function applyHealthChange(value) {
     const newValue = Math.clamped(health.value + value, 0, health.max);
     const fillColor = value > 0 ? "#18520b" : "#aa0200";
     
-    await showValueChange(token, fillColor, value);
+    await showHealthChange(token, value);
     await actor.update({"system.health.value": newValue});
   }
 }

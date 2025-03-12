@@ -97,15 +97,6 @@ Hooks.once("init", async function() {
   // 시스템 ID 확인
   console.log("CWN | 시스템 ID:", game.system.id);
   
-  // 기존 시트 등록 해제 및 재등록
-  Actors.unregisterSheet("core", ActorSheet);
-  Items.unregisterSheet("core", ItemSheet);
-  
-  Actors.registerSheet("cwn-system", CWNActorSheet, { makeDefault: true });
-  Items.registerSheet("cwn-system", CWNItemSheet, { makeDefault: true });
-  
-  console.log("CWN | 시트 재등록 완료");
-  
   // 시스템 스타일 초기화
   CWN._initializeStyles();
   
@@ -117,84 +108,45 @@ Hooks.once("init", async function() {
     rollItemMacro
   };
   
-  // 액터 시트 등록 확인
-  console.log("CWN | 액터 시트 등록:", {
-    "baseClass": ActorSheet,
-    "cwnClass": CWNActorSheet,
-    "defaultClasses": CONFIG.Actor.sheetClasses
-  });
-  
-  // 아이템 시트 등록 확인
-  console.log("CWN | 아이템 시트 등록:", {
-    "baseClass": ItemSheet,
-    "cwnClass": CWNItemSheet,
-    "defaultClasses": CONFIG.Item.sheetClasses
-  });
-  
-  // CWNItemSheet를 전역 변수로 등록
-  globalThis.CWNItemSheet = CWNItemSheet;
-
   // Define custom Document classes
+  // v12 호환성: Document 클래스 등록
   CONFIG.Actor.documentClass = CWNActor;
   CONFIG.Item.documentClass = CWNItem;
   CONFIG.Combatant.documentClass = CWNCombatant;
 
   // Register sheet application classes
+  // v12 호환성: 시트 등록 (중복 등록 제거)
   Actors.unregisterSheet("core", ActorSheet);
   Actors.registerSheet("cwn-system", CWNActorSheet, { makeDefault: true });
   
   // 아이템 시트 등록
   console.log("CWN | Registering item sheet");
   Items.unregisterSheet("core", ItemSheet);
+  Items.registerSheet("cwn-system", CWNItemSheet, { makeDefault: true });
   
-  // 아이템 시트 클래스 등록 - v12 호환성 개선
-  Items.registerSheet("cwn-system", CWNItemSheet, { 
-    makeDefault: true, 
-    label: "CWN.SheetClassItem",
-    types: ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"]
+  // 아이템 시트 클래스 등록 확인
+  console.log("CWN | 아이템 시트 등록 완료:", {
+    "baseClass": ItemSheet,
+    "cwnClass": CWNItemSheet,
+    "defaultClasses": CONFIG.Item.sheetClasses
   });
   
-  // 아이템 시트 클래스 설정
-  CONFIG.Item.sheetClasses["cwn-system"] = CONFIG.Item.sheetClasses["cwn-system"] || {};
-  CONFIG.Item.sheetClasses["cwn-system"].base = {
-    id: "cwn-system",
-    label: "CWN.SheetClassItem",
-    cls: CWNItemSheet
-  };
+  // 전역 변수 등록 (필요한 경우에만 사용)
+  globalThis.CWNItemSheet = CWNItemSheet;
   
-  // 아이템 타입별 시트 클래스 설정
-  const itemTypes = ["weapon", "armor", "skill", "focus", "gear", "cyberware", "drug", "asset", "power", "vehicle"];
-  itemTypes.forEach(type => {
-    CONFIG.Item.sheetClasses["cwn-system"][type] = {
-      id: `cwn-system.${type}`,
-      label: `CWN.SheetClassItem.${type}`,
-      cls: CWNItemSheet
-    };
-  });
+  // v12 호환성: 색상 처리를 위한 Color 클래스 사용 준비
+  // 참고: v12에서는 새로운 Color 클래스가 도입되었으며, 이전의 색상 관련 헬퍼 메서드들은 더 이상 사용되지 않습니다.
   
-  // 아이템 시트 클래스 확인
-  console.log("CWN | Item sheet classes after registration:", CONFIG.Item.sheetClasses);
-
-  // 아이템 클래스 맵 설정
-  CONFIG.CWN = CWN;
-  CONFIG.CWN.ItemClassMap = ItemClassMap;
-
-  // Register Handlebars helpers
+  // 핸들바 템플릿 사전 로드
+  preloadHandlebarsTemplates();
+  
+  // 핸들바 헬퍼 등록
   registerHandlebarsHelpers();
-
-  // Register system settings
+  
+  // 시스템 설정 등록
   registerSystemSettings();
-
-  // Preload Handlebars templates
-  await preloadHandlebarsTemplates();
   
-  // Register custom enrichers for inline rolls and links
-  registerCustomEnrichers();
-  
-  // Foundry v12 호환성을 위한 매크로 등록
-  registerMacros();
-  
-  console.log("CWN | 시트 등록 완료");
+  console.log(`CWN | 시스템 초기화 완료`);
 });
 
 /* -------------------------------------------- */
