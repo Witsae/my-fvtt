@@ -2,7 +2,7 @@
   "id": "cwn-system",
   "title": "Cities Without Number",
   "description": "Cities Without Number 시스템 (Foundry VTT)",
-  "version": "1.3.39",
+  "version": "1.3.40",
   "compatibility": {
     "minimum": "11",
     "verified": "12",
@@ -84,6 +84,6 @@
   "secondaryTokenAttribute": "sanity",
   "url": "https://github.com/Witsae/my-fvtt",
   "manifest": "https://raw.githubusercontent.com/Witsae/my-fvtt/main/system.json",
-  "download": "https://github.com/Witsae/my-fvtt/archive/v1.3.39.zip",
+  "download": "https://github.com/Witsae/my-fvtt/archive/v1.3.40.zip",
   "license": "LICENSE"
 } 
