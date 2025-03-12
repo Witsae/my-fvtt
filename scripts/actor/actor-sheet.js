@@ -80,13 +80,24 @@ export class CWNActorSheet extends ActorSheet {
   }
 
   /**
-   * Organize and classify Items for Character sheets.
-   *
+   * Prepare character data
    * @param {Object} actorData The actor to prepare.
    *
    * @return {undefined}
    */
   _prepareCharacterData(context) {
+    // v12 호환성: system 속성 확인 및 초기화
+    if (!context.system) {
+      console.warn("CWN | 액터 시트 데이터에 system 속성이 없습니다:", context);
+      context.system = {};
+    }
+    
+    // v12 호환성: attributes 속성 확인
+    if (!context.system.attributes) {
+      console.warn("CWN | 액터 시트 데이터에 attributes 속성이 없습니다:", context.system);
+      context.system.attributes = {};
+    }
+    
     // Handle ability scores.
     for (let [k, v] of Object.entries(context.system.attributes)) {
       v.label = game.i18n.localize(CONFIG.CWN.attributes[k]) ?? k;

@@ -29,38 +29,13 @@ export class CWNItemSheet extends ItemSheet {
   /** @override */
   get template() {
     const itemType = this.item.type;
+    // 아이템 타입별 템플릿 경로
     const path = `systems/cwn-system/templates/item/item-${itemType}-sheet.hbs`;
     console.log(`CWN | 아이템 시트 템플릿 요청: ${path}`);
     
-    // 템플릿 존재 여부 확인
-    fetch(path)
-      .then(response => {
-        console.log(`CWN | 아이템 템플릿 존재 여부: ${response.ok ? '존재함' : '존재하지 않음'}`);
-        if (!response.ok) {
-          console.error(`CWN | 아이템 템플릿을 찾을 수 없음: ${path}, 기본 템플릿 사용`);
-          // 기본 템플릿 경로 확인
-          const defaultPath = `systems/cwn-system/templates/item/item-sheet.hbs`;
-          return fetch(defaultPath).then(defaultResponse => {
-            console.log(`CWN | 기본 아이템 템플릿 존재 여부: ${defaultResponse.ok ? '존재함' : '존재하지 않음'}`);
-          });
-        }
-      })
-      .catch(error => {
-        console.error(`CWN | 아이템 템플릿 확인 중 오류 발생:`, error);
-      });
-    
-    // 템플릿이 없는 경우 기본 템플릿 사용
-    try {
-      const templateExists = !!fetch(path).then(r => r.ok);
-      if (!templateExists) {
-        console.warn(`CWN | 아이템 타입 '${itemType}'에 대한 템플릿이 없어 기본 템플릿 사용`);
-        return `systems/cwn-system/templates/item/item-sheet.hbs`;
-      }
-    } catch (error) {
-      console.error(`CWN | 템플릿 확인 중 오류:`, error);
-      return `systems/cwn-system/templates/item/item-sheet.hbs`;
-    }
-    
+    // v12 호환성: 템플릿 경로 단순화
+    // 비동기 fetch 대신 단순히 경로만 반환
+    // 템플릿이 없으면 Foundry가 자동으로 오류를 처리함
     return path;
   }
 
