@@ -168,29 +168,32 @@ export async function showHealthChange(token, value) {
 }
 
 /**
- * 선택된 토큰에 체력 변경을 적용합니다.
- * @param {number} value 변경량 (양수: 회복, 음수: 피해)
+ * 체력 변경 적용 함수
+ * @param {number} value 변경할 체력 값
  */
 export async function applyHealthChange(value) {
-  const tokens = canvas.tokens.controlled;
-  if (!tokens.length) {
+  const token = canvas.tokens.controlled[0];
+  if (!token) {
     ui.notifications.warn("토큰을 선택해주세요.");
     return;
   }
   
-  for (const token of tokens) {
-    const actor = token.actor;
-    if (!actor) continue;
-    
-    const health = actor.system.health;
-    if (!health) continue;
-    
-    const newValue = Math.clamped(health.value + value, 0, health.max);
-    const fillColor = value > 0 ? "#18520b" : "#aa0200";
-    
-    await showHealthChange(token, value);
-    await actor.update({"system.health.value": newValue});
+  const actor = token.actor;
+  if (!actor) {
+    ui.notifications.warn("액터가 없는 토큰입니다.");
+    return;
   }
+  
+  const health = actor.system.health;
+  if (!health) {
+    ui.notifications.warn("체력 정보가 없습니다.");
+    return;
+  }
+  
+  const newValue = Math.clamped(health.value + value, 0, health.max);
+  
+  await showHealthChange(token, value);
+  await actor.update({"system.health.value": newValue});
 }
 
 /**

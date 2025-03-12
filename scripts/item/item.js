@@ -87,6 +87,18 @@ export class CWNItem extends Item {
       case 'asset':
         this._prepareAssetData(this);
         break;
+      case 'vehicle':
+        this._prepareVehicleData(this);
+        break;
+      case 'power':
+        this._preparePowerData(this);
+        break;
+      case 'drug':
+        this._prepareDrugData(this);
+        break;
+      case 'gear':
+        this._prepareGearData(this);
+        break;
       default:
         console.log(`CWN | 알 수 없는 아이템 타입: ${this.type}`);
         break;
@@ -1035,5 +1047,177 @@ export class CWNItem extends Item {
         effect.update({disabled: !isActive});
       }
     });
+  }
+
+  /**
+   * 차량 아이템 데이터 준비
+   * @param {Object} itemData 아이템 데이터
+   * @private
+   */
+  _prepareVehicleData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
+    const data = itemData.system;
+    
+    // 기본값 설정
+    if (!data.type) {
+      data.type = "ground";
+    }
+    
+    if (data.speed === undefined) {
+      data.speed = 0;
+    }
+    
+    if (data.armor === undefined) {
+      data.armor = 0;
+    }
+    
+    if (!data.hp) {
+      data.hp = { value: 10, max: 10 };
+    }
+    
+    if (data.crew === undefined) {
+      data.crew = 1;
+    }
+    
+    if (data.price === undefined) {
+      data.price = 0;
+    }
+    
+    // 태그 배열 확인
+    if (!Array.isArray(data.tags)) {
+      data.tags = [];
+    }
+  }
+  
+  /**
+   * 능력 아이템 데이터 준비
+   * @param {Object} itemData 아이템 데이터
+   * @private
+   */
+  _preparePowerData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
+    const data = itemData.system;
+    
+    // 기본값 설정
+    if (data.level === undefined) {
+      data.level = 1;
+    }
+    
+    if (!data.type) {
+      data.type = "psychic";
+    }
+    
+    if (data.cost === undefined) {
+      data.cost = 0;
+    }
+    
+    if (!data.range) {
+      data.range = "self";
+    }
+    
+    if (!data.duration) {
+      data.duration = "instant";
+    }
+    
+    // 태그 배열 확인
+    if (!Array.isArray(data.tags)) {
+      data.tags = [];
+    }
+  }
+  
+  /**
+   * 약물 아이템 데이터 준비
+   * @param {Object} itemData 아이템 데이터
+   * @private
+   */
+  _prepareDrugData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
+    const data = itemData.system;
+    
+    // 기본값 설정
+    if (!data.duration) {
+      data.duration = "1 hour";
+    }
+    
+    if (!data.type) {
+      data.type = "medical";
+    }
+    
+    if (data.price === undefined) {
+      data.price = 0;
+    }
+    
+    if (data.quantity === undefined) {
+      data.quantity = 1;
+    }
+    
+    if (!data.effect) {
+      data.effect = "";
+    }
+    
+    if (!data.sideEffect) {
+      data.sideEffect = "";
+    }
+    
+    if (!data.overdose) {
+      data.overdose = "";
+    }
+    
+    // 태그 배열 확인
+    if (!Array.isArray(data.tags)) {
+      data.tags = [];
+    }
+  }
+  
+  /**
+   * 장비 아이템 데이터 준비
+   * @param {Object} itemData 아이템 데이터
+   * @private
+   */
+  _prepareGearData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
+    const data = itemData.system;
+    
+    // 기본값 설정
+    if (data.quantity === undefined) {
+      data.quantity = 1;
+    }
+    
+    if (data.weight === undefined) {
+      data.weight = 0.1;
+    }
+    
+    if (data.price === undefined) {
+      data.price = 0;
+    }
+    
+    if (!data.location) {
+      data.location = "stowed";
+    }
+    
+    if (!data.type) {
+      data.type = "general";
+    }
+    
+    // 태그 배열 확인
+    if (!Array.isArray(data.tags)) {
+      data.tags = [];
+    }
   }
 } 
