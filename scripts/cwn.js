@@ -97,6 +97,9 @@ Hooks.once("init", async function() {
   // 시스템 ID 확인
   console.log("CWN | 시스템 ID:", game.system.id);
   
+  // 아이템 카테고리 초기화 (시스템 초기화 시점에 실행)
+  _initializeItemCategories();
+  
   // 시스템 스타일 초기화
   CWN._initializeStyles();
   
@@ -468,30 +471,40 @@ Hooks.once("ready", async function() {
     console.warn("CWN | Error accessing settings:", error);
   }
   
-  // CWNItem 클래스에 카테고리 정보 추가 (getter 메서드 사용)
+  // 카테고리 정보 확인
   try {
     if (game.cwn && game.cwn.itemCategories && game.cwn.itemTagCategories) {
-      // CWNItem 클래스에 정적 메서드 추가
-      CWNItem.getCategories = function() {
-        return game.cwn.itemCategories;
-      };
+      console.log("CWN | 아이템 카테고리 정보가 올바르게 설정되었습니다.");
       
-      CWNItem.getTagCategories = function() {
-        return game.cwn.itemTagCategories;
-      };
+      // CWNItem 클래스에 정적 메서드 추가 (이미 추가되지 않은 경우)
+      if (!CWNItem.getCategories) {
+        CWNItem.getCategories = function() {
+          return game.cwn.itemCategories;
+        };
+      }
+      
+      if (!CWNItem.getTagCategories) {
+        CWNItem.getTagCategories = function() {
+          return game.cwn.itemTagCategories;
+        };
+      }
       
       // 호환성을 위한 별칭 (기존 코드가 categories와 tagCategories를 직접 참조하는 경우)
-      Object.defineProperty(CWNItem, 'categories', {
-        get: function() { return game.cwn.itemCategories; }
-      });
+      if (!Object.getOwnPropertyDescriptor(CWNItem, 'categories')) {
+        Object.defineProperty(CWNItem, 'categories', {
+          get: function() { return game.cwn.itemCategories; }
+        });
+      }
       
-      Object.defineProperty(CWNItem, 'tagCategories', {
-        get: function() { return game.cwn.itemTagCategories; }
-      });
+      if (!Object.getOwnPropertyDescriptor(CWNItem, 'tagCategories')) {
+        Object.defineProperty(CWNItem, 'tagCategories', {
+          get: function() { return game.cwn.itemTagCategories; }
+        });
+      }
       
-      console.log("CWN | CWNItem 클래스에 카테고리 getter 메서드 추가 완료");
+      console.log("CWN | CWNItem 클래스에 카테고리 getter 메서드 확인 완료");
     } else {
-      console.error("CWN | 카테고리 정보를 CWNItem 클래스에 추가할 수 없습니다:", {
+      console.error("CWN | 카테고리 정보가 올바르게 설정되지 않았습니다:", {
         hasCwn: !!game.cwn,
         hasItemCategories: !!(game.cwn && game.cwn.itemCategories),
         hasItemTagCategories: !!(game.cwn && game.cwn.itemTagCategories)
@@ -1235,4 +1248,20 @@ function rollItemMacro(itemName) {
   }
   
   return item.roll();
-} 
+}
+
+/* -------------------------------------------- */
+/*  Hooks                                       */
+/* -------------------------------------------- */
+
+Hooks.once("setup", function() {
+  console.log("CWN | 시스템 설정 시작");
+  
+  // 아이템 카테고리 초기화 (setup 단계에서도 실행)
+  _initializeItemCategories();
+  
+  // 시스템 설정 등록
+  _registerSystemSettings();
+  
+  console.log("CWN | 시스템 설정 완료");
+}); 

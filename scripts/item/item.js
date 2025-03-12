@@ -67,27 +67,25 @@ export class CWNItem extends Item {
    * v12 호환성: 아이템 타입별 데이터 준비 메서드
    */
   _prepareItemData() {
-    const systemData = this.system; // v12 호환성: system 속성 사용
-    
     // 아이템 타입별 처리
     switch (this.type) {
       case 'weapon':
-        this._prepareWeaponData(systemData);
+        this._prepareWeaponData(this);
         break;
       case 'armor':
-        this._prepareArmorData(systemData);
+        this._prepareArmorData(this);
         break;
       case 'skill':
-        this._prepareSkillData(systemData);
+        this._prepareSkillData(this);
         break;
       case 'focus':
-        this._prepareFocusData(systemData);
+        this._prepareFocusData(this);
         break;
       case 'cyberware':
-        this._prepareCyberwareData(systemData);
+        this._prepareCyberwareData(this);
         break;
       case 'asset':
-        this._prepareAssetData(systemData);
+        this._prepareAssetData(this);
         break;
       default:
         console.log(`CWN | 알 수 없는 아이템 타입: ${this.type}`);
@@ -101,6 +99,11 @@ export class CWNItem extends Item {
    * @private
    */
   _prepareWeaponData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
     const data = itemData.system;
     
     // 기본값 설정
@@ -130,6 +133,11 @@ export class CWNItem extends Item {
    * @private
    */
   _prepareArmorData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
     const data = itemData.system;
     
     // 기본값 설정
@@ -154,6 +162,11 @@ export class CWNItem extends Item {
    * @private
    */
   _prepareSkillData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
     const data = itemData.system;
     
     // 기본값 설정
@@ -173,6 +186,11 @@ export class CWNItem extends Item {
    * @private
    */
   _prepareFocusData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
     const data = itemData.system;
     
     // 기본값 설정
@@ -192,6 +210,11 @@ export class CWNItem extends Item {
    * @private
    */
   _prepareCyberwareData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
     const data = itemData.system;
     
     // 기본값 설정
@@ -211,6 +234,11 @@ export class CWNItem extends Item {
    * @private
    */
   _prepareAssetData(itemData) {
+    // 시스템 데이터가 없으면 초기화
+    if (!itemData.system) {
+      itemData.system = {};
+    }
+    
     const data = itemData.system;
     
     // 기본값 설정
