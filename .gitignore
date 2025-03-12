@@ -23,4 +23,7 @@ logs/
 
 # 임시 파일
 tmp/
-temp/ 
+temp/
+
+# 에이전트 참조 디렉토리 (개발 문서 및 변경 기록)
+agent-reference/ 
